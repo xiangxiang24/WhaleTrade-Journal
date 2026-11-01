@@ -5,8 +5,9 @@ import OnboardingConnected from './onboarding/onboarding-connected'
 import Login from './onboarding/login'
 import Register from './onboarding/register'
 import Loading from './onboarding/loading'
+import RecoveryPassword from './onboarding/recovery-password'
 
-type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading'
+type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery'
 
 // ชั่วคราว: ข้อมูลตัวอย่างไว้ดูหน้า Onboarding จนกว่าจะมี router และระบบ auth จริง
 const SAMPLE_ACCOUNT = { displayName: 'Thomas W.' }
@@ -31,6 +32,7 @@ function App() {
       <Login
         onBack={() => setScreen('inconnected')}
         onSwitchToRegister={() => setScreen('register')}
+        onForgotPassword={() => setScreen('recovery')}
         onSuccess={() => setScreen('loading')}
       />
     )
@@ -41,6 +43,14 @@ function App() {
         onBack={() => setScreen('inconnected')}
         onSwitchToLogin={() => setScreen('login')}
         onSuccess={() => setScreen('loading')}
+      />
+    )
+  }
+  if (screen === 'recovery') {
+    return (
+      <RecoveryPassword
+        onBack={() => setScreen('inconnected')}
+        onSuccess={() => setScreen('login')}
       />
     )
   }

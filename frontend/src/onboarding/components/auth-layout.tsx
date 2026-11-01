@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { ArrowLeft } from 'lucide-react'
 import logo from '../../assets/Logo.png'
+import BackButton from './back-button'
 import OnboardingHeader from './onboarding-header'
 
 type AuthLayoutProps = {
@@ -30,14 +30,7 @@ export default function AuthLayout({
 
       <div className={`flex flex-1 flex-col ${leaving ? 'animate-page-out motion-reduce:animate-none' : ''}`}>
         <div className="mt-8 short:mt-4 animate-fade-up motion-reduce:animate-none">
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex h-8 items-center gap-1.5 rounded-pill border border-line bg-surface px-3.5 text-[13px] leading-5 font-medium text-navy-700 shadow-md transition-colors duration-150 hover:bg-blue-50 active:bg-blue-100"
-          >
-            <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" />
-            Back to Onboarding
-          </button>
+          <BackButton onClick={onBack} />
         </div>
 
         <main className="flex flex-1 flex-col items-center justify-center pt-4 pb-8 short:pt-2 short:pb-4">

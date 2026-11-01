@@ -3,6 +3,7 @@ import { RefreshCw } from 'lucide-react'
 import AuthLayout from './components/auth-layout'
 import { FieldError, PasswordField, TextField } from './components/auth-field'
 import OnboardingButton from './components/onboarding-button'
+import { EMAIL_PATTERN, MIN_PASSWORD_LENGTH } from './components/auth-validation'
 import { usePageLeave } from './components/use-page-leave'
 import RegisterSuccessModal from './modals/register-success-modal'
 import type { RegisterData, RegisterErrors, RegisterResult } from './types/register'
@@ -16,8 +17,6 @@ type RegisterProps = {
   onSwitchToLogin?: () => void
 }
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const MIN_PASSWORD_LENGTH = 8
 
 // ชั่วคราว: รหัสตัวอย่างไว้ดู modal จนกว่าจะต่อ backend (backend เป็นผู้สร้างรหัสกู้คืนจริง)
 const DEMO_RECOVERY_CODE = 'AHDB3309'
