@@ -1,7 +1,7 @@
 import { Paperclip } from 'lucide-react'
 import EmotionIcon from '../../shared/emotion/emotion-icon'
 import { EMOTIONS, NO_EMOTION_LABEL, type Emotion } from '../../shared/emotion/emotions'
-import { formatNoteDate } from '../format-note-date'
+import { formatNoteDate } from '../types/format-note-date'
 import type { JournalNote } from '../types/journal'
 
 type JournalCardProps = {

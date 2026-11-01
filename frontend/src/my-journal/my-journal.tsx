@@ -9,7 +9,7 @@ import JournalToolbar from './components/journal-toolbar'
 import MoodFilter from './components/mood-filter'
 import NewNoteModal from './modals/new-note-modal'
 import type { MoodFilterValue } from './types/journal'
-import { useJournalNotes } from './use-journal-notes'
+import { useJournalNotes } from './types/use-journal-notes'
 
 type MyJournalProps = {
   user: SidebarUser

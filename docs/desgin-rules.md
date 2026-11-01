@@ -644,9 +644,9 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 |---|---|
 | `my-journal.tsx` | หน้าเต็ม: `AppLayout` + ส่วนหัว + ค้นหา/กรอง + รายการ; ถือ state `query`, `mood`; กรองด้วย `useMemo` (ค้นใน title/content ไม่สนตัวพิมพ์, เรียงใหม่ → เก่า) |
 | `data/journal-notes.ts` | `fetchJournalNotes()` คืนข้อมูลจำลอง 12 โน้ต (หน่วง 500ms) และ `createJournalNote(values)` สร้างโน้ตใหม่ (จำลอง เก็บในหน่วยความจำ) **สองฟังก์ชันนี้คือจุดเดียวที่ต้องแก้ตอนต่อ backend** (มีตัวอย่าง `fetch('/api/notes')` และ POST ในคอมเมนต์) |
-| `use-journal-notes.ts` | hook `{ notes, status: 'loading' \| 'ready' \| 'error', reload, addNote }` (`addNote` สร้างแล้วเพิ่มโน้ตใหม่ไว้หัวรายการ) |
+| `types/use-journal-notes.ts` | hook `{ notes, status: 'loading' \| 'ready' \| 'error', reload, addNote }` (`addNote` สร้างแล้วเพิ่มโน้ตใหม่ไว้หัวรายการ) |
 | `types/journal.ts` | `JournalNote` (รูปเดียวกับตาราง Note, `createdAt` ISO UTC), `MoodFilterValue`, `JournalLoadStatus` |
-| `format-note-date.ts` | `21 Sep 2026 \| 21:31` แปลงตามเขตเวลาผู้ใช้ (`timeZone` prop จาก `User.timezone`) |
+| `types/format-note-date.ts` | `21 Sep 2026 \| 21:31` แปลงตามเขตเวลาผู้ใช้ (`timeZone` prop จาก `User.timezone`) |
 | `components/journal-header.tsx` | Welcome back + ป้าย Safe Haven + คำเตือนใจ + กล่องข้อความฮีลใจ (ข้อความคงที่) |
 | `components/journal-toolbar.tsx` | ช่องค้นหา + ป้าย Dividend Yield + ปุ่ม New Note |
 | `components/mood-filter.tsx` | ชิป All + 5 อารมณ์ พร้อมจำนวน (จำนวนไม่ขึ้นกับคำค้นหา) |
