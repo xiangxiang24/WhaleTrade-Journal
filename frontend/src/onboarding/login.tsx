@@ -4,7 +4,7 @@ import AuthLayout from './components/auth-layout'
 import { FieldError, PasswordField, TextField } from './components/auth-field'
 import OnboardingButton from './components/onboarding-button'
 import { EMAIL_PATTERN } from './components/auth-validation'
-import { usePageLeave } from './components/use-page-leave'
+import { usePageLeave } from '../shared/hooks/use-page-leave'
 import LoginSuccessModal from './modals/login-success-modal'
 import type { LoginCredentials, LoginErrors } from './types/login'
 

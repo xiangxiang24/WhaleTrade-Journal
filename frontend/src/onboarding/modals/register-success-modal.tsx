@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
-import ModalFrame from './modal-frame'
+import ModalFrame from '../../shared/modal/modal-frame'
 import SuccessCheck from './success-check'
 
 type RegisterSuccessModalProps = {

@@ -1,7 +1,7 @@
 import { LogIn, UserPlus } from 'lucide-react'
 import OnboardingButton from './components/onboarding-button'
 import OnboardingShell from './components/onboarding-shell'
-import { usePageLeave } from './components/use-page-leave'
+import { usePageLeave } from '../shared/hooks/use-page-leave'
 
 type OnboardingInconnectedProps = {
   onLogin?: () => void

@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from 'react'
-import ModalFrame from './modal-frame'
+import ModalFrame from '../../shared/modal/modal-frame'
 import SuccessCheck from './success-check'
 
 type SuccessModalProps = {

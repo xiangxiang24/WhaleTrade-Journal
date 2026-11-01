@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ChevronRight, ShieldCheck } from 'lucide-react'
 import OnboardingButton from './components/onboarding-button'
 import OnboardingShell from './components/onboarding-shell'
-import { usePageLeave } from './components/use-page-leave'
+import { usePageLeave } from '../shared/hooks/use-page-leave'
 import type { ConnectedAccount } from './types/connected-account'
 
 type OnboardingConnectedProps = {

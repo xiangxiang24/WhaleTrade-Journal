@@ -7,8 +7,12 @@ type ModalFrameProps = {
   closing: boolean
   /** ขอปิด modal (กด Esc) */
   onRequestClose: () => void
+  /** class ของการ์ด (ขนาด/padding/การจัดข้อความ) ค่าเริ่มต้นเป็นกล่องแจ้งผลกว้าง 464 จัดกึ่งกลาง */
+  cardClassName?: string
   children: ReactNode
 }
+
+const DEFAULT_CARD = 'max-w-116 px-12 py-10 text-center'
 
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
@@ -18,6 +22,7 @@ export default function ModalFrame({
   descId,
   closing,
   onRequestClose,
+  cardClassName = DEFAULT_CARD,
   children,
 }: ModalFrameProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -53,7 +58,7 @@ export default function ModalFrame({
             first.focus()
           }
         }}
-        className={`max-h-full w-full max-w-116 overflow-y-auto rounded-3xl bg-surface px-12 py-10 text-center shadow-lg ${
+        className={`max-h-full w-full overflow-y-auto rounded-3xl bg-surface shadow-lg ${cardClassName} ${
           closing ? 'animate-modal-out' : 'animate-modal-pop'
         } motion-reduce:animate-none`}
       >

@@ -5,7 +5,7 @@ import { EMAIL_PATTERN, MIN_PASSWORD_LENGTH } from './components/auth-validation
 import { FieldError, PasswordField, TextField } from './components/auth-field'
 import OnboardingButton from './components/onboarding-button'
 import OnboardingHeader from './components/onboarding-header'
-import { usePageLeave } from './components/use-page-leave'
+import { usePageLeave } from '../shared/hooks/use-page-leave'
 import ResetPasswordSuccessModal from './modals/reset-password-success-modal'
 import type { RecoveryPasswordData, RecoveryPasswordErrors } from './types/recovery-password'
 

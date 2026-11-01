@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import whale from '../assets/Loading.png'
-import { usePageLeave } from './components/use-page-leave'
+import { usePageLeave } from '../shared/hooks/use-page-leave'
 
 type LoadingProps = {
   /** เรียกเมื่อแถบโหลดเต็มแล้ว ให้ผู้เรียกพาไปหน้าถัดไป (My Journals) */

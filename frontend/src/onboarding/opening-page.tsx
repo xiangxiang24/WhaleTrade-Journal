@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import logo from '../assets/Logo.png'
-import { usePageLeave } from './components/use-page-leave'
+import { usePageLeave } from '../shared/hooks/use-page-leave'
 
 type OpeningPageProps = {
   /** เรียกเมื่อเล่นแอนิเมชันและค้างหน้าจอครบเวลาแล้ว ให้ผู้เรียกตัดสินใจนำทาง (Onboarding หรือ My Journals) */
