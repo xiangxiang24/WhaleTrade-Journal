@@ -210,3 +210,24 @@
 	- เปลี่ยนรหัสผ่าน (รหัสผ่านปัจจุบัน, รหัสใหม่, ยืนยันรหัสใหม่)
 	- ออกจากระบบทุกอุปกรณ์ (ถามยืนยันก่อน)
 	- ลบบัญชี: อยู่ในโซน Danger zone ต้องพิมพ์คำว่า DELETE เพื่อยืนยัน ข้อมูลทั้งหมดถูกลบถาวร
+
+***
+
+## กลุ่ม FEATURE BRANCH (Git)
+
+แบ่ง branch ตามกลุ่ม feature 7 กลุ่ม แต่ละ branch แตกจาก `main` และ merge กลับเมื่อเสร็จเป็นก้อน
+
+| Branch | กลุ่ม | หน้าที่ครอบคลุม | Spec |
+|---|---|---|---|
+| `feat/onboarding` | Onboarding | Splash / Loading, Onboarding, Login, Register (Auth flow ทั้งหมดก่อนเข้าแอป) | `functional-specification/onboarding-page.md` |
+| `feat/journal` | Journal | My Journals (หน้ารวมบันทึก / หน้าแรก), Journaling Page (เขียน / ดู / แก้โน้ตแต่ละรายการ) | `functional-specification/my-journals-page.md`, `functional-specification/journaling-page.md` |
+| `feat/portlog` | Portfolio & Transaction Logs | Portfolio (หน้ารวมพอร์ตทั้งหมด), Portfolio Detail + Transaction Logs ของพอร์ตนั้น ๆ | `functional-specification/portfolio-page.md`, `functional-specification/transaction-logs.md` |
+| `feat/reminder` | Reminder | Reminders (การแจ้งเตือน, ปฏิทิน, Task / To-Do, ข้อความเตือนความจำระยะยาว) | `functional-specification/reminder-page.md` |
+| `feat/target-amount` | Target Amount | Target Amount (ฟอร์มคำนวณเงินเป้าหมาย และส่วนแสดงผลลัพธ์) | `functional-specification/target-amount-page.md` |
+| `feat/saved-plan` | Saved Plan | Saved Plan (รายการแผนที่บันทึกไว้จากเครื่องคำนวณ ดู / แก้ไข / ลบ) | `functional-specification/saved-plan-page.md` |
+| `feat/setting` | Setting | Setting (Account, Language & Display, Account Security) | `functional-specification/setting-page.md` |
+
+หมายเหตุ
+- Trash (กลุ่ม Port ในแถบเมนู) อยู่ใน `feat/portlog`
+- Saved Plan ไม่มีหน้าแยกในแถบเมนู แต่แยก branch เพื่อให้ทำงานคนละก้อนกับเครื่องคำนวณ (`feat/target-amount`)
+- งานเอกสารและงานตั้งค่าโปรเจกต์ใช้ `docs/<ชื่อ>` หรือ `chore/<ชื่อ>` ตามปกติ
