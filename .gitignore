@@ -5,3 +5,4 @@ generated
 .env
 *.db
 /generated/prisma
+.DS_Store
