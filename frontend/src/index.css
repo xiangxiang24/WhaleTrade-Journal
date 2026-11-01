@@ -51,6 +51,7 @@
 
   /* Motion */
   --ease-soft: cubic-bezier(.2, .8, .2, 1);
+  --ease-bounce: cubic-bezier(.34, 1.56, .64, 1); /* เด้งเกินเป้าเล็กน้อยแล้วกลับ */
 
   /* Opening / Splash (onboarding-page.md หัวข้อ 1.1)
      วาฬขยายแล้วเด้ง 0-1000ms → ชื่อแอปเด้งช้าๆ 1000-2000ms → สโลแกนลงมาช้าๆ 1700-2600ms */
@@ -134,6 +135,43 @@
   html, body, #root { min-height: 100%; }
   body { margin: 0; @apply bg-surface font-sans text-navy-900 antialiased; }
   :lang(th) { line-height: 1.6; }
+  /* Tailwind (preflight) รีเซ็ตเคอร์เซอร์ของปุ่มเป็นลูกศร: ทุกอย่างที่คลิกได้ต้องเป็นรูปมือ */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a[href],
+  summary,
+  select,
+  label[for],
+  input[type='checkbox']:not(:disabled),
+  input[type='radio']:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
   /* focus ring ที่มองเห็นสำหรับคีย์บอร์ด (design rules หัวข้อ 12) */
   :focus-visible { outline: 2px solid var(--color-blue-500); outline-offset: 2px; }
+}
+
+/* ปุ่มทุกปุ่มเด้งนิดหน่อยตอน hover และตอนกด
+   เขียนนอก @layer เพื่อให้ชนะ transition-* ของ utility ที่ปุ่มแต่ละปุ่มกำหนดเอง
+   ใช้ property `scale` (แยกจาก transform/translate) จึงไม่ชนกับ animation หรือ -translate ของปุ่มอื่น
+   สีใช้ ease-out ปกติ มีแค่ scale ที่เด้ง */
+button,
+[role='button'] {
+  transition-property: color, background-color, border-color, box-shadow, opacity, scale;
+  transition-duration: 150ms, 150ms, 150ms, 150ms, 150ms, 250ms;
+  transition-timing-function:
+    ease-out, ease-out, ease-out, ease-out, ease-out, var(--ease-bounce);
+}
+@media (prefers-reduced-motion: no-preference) {
+  button:not(:disabled):hover,
+  [role='button']:not([aria-disabled='true']):hover {
+    scale: 1.04;
+  }
+  button:not(:disabled):active,
+  [role='button']:not([aria-disabled='true']):active {
+    scale: 0.94;
+  }
 }
