@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronRight, ShieldCheck } from 'lucide-react'
 import OnboardingButton from './components/onboarding-button'
 import OnboardingShell from './components/onboarding-shell'
+import { usePageLeave } from './components/use-page-leave'
 import type { ConnectedAccount } from './types/connected-account'
 
 type OnboardingConnectedProps = {
@@ -30,9 +31,14 @@ export default function OnboardingConnected({
   onSwitch,
 }: OnboardingConnectedProps) {
   const [selected, setSelected] = useState(true)
+  const { leaving, leaveTo } = usePageLeave()
 
   return (
-    <OnboardingShell switchLabel="Switch to Login/Register" onSwitch={onSwitch}>
+    <OnboardingShell
+      leaving={leaving}
+      switchLabel="Switch to Login/Register"
+      onSwitch={() => leaveTo(onSwitch)}
+    >
       <button
         type="button"
         aria-pressed={selected}
@@ -64,7 +70,7 @@ export default function OnboardingConnected({
         />
       </button>
 
-      <OnboardingButton className="mt-6 min-w-83" disabled={!selected} onClick={onStart}>
+      <OnboardingButton className="mt-6 min-w-83" disabled={!selected} onClick={() => leaveTo(onStart)}>
         Start your Journal
         <ChevronRight size={24} strokeWidth={2} aria-hidden="true" />
       </OnboardingButton>
