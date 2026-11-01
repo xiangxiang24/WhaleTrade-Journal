@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"      // ตัวใหม่ของ v7 (ไม่ใช่ prisma-client-js)
+  provider = "prisma-client" // ตัวใหม่ของ v7 (ไม่ใช่ prisma-client-js)
   output   = "../generated/prisma" // v7 บังคับระบุ output
 }
 
@@ -8,11 +8,182 @@ datasource db {
   // v7: ไม่ใส่ url ที่นี่ แต่ไปอยู่ใน prisma.config.ts
 }
 
+// เงินทุกฟิลด์เป็น BigInt: จำนวนเงิน = สตางค์, price = ×10,000, units = ×1,000,000
+// ไม่มี enum ใน SQLite: type / emotion เป็น String แล้วตรวจค่าในโค้ด backend
+
 model User {
   id           Int      @id @default(autoincrement())
   email        String   @unique
+  fullName     String
   displayName  String
-  passwordHash String
+  passwordHash String // bcrypt
+  recoveryCode String // AES-256-GCM (base64 ของ iv + authTag + ciphertext) ไม่ใช่ hash
+  avatar       String? // path ไฟล์ใน userData
+  language     String   @default("th") // th / en
+  timezone     String   @default("Asia/Bangkok") // รหัส IANA
   tokenVersion Int      @default(0)
   createdAt    DateTime @default(now())
+
+  notes      Note[]
+  noteDrafts NoteDraft[]
+  portfolios Portfolio[]
+  reminders  Reminder[]
+  tasks      Task[]
+  calcPlans  CalcPlan[]
+}
+
+model Asset {
+  id     Int     @id @default(autoincrement())
+  ticker String
+  name   String
+  type   String // stock / fund
+  market String // SET, US, TH-FUND ฯลฯ
+  sector String?
+  source String
+
+  transactions Transaction[]
+  planAssets   PlanAsset[]
+
+  @@unique([market, ticker])
+  @@index([name])
+}
+
+model Note {
+  id               Int       @id @default(autoincrement())
+  userId           Int
+  title            String?
+  content          String
+  emotion          String? // overjoyed / happy / neutral / worried / sad / null
+  emotionChangedAt DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  drafts NoteDraft[]
+
+  @@index([userId, createdAt])
+  @@index([userId, emotion])
+}
+
+model NoteDraft {
+  id      Int      @id @default(autoincrement())
+  userId  Int
+  noteId  Int? // null = ร่างของโน้ตใหม่
+  data    String // JSON: emotion, title, content
+  savedAt DateTime
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note Note? @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  // SQLite ถือว่า NULL ไม่ซ้ำกัน ร่างโน้ตใหม่ (noteId null) ต้องให้ service บังคับ 1 อันต่อผู้ใช้เอง
+  @@unique([userId, noteId])
+}
+
+model Portfolio {
+  id                 Int       @id @default(autoincrement())
+  userId             Int
+  name               String
+  tagline            String?
+  description        String?
+  icon               String?
+  annualDividendGoal BigInt? // สตางค์
+  deletedAt          DateTime? // มีค่า = อยู่ในถังขยะ
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt // service ต้อง touch เองเมื่อ transaction ของพอร์ตเปลี่ยน
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  calcPlans    CalcPlan[]
+
+  @@index([userId, deletedAt])
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  portfolioId Int
+  assetId     Int
+  type        String // buy / sell / dividend
+  date        String // YYYY-MM-DD
+  price       BigInt? // ×10,000
+  units       BigInt? // ×1,000,000
+  fee         BigInt? // สตางค์
+  amount      BigInt? // สตางค์ (ปันผลเท่านั้น)
+  note        String?
+  tag         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  asset     Asset     @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@index([portfolioId, date])
+  @@index([assetId])
+}
+
+model Reminder {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String?
+  remindAt    DateTime // UTC
+  done        Boolean   @default(false)
+  doneAt      DateTime?
+  notifiedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, remindAt])
+}
+
+model Task {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  text      String
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, done, createdAt])
+}
+
+model CalcPlan {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  portfolioId  Int? // null = กรอกเอง (Manual Portfolio)
+  name         String
+  principal    BigInt // สตางค์
+  resultAmount BigInt // สตางค์
+  savedAt      DateTime
+
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolio Portfolio?  @relation(fields: [portfolioId], references: [id], onDelete: SetNull)
+  phases    PlanPhase[]
+  assets    PlanAsset[]
+
+  @@index([userId, savedAt])
+}
+
+model PlanPhase {
+  id         Int    @id @default(autoincrement())
+  planId     Int
+  orderNo    Int
+  years      Int
+  monthlyDca BigInt // สตางค์
+
+  plan CalcPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, orderNo])
+}
+
+model PlanAsset {
+  id         Int @id @default(autoincrement())
+  planId     Int
+  assetId    Int
+  dividendBp Int // basis points: 7.1% = 710
+
+  plan  CalcPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  asset Asset    @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@index([planId])
 }
