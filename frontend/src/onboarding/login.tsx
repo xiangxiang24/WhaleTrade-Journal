@@ -42,10 +42,11 @@ export default function Login({
   const [successOpen, setSuccessOpen] = useState(false)
   const { leaving, leaveTo } = usePageLeave()
 
+  // modal ปิดแล้ว: เนื้อหาหน้าลอยออกก่อนไปหน้า Loading
   const handleSuccessClose = useCallback(() => {
     setSuccessOpen(false)
-    onSuccess?.()
-  }, [onSuccess])
+    leaveTo(onSuccess)
+  }, [onSuccess, leaveTo])
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()

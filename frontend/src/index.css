@@ -85,6 +85,11 @@
   --animate-modal-out: modal-out 200ms ease-in both;
   --animate-circle-pop: circle-pop 600ms ease-out 250ms both;
   --animate-check-draw: check-draw 400ms ease-out 650ms both;
+  /* Loading: แถบเต็มจาก 0 → 100% (ระยะเวลาจริงตั้งผ่าน style ในหน้า) */
+  /* Loading: วาฬว่ายน้ำ (ตัวเอนส่ายหางตามจังหวะ) และคลื่นไหลสวนกัน รอบเดียวกัน 2.4 วินาที */
+  --animate-swim: swim 2400ms ease-in-out infinite;
+  --animate-wave: wave 2400ms ease-in-out infinite;
+  --animate-loading-fill: loading-fill 2400ms ease-in-out both;
 
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(16px); }
@@ -121,6 +126,20 @@
     60%  { transform: scale(1.15); }
     80%  { transform: scale(.95); }
     100% { transform: scale(1); }
+  }
+  @keyframes swim {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25%      { transform: translate(-6px, -10px) rotate(-3deg); }
+    50%      { transform: translate(0, -2px) rotate(0deg); }
+    75%      { transform: translate(6px, -10px) rotate(3deg); }
+  }
+  @keyframes wave {
+    0%, 100% { transform: translateX(8px); }
+    50%      { transform: translateX(-8px); }
+  }
+  @keyframes loading-fill {
+    from { width: 0; }
+    to   { width: 100%; }
   }
   @keyframes check-draw {
     from { stroke-dashoffset: 1; }

@@ -4,8 +4,9 @@ import OnboardingInconnected from './onboarding/onboarding-inconnected'
 import OnboardingConnected from './onboarding/onboarding-connected'
 import Login from './onboarding/login'
 import Register from './onboarding/register'
+import Loading from './onboarding/loading'
 
-type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register'
+type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading'
 
 // ชั่วคราว: ข้อมูลตัวอย่างไว้ดูหน้า Onboarding จนกว่าจะมี router และระบบ auth จริง
 const SAMPLE_ACCOUNT = { displayName: 'Thomas W.' }
@@ -30,7 +31,7 @@ function App() {
       <Login
         onBack={() => setScreen('inconnected')}
         onSwitchToRegister={() => setScreen('register')}
-        onSuccess={() => setScreen('connected')}
+        onSuccess={() => setScreen('loading')}
       />
     )
   }
@@ -39,9 +40,13 @@ function App() {
       <Register
         onBack={() => setScreen('inconnected')}
         onSwitchToLogin={() => setScreen('login')}
-        onSuccess={() => setScreen('login')}
+        onSuccess={() => setScreen('loading')}
       />
     )
+  }
+  if (screen === 'loading') {
+    // ชั่วคราว: จบแล้วไปหน้า connected แทน My Journals จนกว่าหน้านั้นจะพร้อม
+    return <Loading onFinish={() => setScreen('connected')} />
   }
   return <OnboardingConnected account={SAMPLE_ACCOUNT} onSwitch={() => setScreen('inconnected')} />
 }

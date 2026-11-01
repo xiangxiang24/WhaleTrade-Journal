@@ -10,7 +10,7 @@ import type { RegisterData, RegisterErrors, RegisterResult } from './types/regis
 type RegisterProps = {
   /** สร้างบัญชีกับ backend แล้วคืนรหัสกู้คืน: ถ้าไม่สำเร็จให้ throw Error พร้อมข้อความที่จะแสดง */
   onRegister?: (data: RegisterData) => Promise<RegisterResult>
-  /** เรียกเมื่อ modal "Register Successful" ปิดแล้ว ให้ผู้เรียกพาไปหน้าถัดไป (Login) */
+  /** เรียกเมื่อ modal "Register Successful" ปิดแล้ว ให้ผู้เรียกพาไปหน้าถัดไป (Loading) */
   onSuccess?: () => void
   onBack?: () => void
   onSwitchToLogin?: () => void
@@ -39,7 +39,7 @@ function validate(
   return errors
 }
 
-// หน้า Register: สมัครสมาชิกแล้วแสดง modal พร้อมรหัสกู้คืน (แสดงครั้งเดียว) กด OK แล้วไปหน้า Login
+// หน้า Register: สมัครสมาชิกแล้วแสดง modal พร้อมรหัสกู้คืน (แสดงครั้งเดียว) กด OK แล้วไปหน้า Loading
 export default function Register({ onRegister, onSuccess, onBack, onSwitchToLogin }: RegisterProps) {
   const [fullName, setFullName] = useState('')
   const [displayName, setDisplayName] = useState('')
@@ -53,10 +53,11 @@ export default function Register({ onRegister, onSuccess, onBack, onSwitchToLogi
   const [recoveryCode, setRecoveryCode] = useState<string | null>(null)
   const { leaving, leaveTo } = usePageLeave()
 
+  // modal ปิดแล้ว: เนื้อหาหน้าลอยออกก่อนไปหน้า Loading
   const handleSuccessClose = useCallback(() => {
     setRecoveryCode(null)
-    onSuccess?.()
-  }, [onSuccess])
+    leaveTo(onSuccess)
+  }, [onSuccess, leaveTo])
 
   function handleFullNameChange(value: string) {
     setFullName(value)
