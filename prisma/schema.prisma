@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client"      // ตัวใหม่ของ v7 (ไม่ใช่ prisma-client-js)
+  output   = "../generated/prisma" // v7 บังคับระบุ output
+}
+
+datasource db {
+  provider = "sqlite"
+  // v7: ไม่ใส่ url ที่นี่ แต่ไปอยู่ใน prisma.config.ts
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  displayName  String
+  passwordHash String
+  tokenVersion Int      @default(0)
+  createdAt    DateTime @default(now())
+}
