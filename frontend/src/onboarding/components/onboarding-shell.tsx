@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { RefreshCw } from 'lucide-react'
 import banner from '../../assets/Banner.png'
+import OnboardingHeader from './onboarding-header'
 
 type OnboardingShellProps = {
   /** ข้อความปุ่มสลับมุมมองใต้เส้นคั่นด้านขวา */
@@ -14,12 +15,7 @@ type OnboardingShellProps = {
 export default function OnboardingShell({ switchLabel, onSwitch, children }: OnboardingShellProps) {
   return (
     <div className="flex min-h-screen flex-col bg-surface px-8 min-[1280px]:px-15">
-      <header className="flex items-center gap-2 border-b-2 border-blue-200 pt-11 pb-3">
-        <span aria-hidden="true" className="size-2 rounded-pill bg-navy-700" />
-        <span className="text-[20px] leading-7 font-semibold text-navy-900">
-          Whale Trade Journal
-        </span>
-      </header>
+      <OnboardingHeader />
 
       <div className="mt-5.5 flex justify-end">
         <button

@@ -46,6 +46,7 @@
   --shadow-sm: 0 1px 2px rgba(9, 29, 54, .06);
   --shadow-md: 0 4px 16px rgba(9, 29, 54, .06);
   --shadow-lg: 0 16px 48px rgba(9, 29, 54, .16);
+  --shadow-focus: 0 0 0 3px rgba(94, 131, 186, .25); /* วงแหวน focus ของช่องกรอก */
   --shadow-cta: 0 8px 20px rgba(94, 131, 186, .28); /* ปุ่มหลักหน้า Onboarding */
 
   /* Motion */
@@ -73,7 +74,61 @@
     from { opacity: 0; transform: translateY(-16px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+  /* Login: การเปลี่ยนหน้า (เข้า/ออก), วาฬลอย, modal เด้ง */
+  --animate-fade-up: fade-up 450ms var(--ease-soft) both;
+  --animate-page-out: page-out 250ms ease-in both;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-scrim-in: fade-in 200ms ease-out both;
+  --animate-scrim-out: fade-out 200ms ease-in both;
+  --animate-modal-pop: modal-pop 600ms ease-out both;
+  --animate-modal-out: modal-out 200ms ease-in both;
+  --animate-circle-pop: circle-pop 600ms ease-out 250ms both;
+  --animate-check-draw: check-draw 400ms ease-out 650ms both;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes page-out {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-12px); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+  @keyframes modal-pop {
+    0%   { opacity: 0; transform: translateY(24px) scale(.6); }
+    55%  { opacity: 1; transform: translateY(0) scale(1.06); }
+    75%  { transform: scale(.97); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes modal-out {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(.92); }
+  }
+  @keyframes circle-pop {
+    0%   { transform: scale(0); }
+    60%  { transform: scale(1.15); }
+    80%  { transform: scale(.95); }
+    100% { transform: scale(1); }
+  }
+  @keyframes check-draw {
+    from { stroke-dashoffset: 1; }
+    to   { stroke-dashoffset: 0; }
+  }
 }
+
+/* หน้าต่างเตี้ย (ความสูง < 760 เช่น 1024 × 680): บีบระยะให้หน้าที่ยาวพอดีจอ */
+@custom-variant short (@media (max-height: 759px));
 
 @layer base {
   html, body, #root { min-height: 100%; }

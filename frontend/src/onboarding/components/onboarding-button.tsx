@@ -4,7 +4,7 @@ type Variant = 'primary' | 'secondary'
 
 // ปุ่มแคปซูลใหญ่ของหน้า Onboarding ตามดีไซน์ Figma
 const base =
-  'inline-flex h-13 items-center justify-center gap-2 rounded-pill px-8 text-[20px] font-semibold shadow-cta transition-colors duration-150 disabled:cursor-not-allowed disabled:shadow-none'
+  'inline-flex h-13 short:h-12 items-center justify-center gap-2 rounded-pill px-8 text-[20px] font-semibold shadow-cta transition-colors duration-150 disabled:cursor-not-allowed disabled:shadow-none'
 
 const variants: Record<Variant, string> = {
   primary:
