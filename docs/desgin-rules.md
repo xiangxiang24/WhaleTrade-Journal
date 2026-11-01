@@ -445,6 +445,7 @@
 :lang(th) { line-height: 1.6; }
 ```
 
+- โค้ดจริงใช้ **Tailwind CSS v4**: token ข้างบนถูกประกาศใน `@theme` ของ `frontend/src/index.css` (เช่น `--color-navy-900` ใช้เป็น `text-navy-900`) วิธีใช้และแนวทางที่ใช้จริงดูหัวข้อ 14
 - รอบแรกมีธีมสว่างธีมเดียว (ดีไซน์ไม่มีธีมมืด) แต่ให้อ้างอิงสีผ่าน token เสมอ เพื่อเพิ่มธีมมืดภายหลังได้โดยไม่แก้ component
 
 ---
@@ -468,3 +469,109 @@
 - [ ] มีสถานะ hover / focus / disabled / ว่าง / กำลังโหลด / error ครบ
 - [ ] ใช้งานด้วยคีย์บอร์ดอย่างเดียวได้ครบทุกปุ่ม
 - [ ] ตัวเลขเงินใช้ tabular-nums และชิดขวาในตาราง
+- [ ] ทุก navigation ใช้ `leaveTo(...)` และทุกหน้ามีแอนิเมชันเข้า (หัวข้อ 14.3)
+- [ ] ทุกแอนิเมชันมี `motion-reduce:animate-none`
+- [ ] ทดสอบที่ 1024 × 680 แล้วพอดีจอ (ใช้ variant `short` ถ้าหน้ายาว)
+
+---
+
+## 14. แนวทางที่ใช้จริงในโค้ด (Tailwind, Motion, Component ร่วม)
+
+หัวข้อนี้สรุปสิ่งที่ลงมือทำจริงตั้งแต่หน้า Onboarding / Login / Register เพื่อให้หน้าถัดไปใช้แนวเดียวกัน ถ้าไม่แน่ใจให้เปิดไฟล์อ้างอิงใน `frontend/src/onboarding/` เป็นตัวอย่าง
+
+### 14.1 Tailwind และ token
+- Token อยู่ใน `@theme` ของ `frontend/src/index.css` ใช้ผ่าน class เท่านั้น ไม่ใส่ hex/rgba ใน component
+  - สี: `text-navy-900`, `bg-surface`, `bg-blue-500`, `border-blue-200`, `text-text-muted`, `bg-green-500` ฯลฯ (ชื่อตามหัวข้อ 2)
+  - มุม: `rounded-pill` (999), `rounded-xl` (20), `rounded-lg` (16), `rounded-4xl` (32 ใช้กับการ์ด auth)
+  - เงา: `shadow-sm|md|lg`, `shadow-cta` (เงาฟ้าใต้ปุ่มหลัก), `shadow-focus` (วงแหวนช่องกรอก)
+  - Easing: `--ease-soft` (เข้าอย่างนุ่ม), `--ease-bounce` (เด้งเกินเป้าเล็กน้อย)
+- ถ้าต้องมีสี/เงา/แอนิเมชันใหม่ **เพิ่ม token ใน `@theme` ก่อน** แล้วค่อยใช้ ห้ามใส่ตรงใน component
+- ระยะห่างใช้ scale ของ Tailwind (1 หน่วย = 4px) เช่น `mt-6` = 24 ค่าตามภาพ Figma ที่ไม่ใช่ผลคูณของ 4 ให้ใช้ค่าที่ใกล้สุด ส่วนขนาดเฉพาะใช้ arbitrary value ได้ (`text-[26px]`, `w-[clamp(...)]`)
+- ฟอนต์ติดไปกับแอปผ่าน `@fontsource/montserrat` และ `@fontsource/ibm-plex-sans-thai` (import ใน `index.css`) ไอคอนใช้ `lucide-react` (`strokeWidth={1.75}`, ไอคอนตกแต่งใส่ `aria-hidden="true"`)
+- ข้อความยังเป็นอังกฤษตรงๆ เพราะยังไม่ได้ติดตั้งระบบแปลภาษา ต้องย้ายเข้าระบบแปลเมื่อติดตั้ง
+
+### 14.2 เมื่อ Figma ไม่ตรงกับเอกสารนี้
+- **ขนาด/ระยะ/เลย์เอาต์:** ยึด Figma (ตัวอย่าง: แบนเนอร์ Onboarding 436px, page padding 60, ปุ่มสูง 52 ตัวอักษร 20, หัวข้อ Login 44/32, การ์ด auth กว้าง 860, modal กว้าง 464)
+- **สี:** ยึด palette ในหัวข้อ 2 (เช่นวงกลมเช็กใน modal ใช้ `green-500` ทั้งที่ Figma เขียวอ่อนกว่า) ถ้าต้องการสีใหม่ให้เพิ่ม token แล้วจดไว้ที่นี่
+- **Placeholder ที่ Figma คัดลอกผิด** (เช่นทุกช่องเป็น your.email@example.com) ให้ใช้ข้อความที่สื่อความหมายจริง
+- ถ้าตัดสินใจต่างจาก Figma หรือเอกสาร ให้บอกผู้ใช้ในสรุปงานเสมอ
+
+### 14.3 การเปลี่ยนหน้า (Page transition)
+แนวคิด: **แถบหัวอยู่นิ่ง เนื้อหาลอยเข้า–ลอยออก** ใช้ชุดเดียวกันทุกหน้าที่เปลี่ยนด้วยการกดปุ่ม
+
+| ช่วง | แอนิเมชัน | ค่า |
+|---|---|---|
+| เข้าหน้า | `animate-fade-up` (จางเข้า + ลอยขึ้นจากล่าง 16px) | 450ms ease-soft เหลื่อมทีละส่วน `[animation-delay:80ms]` / `160ms` / `240ms` |
+| ออกจากหน้า | `animate-page-out` (จางหาย + ลอยขึ้น 12px) | 250ms ease-in แล้วค่อยนำทาง |
+
+ลำดับการเข้า (บนลงล่าง): ปุ่มสลับ/ปุ่มกลับ (0) → แบนเนอร์หรือหัวข้อ (80) → หัวข้อ/การ์ด (160) → ปุ่มหรือส่วนล่าง (240)
+
+วิธีใช้ในหน้าใหม่ (ดู `login.tsx`, `onboarding-inconnected.tsx`):
+```tsx
+const { leaving, leaveTo } = usePageLeave()          // components/use-page-leave.ts
+<div className={leaving ? 'animate-page-out motion-reduce:animate-none' : ''}> ...เนื้อหา... </div>
+<button onClick={() => leaveTo(onBack)}>…</button>  // ห่อ callback นำทางทุกตัวด้วย leaveTo
+```
+- `leaveTo(cb)` ตั้ง `leaving` แล้วเรียก `cb` หลัง 250ms (ถ้าผู้ใช้ตั้ง reduce motion เรียกทันที) และกันกดซ้ำให้
+- ผู้เรียกหน้า (ตอนนี้คือ `App.tsx`) เป็นคนเปลี่ยนหน้าจริงใน `cb` หน้าไม่นำทางเอง
+- ปุ่มที่ไม่ได้เปลี่ยนหน้า (เช่น แสดง/ซ่อนรหัสผ่าน) ห้ามใช้ `leaveTo`
+- `Opening → Onboarding` ก็ใช้แบบเดียวกัน: Splash เล่นจบ ค้างรวม 2.6 วินาที แล้ว `leaveTo` ออก ก่อนหน้า Onboarding ลอยเข้า (รวมไม่เกิน ~3 วินาทีตามสเปก)
+
+### 14.4 Splash / Opening (`opening-page.tsx`)
+| ช่วงเวลา | องค์ประกอบ | แอนิเมชัน |
+|---|---|---|
+| 0 – 1000ms | โลโก้วาฬ (สูง 160) | `animate-logo-in`: ขยาย .4 → 1.1 → .97 → 1 (เด้งหลังขยายเต็ม) |
+| 1000 – 2000ms | "Whale Trade Journal" | `animate-title-bounce`: ตกลงมาแล้วเด้งกลับ (translateY -24 → 8 → -4 → 0) |
+| 1700 – 2600ms | สโลแกน | `animate-tagline-in`: ค่อยๆ ลงมาช้าๆ |
+| 2600ms | ทั้งหน้า | `page-out` 250ms แล้วเรียก `onFinish` |
+
+### 14.5 Modal (`modals/`)
+- ใช้ `modal-frame.tsx` เป็นกรอบเสมอ: ฉากหลัง `bg-black/40` จางเข้า (`animate-scrim-in` 200ms), การ์ดเด้งขึ้น `animate-modal-pop` (600ms: 0.6 → 1.06 → .97 → 1 + ลอยขึ้น 24px), ปิดด้วย `animate-modal-out` 200ms (ย่อ .92 + จาง)
+- Modal แจ้งสำเร็จใช้ `success-check.tsx`: วงกลมเด้ง `animate-circle-pop` (เริ่ม 250ms) แล้วเครื่องหมายถูกถูกวาดตาม `animate-check-draw` (เริ่ม 650ms ใช้ `pathLength={1}` + `stroke-dashoffset`)
+- การ์ด: กว้างสูงสุด 464 (`max-w-116`), `rounded-3xl`, `px-12 py-10`, ขนาดวงกลมใช้ `clamp(...)` ตามความสูงหน้าต่าง
+- พฤติกรรมที่ต้องมี: `role="dialog"` + `aria-modal` + `aria-labelledby/describedby`, กัก focus ในกล่อง (Tab วนในกล่อง), ปิดด้วย Esc, โฟกัสปุ่มที่มี `data-autofocus` ตอนเปิด
+- Mount เฉพาะตอนเปิด (`open ? <Dialog/> : null`) เพื่อให้แอนิเมชันและตัวจับเวลาเริ่มใหม่ทุกครั้ง และหลีกเลี่ยง setState ใน effect
+- ปิดแบบสองจังหวะ: ตั้ง `closing = true` → เล่นแอนิเมชันออก 200ms → ค่อยเรียก `onClose`
+- Login Success: ปิดเองหลัง 2 วินาที / Register Success (รหัสกู้คืน): **ไม่ปิดเอง** ต้องกด OK หรือ Esc และมีปุ่ม copy (ไอคอนเปลี่ยนเป็นเครื่องหมายถูก 1.5 วินาที)
+
+### 14.6 ปุ่ม: เคอร์เซอร์และความเด้ง (กฎส่วนกลางท้าย `index.css`)
+- ทุก `button` / `[role=button]` / `a[href]` / `select` / `label[for]` / checkbox / radio เป็น `cursor: pointer`; ที่ disabled เป็น `not-allowed` (Tailwind preflight รีเซ็ตเป็นลูกศร จึงต้องมีกฎนี้)
+- ปุ่มทุกปุ่ม **เด้งอัตโนมัติ** โดยไม่ต้องใส่ class: hover `scale 1.04`, กด `scale 0.94`, easing `--ease-bounce` 250ms; สี/เงาเปลี่ยนแบบ ease-out 150ms (ไม่เด้ง); ปุ่ม disabled ไม่เด้ง; ผู้ใช้ reduce motion ไม่เด้ง
+- กฎนี้เขียน **นอก `@layer`** โดยตั้งใจ เพื่อให้ชนะ `transition-*` ของ utility ในปุ่มแต่ละปุ่ม และใช้ property `scale` (ไม่ใช่ `transform`) จึงไม่ชนกับ `-translate-*` หรือ keyframes ของ element เดียวกัน
+- ตั้งใจ **ไม่รวม** ลิงก์ข้อความ และการ์ดใบใหญ่ที่คลิกได้ทั้งใบ (การ์ดโน้ต การ์ดพอร์ต) ซึ่งมี hover/กดของตัวเองในหัวข้อ 7.3 และ 9.3
+- ปุ่มใหญ่ของ Onboarding/Auth ใช้ `components/onboarding-button.tsx` (Primary/Secondary, สูง 52, ตัวอักษร 20, `shadow-cta`)
+
+### 14.7 ฟอร์ม (`components/auth-field.tsx`)
+- ใช้ `TextField` / `PasswordField` (ป้ายชื่อ + ช่อง + ข้อความ error) และ `FieldError` ไม่เขียนช่องกรอกเองซ้ำ
+- ช่อง: สูง 44 (หน้าต่างเตี้ย 40), ทรงแคปซูล, ขอบ 2px `blue-500`, error = ขอบ `red-500` + `FieldError` (ไอคอน `CircleAlert` แดง + ข้อความสี navy-900), focus = `shadow-focus`, `aria-invalid` และ `aria-describedby` ครบ
+- `PasswordField` มีปุ่มตาแสดง/ซ่อน (`aria-label`) และรับ `labelAction` สำหรับลิงก์ข้างป้ายชื่อ (เช่น Forgot Password?)
+- ตรวจข้อมูลตอนกด submit (ไม่ตรวจขณะพิมพ์), `noValidate` บน `<form>`, ข้อผิดพลาดจากระบบแสดงใต้ฟอร์มด้วย `role="alert"`
+- ฟอร์มรับ callback จากภายนอก (`onLogin`, `onRegister` ที่ throw `Error` เมื่อล้มเหลว) หน้าไม่เรียก API เอง
+
+### 14.8 Responsive ที่ใช้จริง
+- ความกว้าง: `min-[1280px]:` เปลี่ยน page padding 32 → 60 และขนาดหัวข้อ, `min-[1100px]:` แสดง/ซ่อนส่วนภาพประกอบของการ์ด auth
+- ความสูง: variant **`short`** (หน้าต่างสูง < 760 เช่น 1024 × 680) ประกาศใน `index.css` ด้วย `@custom-variant short` ใช้บีบหน้าที่ยาวให้พอดีจอ: ลดความสูงปุ่ม (52 → 48) ช่องกรอก (44 → 40) ระยะห่างหัวข้อ/ฟอร์ม และ padding บนของแถบหัว
+- รูปภาพที่ควรย่อตามจอใช้ `clamp()` ผูกกับ `100vh` (เช่นแบนเนอร์ `w-[clamp(200px,calc(100vh_-_440px),436px)]`)
+- ใช้ `min-h-screen` ไม่ใช้ความสูงตายตัว ให้หน้าเลื่อนแนวตั้งได้ถ้าเนื้อหายาวกว่าจอ แต่ห้ามเลื่อนแนวนอน
+- ข้อความและปุ่มใช้ `min-w-*` แทนความกว้างตายตัว เพื่อเผื่อภาษาไทยยาวกว่า
+
+### 14.9 Component ร่วมที่มีอยู่แล้ว (ใช้ซ้ำก่อนเขียนใหม่)
+| ไฟล์ (`frontend/src/onboarding/`) | หน้าที่ |
+|---|---|
+| `components/use-page-leave.ts` | hook `usePageLeave()` ให้ `{ leaving, leaveTo }` สำหรับแอนิเมชันออกก่อนเปลี่ยนหน้า |
+| `components/onboarding-header.tsx` | แถบหัว: จุด + ชื่อแอป + เส้นคั่น (นิ่ง ไม่มีแอนิเมชัน) |
+| `components/onboarding-shell.tsx` | โครงหน้า Onboarding: ลิงก์สลับ + แบนเนอร์ + หัวข้อ + คำโปรย + slot ล่าง |
+| `components/auth-layout.tsx` | โครงหน้า Login/Register: ปุ่มกลับ + หัวข้อ + การ์ด (วาฬซ้าย ฟอร์มขวา) + slot modal |
+| `components/auth-field.tsx` | `TextField`, `PasswordField`, `FieldError` |
+| `components/onboarding-button.tsx` | ปุ่มใหญ่ Primary/Secondary |
+| `modals/modal-frame.tsx` | กรอบ modal (scrim, เด้ง, กัก focus, Esc) |
+| `modals/success-check.tsx` | วงกลมเช็กเด้ง + เครื่องหมายถูกถูกวาด |
+| `modals/login-success-modal.tsx`, `modals/register-success-modal.tsx` | ตัวอย่างการใช้ `ModalFrame` |
+
+ถ้า component ใดต้องใช้ข้ามหน้าอื่นนอก Onboarding ให้ย้ายไป `frontend/src/shared/`
+
+### 14.10 ข้อควรระวังตอนทำหน้าใหม่
+- ทุก `animate-*` ต้องมี `motion-reduce:animate-none` คู่กัน
+- อย่าใส่ `transform` ลง element ที่มี keyframes ของตัวเอง ใช้ `scale` / `translate` utility ที่เป็น property แยกแทน
+- ตรวจหน้าจริงด้วยภาพ: build แล้วถ่ายภาพด้วย Chrome headless (`--window-size=<กว้าง>,<สูง> --virtual-time-budget=<ms> --screenshot=...`) ที่ 1024 × 680 และ 1250 × 1110 เป็นอย่างน้อย หน้าที่เปลี่ยนหลังหน่วงเวลา (เช่นหลัง Opening) ต้องตั้ง budget สูงมาก (~15000) เพราะแอนิเมชัน CSS ไม่เดินตาม virtual time
+- ปุ่มที่ต่อกับ backend ที่ยังไม่มี ให้เป็น prop callback (`onXxx?: () => void`) แล้วให้ `App.tsx` ต่อชั่วคราว
