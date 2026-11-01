@@ -149,6 +149,8 @@
 
 /* หน้าต่างเตี้ย (ความสูง < 760 เช่น 1024 × 680): บีบระยะให้หน้าที่ยาวพอดีจอ */
 @custom-variant short (@media (max-height: 759px));
+/* หน้าต่างสูงน้อยกว่า 940: Sidebar ไม่พอที่ให้ภาพประกอบ จึงซ่อนภาพ */
+@custom-variant snug (@media (max-height: 939px));
 
 @layer base {
   html, body, #root { min-height: 100%; }
@@ -173,7 +175,7 @@
   :focus-visible { outline: 2px solid var(--color-blue-500); outline-offset: 2px; }
 }
 
-/* ปุ่มทุกปุ่มเด้งนิดหน่อยตอน hover และตอนกด
+/* ปุ่มทุกปุ่มเด้งนิดหน่อยตอน hover และตอนกด (ปรับความแรงรายปุ่มได้ด้วยตัวแปร --bounce-scale / --press-scale หรือปิดด้วย data-no-bounce)
    เขียนนอก @layer เพื่อให้ชนะ transition-* ของ utility ที่ปุ่มแต่ละปุ่มกำหนดเอง
    ใช้ property `scale` (แยกจาก transform/translate) จึงไม่ชนกับ animation หรือ -translate ของปุ่มอื่น
    สีใช้ ease-out ปกติ มีแค่ scale ที่เด้ง */
@@ -185,12 +187,12 @@ button,
     ease-out, ease-out, ease-out, ease-out, ease-out, var(--ease-bounce);
 }
 @media (prefers-reduced-motion: no-preference) {
-  button:not(:disabled):hover,
-  [role='button']:not([aria-disabled='true']):hover {
-    scale: 1.04;
+  button:not(:disabled):not([data-no-bounce]):hover,
+  [role='button']:not([aria-disabled='true']):not([data-no-bounce]):hover {
+    scale: var(--bounce-scale, 1.04);
   }
-  button:not(:disabled):active,
-  [role='button']:not([aria-disabled='true']):active {
-    scale: 0.94;
+  button:not(:disabled):not([data-no-bounce]):active,
+  [role='button']:not([aria-disabled='true']):not([data-no-bounce]):active {
+    scale: var(--press-scale, 0.94);
   }
 }

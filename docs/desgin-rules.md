@@ -537,6 +537,8 @@ const { leaving, leaveTo } = usePageLeave()          // components/use-page-leav
 ### 14.6 ปุ่ม: เคอร์เซอร์และความเด้ง (กฎส่วนกลางท้าย `index.css`)
 - ทุก `button` / `[role=button]` / `a[href]` / `select` / `label[for]` / checkbox / radio เป็น `cursor: pointer`; ที่ disabled เป็น `not-allowed` (Tailwind preflight รีเซ็ตเป็นลูกศร จึงต้องมีกฎนี้)
 - ปุ่มทุกปุ่ม **เด้งอัตโนมัติ** โดยไม่ต้องใส่ class: hover `scale 1.04`, กด `scale 0.94`, easing `--ease-bounce` 250ms; สี/เงาเปลี่ยนแบบ ease-out 150ms (ไม่เด้ง); ปุ่ม disabled ไม่เด้ง; ผู้ใช้ reduce motion ไม่เด้ง
+- **ปรับความแรงรายปุ่ม** ด้วย CSS variable บนตัวปุ่ม (ไม่ต้องเขียนกฎใหม่): `[--bounce-scale:1.03]` (ขนาดตอน hover, ค่าเริ่มต้น 1.04) และ `[--press-scale:0.97]` (ขนาดตอนกด, ค่าเริ่มต้น 0.94) ปุ่มเต็มความกว้างหรือแถวเมนูควรใช้ค่าอ่อนลง ปุ่มไอคอนเล็กใช้ค่าแรงขึ้นได้ (เช่น 1.1 / 0.92)
+- ปิดการเด้งเฉพาะปุ่มด้วย attribute `data-no-bounce` (ใช้เมื่อการขยายทำให้เลย์เอาต์ดูผิด เช่นปุ่มที่ชิดขอบ container ซึ่ง `overflow-hidden`)
 - กฎนี้เขียน **นอก `@layer`** โดยตั้งใจ เพื่อให้ชนะ `transition-*` ของ utility ในปุ่มแต่ละปุ่ม และใช้ property `scale` (ไม่ใช่ `transform`) จึงไม่ชนกับ `-translate-*` หรือ keyframes ของ element เดียวกัน
 - ตั้งใจ **ไม่รวม** ลิงก์ข้อความ และการ์ดใบใหญ่ที่คลิกได้ทั้งใบ (การ์ดโน้ต การ์ดพอร์ต) ซึ่งมี hover/กดของตัวเองในหัวข้อ 7.3 และ 9.3
 - ปุ่มใหญ่ของ Onboarding/Auth ใช้ `components/onboarding-button.tsx` (Primary/Secondary, สูง 52, ตัวอักษร 20, `shadow-cta`)
@@ -568,10 +570,61 @@ const { leaving, leaveTo } = usePageLeave()          // components/use-page-leav
 | `modals/success-check.tsx` | วงกลมเช็กเด้ง + เครื่องหมายถูกถูกวาด |
 | `modals/login-success-modal.tsx`, `modals/register-success-modal.tsx` | ตัวอย่างการใช้ `ModalFrame` |
 
-ถ้า component ใดต้องใช้ข้ามหน้าอื่นนอก Onboarding ให้ย้ายไป `frontend/src/shared/`
+component ที่ใช้ข้ามหลายหน้าอยู่ใน `frontend/src/shared/` (ตอนนี้มี `shared/sidebar/` ดูหัวข้อ 14.11) ถ้า component ใดใน Onboarding ต้องใช้ข้ามหน้าอื่นให้ย้ายไปที่นั่น
 
 ### 14.10 ข้อควรระวังตอนทำหน้าใหม่
 - ทุก `animate-*` ต้องมี `motion-reduce:animate-none` คู่กัน
 - อย่าใส่ `transform` ลง element ที่มี keyframes ของตัวเอง ใช้ `scale` / `translate` utility ที่เป็น property แยกแทน
 - ตรวจหน้าจริงด้วยภาพ: build แล้วถ่ายภาพด้วย Chrome headless (`--window-size=<กว้าง>,<สูง> --virtual-time-budget=<ms> --screenshot=...`) ที่ 1024 × 680 และ 1250 × 1110 เป็นอย่างน้อย หน้าที่เปลี่ยนหลังหน่วงเวลา (เช่นหลัง Opening) ต้องตั้ง budget สูงมาก (~15000) เพราะแอนิเมชัน CSS ไม่เดินตาม virtual time
 - ปุ่มที่ต่อกับ backend ที่ยังไม่มี ให้เป็น prop callback (`onXxx?: () => void`) แล้วให้ `App.tsx` ต่อชั่วคราว
+
+### 14.11 Sidebar (`frontend/src/shared/sidebar/`)
+ใช้ทุกหน้าหลังเข้าสู่ระบบ: `<Sidebar active user reminderBadge onNavigate onLogout />` (`sidebar.tsx` + `sidebar-item.tsx`, type อยู่ใน `shared/types/sidebar.ts`) ตัว component สูงเต็มพื้นที่ของ parent (`h-full`) parent เป็นคนกำหนดระยะห่างขอบหน้าต่าง 16 และพื้นหลัง `bg-paper`
+
+| ส่วน | ค่าที่ใช้ (ยึด Figma) |
+|---|---|
+| ตัวกล่อง | กว้าง 248, `rounded-[28px]`, พื้น surface, `shadow-md`, padding 20 × 24 |
+| โลโก้ | `Logo.png` สูง 96 + ชื่อแอป 18/24 bold จัดกลาง 2 บรรทัด |
+| ป้ายหมวด | 17/24 semibold สี navy-700 ชิดซ้ายเท่าขอบเมนู (ไม่เว้น 12) |
+| เมนู | สูง 40 ห่างกัน 12, ไอคอน lucide 22 (เส้น 1.75) + ช่องว่าง 20 + ข้อความ 16 medium |
+| Hover | พื้น `blue-50` และ **ไอคอน/ข้อความเป็น `blue-500`** + เด้ง (1.03 / กด 0.97) |
+| เมนูที่เลือก | พื้น `blue-100` ข้อความ navy-700, `aria-current="page"` (ยังเด้งตอน hover/กดเหมือนกัน) |
+| เส้นแบ่งหมวด | `border-blue-200/60` ระยะบนล่าง 20 |
+| ภาพประกอบ | `Banner.png` ท้ายเมนู กินที่ว่างที่เหลือและย่อตามความสูง (`object-contain`) |
+| ผู้ใช้ | `Avatar` กลม 36 (รูป `avatarUrl` หรือเงาวาฬ ดูหัวข้อ 14.14), ชื่อ 15/20 semibold, "Dividend Haven" 12 text-muted, ปุ่ม LogOut 32 ชิดขวา (ติดล่างสุดเสมอ) |
+| Reminder badge | วงกลมแดง 18 ตัวเลขขาว 11 bold ที่เมนู Reminder (แสดงเมื่อ > 0, เกิน 99 แสดง 99+) |
+
+- **เด้ง:** ใช้กฎปุ่มส่วนกลาง (หัวข้อ 14.6) แต่เมนูเต็มความกว้างตั้ง `--bounce-scale:1.03` / `--press-scale:0.97` (อ่อนกว่าปุ่มทั่วไปเพราะแถวกว้าง) ส่วนแบบไอคอน 44 × 44 ตั้ง `1.1` / `0.92` (แรงขึ้นเพราะปุ่มเล็ก) ปุ่ม LogOut ใช้ค่าเริ่มต้น
+- **แบบไอคอน** เมื่อหน้าต่างกว้าง < 1280 (`max-[1279px]:`): กว้าง 76, เมนู 44 × 44, ซ่อนป้ายหมวด/ข้อความ/ภาพประกอบ/ชื่อผู้ใช้, tooltip ชื่อเมนูทางขวาหน่วง 300ms (ขึ้นด้วย focus คีย์บอร์ดทันที), badge ย้ายไปมุมบนขวาของไอคอน, avatar กับปุ่ม LogOut เรียงแนวตั้ง (ยังไม่ทำเมนู popup ตามหัวข้อ 6.3)
+- **หน้าต่างเตี้ย:** variant `snug` (สูง < 940) ซ่อนภาพประกอบเพราะไม่พอที่, variant `short` (สูง < 760) บีบระยะ: โลโก้ 64, เมนูสูง 36 ห่าง 4, เส้นแบ่งห่าง 8 ให้พอดีที่ 1024 × 680
+- เมนูเป็น `<button>` ภายใน `<nav>` + `<ul>`: ทุกปุ่มมี `aria-label`, ใช้ `onNavigate(key)` ให้ผู้เรียกเป็นคนเปลี่ยนหน้า (ยังไม่ผูก router)
+
+### 14.12 TopBar (`frontend/src/shared/top-bar/top-bar.tsx`)
+แถบบนสุดของทุกหน้าหลังเข้าสู่ระบบ **ไม่มีพื้นหลัง** (วางบน `bg-paper` ตรงๆ) ใช้คู่กับ Sidebar: `<TopBar displayName avatarUrl? date? locale? />`
+
+| ส่วน | ค่าที่ใช้ (ยึด Figma) |
+|---|---|
+| ตัวแถบ | สูง 56, **ไม่มี padding แนวนอนของตัวเอง** (ระยะขอบซ้าย–ขวาของหน้ามาจาก `AppShell`), ข้อความ 16/24 สี navy-700 |
+| ซ้าย | ไอคอน `Sunset` 20 → "A peaceful session" → จุดคั่น 6 (`blue-200`) → วันที่ เช่น "Monday, Nov 2" (`Intl.DateTimeFormat`, ค่าเริ่มต้น `en-US`, `<time dateTime>`) |
+| ขวา | ป้ายแคปซูล `bg-blue-50` มีจุด navy-700 8 + **`displayName` ของผู้ใช้** (15 semibold, ยาวเกินตัดด้วย `…` กว้างสูงสุด 240) แทนข้อความ "Market quiet" ใน Figma → `Avatar` กลม 44 (รูป `avatarUrl` หรือเงาวาฬ ดูหัวข้อ 14.14) |
+
+- "Market quiet" ใน Figma เป็นข้อมูลภายนอกที่แอปออฟไลน์ไม่มี (database.md หัวข้อ 4) จึงเปลี่ยนเป็นชื่อผู้ใช้ตามที่ตกลง
+- ข้อความ "A peaceful session" เป็นข้อความคงที่ของหน้าจอ รอเข้าระบบแปลภาษา
+- ขนาด avatar 44 และไม่มีปุ่มกระดิ่งตาม Figma (หัวข้อ 6.1 เขียนไว้ 32 + ปุ่มกระดิ่ง) Reminder badge แสดงที่เมนู Sidebar แทน
+- ใช้ภายใน `AppShell` (หัวข้อ 14.13) ไม่ต้องจัดระยะขอบเอง
+- ใช้ใน app shell: ซ้าย Sidebar, ขวาเป็นคอลัมน์ `TopBar` + เนื้อหาที่เลื่อนเอง 
+
+### 14.13 AppShell (`frontend/src/shared/app-shell/app-shell.tsx`)
+โครงของทุกหน้าหลังเข้าสู่ระบบ: `<AppShell sidebar={<Sidebar …/>} topBar={<TopBar …/>}>เนื้อหาหน้า</AppShell>`
+- **ระยะขอบหน้าต่างซ้ายและขวาเท่ากันเสมอ = 16** (`p-4` บน `bg-paper`): ซ้ายคือขอบของ Sidebar, ขวาคือขอบของ TopBar/เนื้อหา ห้ามเพิ่ม padding แนวนอนให้ TopBar หรือหน้า ที่ทำให้ขอบขวาไม่เท่ากับขอบซ้าย (ถ้าหน้าต้องการช่องไฟภายใน ให้ใส่ที่การ์ดหรือเนื้อหาของหน้าเอง)
+- Sidebar กับคอลัมน์ขวาห่างกัน 24 (`gap-6`)
+- คอลัมน์ขวา = TopBar (สูง 56 อยู่กับที่) + เนื้อหา (`overflow-y-auto` เลื่อนเฉพาะส่วนนี้) Sidebar และ TopBar จึงไม่เลื่อนตาม
+- หน้า Onboarding / Login / Register / Loading ไม่ใช้ AppShell (หน้าเต็มจอ ไม่มี Sidebar)
+
+### 14.14 Avatar (`frontend/src/shared/avatar/avatar.tsx`)
+รูปโปรไฟล์กลมที่ใช้ทุกที่ที่แสดงผู้ใช้ (Sidebar, TopBar, หน้า Setting ในอนาคต): `<Avatar src? className="size-9" />` กำหนดขนาดด้วย class
+- **มีรูปที่ผู้ใช้อัปโหลด** (`src`): แสดงรูปแบบ `object-cover` ในวงกลม
+- **ยังไม่ได้ตั้งรูป:** แสดง **เงาวาฬสีเดียว** (SVG ในไฟล์ ไม่ใช้รูปภายนอก) ไม่มีตาหรือปาก วางเล็กอยู่กลางวงกลมประมาณ 2/3 ของความกว้าง สี `blue-200` บนพื้น `blue-100` เป็นฟีลเดียวกับรูปคนสีเทาที่ใช้เป็นภาพแทน (ตั้งใจให้เรียบ ไม่ใหญ่เต็มวงกลม)
+- ใช้สีจาก token เท่านั้น (`fill-blue-200`) ไม่ใส่ hex และไม่มีแอนิเมชัน
+- เป็นภาพตกแต่ง (`aria-hidden`) ชื่อผู้ใช้ต้องแสดงเป็นข้อความอยู่ข้างๆ เสมอ
+- ต่างจากการ์ดบัญชีในหน้า Onboarding (สถานะ connected) ที่ใช้อักษรย่อ `TW` ตาม Figma ซึ่งยังไม่ได้เปลี่ยนมาใช้ `Avatar`

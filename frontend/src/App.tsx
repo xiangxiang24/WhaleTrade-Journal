@@ -58,7 +58,12 @@ function App() {
     // ชั่วคราว: จบแล้วไปหน้า connected แทน My Journals จนกว่าหน้านั้นจะพร้อม
     return <Loading onFinish={() => setScreen('connected')} />
   }
-  return <OnboardingConnected account={SAMPLE_ACCOUNT} onSwitch={() => setScreen('inconnected')} />
+  return (
+    <OnboardingConnected
+      account={SAMPLE_ACCOUNT}
+      onSwitch={() => setScreen('inconnected')}
+    />
+  )
 }
 
 export default App
