@@ -21,7 +21,7 @@
   --color-blue-500: #5E83BA;
   --color-blue-200: #C2D2E9;
   --color-paper: #F9F9F8;
-  --color-parchment: #F6F1E2;
+  --color-parchment: #FAF6F1;
   --color-red-500: #E35050;
   --color-green-500: #499B7D;
 
@@ -34,6 +34,13 @@
   --color-red-50: #FCEDED;
   --color-green-50: #EAF4F0;
   --color-gold-400: #F2C14E;
+
+  /* สีพื้นป้ายอารมณ์บนการ์ดโน้ต (design rules หัวข้อ 9.2) */
+  --color-mood-overjoyed: #2E5B53;
+  --color-mood-happy: #6B5530;
+  --color-mood-neutral: #3A3F4A;
+  --color-mood-worried: #7A3340;
+  --color-mood-sad: #2F4374;
 
   /* Radius */
   --radius-sm: 8px;
@@ -151,6 +158,14 @@
 @custom-variant short (@media (max-height: 759px));
 /* หน้าต่างสูงน้อยกว่า 940: Sidebar ไม่พอที่ให้ภาพประกอบ จึงซ่อนภาพ */
 @custom-variant snug (@media (max-height: 939px));
+
+/* ซ่อนแถบเลื่อนแต่ยังเลื่อนด้วยล้อเมาส์/ทัชแพด/คีย์บอร์ดได้ */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
 
 @layer base {
   html, body, #root { min-height: 100%; }

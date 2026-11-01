@@ -6,11 +6,24 @@ import Login from './onboarding/login'
 import Register from './onboarding/register'
 import Loading from './onboarding/loading'
 import RecoveryPassword from './onboarding/recovery-password'
+import MyJournal from './my-journal/my-journal'
+import type { LoginCredentials } from './onboarding/types/login'
 
-type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery'
+type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals'
 
 // ชั่วคราว: ข้อมูลตัวอย่างไว้ดูหน้า Onboarding จนกว่าจะมี router และระบบ auth จริง
 const SAMPLE_ACCOUNT = { displayName: 'Thomas W.' }
+
+// ชั่วคราว (ลบทิ้งเมื่อต่อ backend): บัญชีจำลองไว้ทดสอบ Login → modal → Loading → My Journals
+const MOCK_EMAIL = 'demo@whaletrade.app'
+const MOCK_PASSWORD = 'Whale1234'
+
+async function mockLogin({ email, password }: LoginCredentials) {
+  await new Promise((resolve) => setTimeout(resolve, 600))
+  if (email.toLowerCase() !== MOCK_EMAIL || password !== MOCK_PASSWORD) {
+    throw new Error('Incorrect email or password.')
+  }
+}
 
 function App() {
   const [screen, setScreen] = useState<Screen>('opening')
@@ -30,6 +43,7 @@ function App() {
   if (screen === 'login') {
     return (
       <Login
+        onLogin={mockLogin}
         onBack={() => setScreen('inconnected')}
         onSwitchToRegister={() => setScreen('register')}
         onForgotPassword={() => setScreen('recovery')}
@@ -54,13 +68,23 @@ function App() {
       />
     )
   }
+  if (screen === 'journals') {
+    return (
+      <MyJournal
+        user={SAMPLE_ACCOUNT}
+        reminderBadge={2}
+        onLogout={() => setScreen('inconnected')}
+      />
+    )
+  }
   if (screen === 'loading') {
-    // ชั่วคราว: จบแล้วไปหน้า connected แทน My Journals จนกว่าหน้านั้นจะพร้อม
-    return <Loading onFinish={() => setScreen('connected')} />
+    // จบแล้วเข้าหน้าแรกของแอป (My Journals)
+    return <Loading onFinish={() => setScreen('journals')} />
   }
   return (
     <OnboardingConnected
       account={SAMPLE_ACCOUNT}
+      onStart={() => setScreen('journals')}
       onSwitch={() => setScreen('inconnected')}
     />
   )

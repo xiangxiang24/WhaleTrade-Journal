@@ -29,7 +29,7 @@
 | `--blue-500` | `#5E83BA` | ปุ่ม primary, ลิงก์, แถบความคืบหน้า, ชิปที่เลือก, focus ring, การ์ดโน้ตตอน hover, หัวตาราง |
 | `--blue-200` | `#C2D2E9` | เส้นขอบ, กระดาษซ้อนหลังการ์ดโน้ต, track ของแถบ/สวิตช์, ปุ่ม disabled |
 | `--paper` | `#F9F9F8` | พื้นหลังหน้าแอป (นอกการ์ด) |
-| `--parchment` | `#F6F1E2` | พื้นที่เขียนโน้ต ("Parchment Edition"), กล่องข้อความแนะนำ/หมายเหตุ |
+| `--parchment` | `#FAF6F1` | พื้นที่เขียนโน้ต ("Parchment Edition"), กล่องข้อความแนะนำ/หมายเหตุ |
 | `--red-500` | `#E35050` | ลบ, error, Danger zone, ยอดติดลบ |
 | `--green-500` | `#499B7D` | สำเร็จ (วงกลมเช็กใน modal), ถึงเป้า Goal, "+X THB" |
 | `--black` | `#000000` | ใช้เป็นฐานของ scrim หลัง modal (`rgba(0,0,0,.40)`) เท่านั้น ห้ามใช้เป็นสีข้อความ |
@@ -385,7 +385,7 @@
   --blue-500: #5E83BA;
   --blue-200: #C2D2E9;
   --paper: #F9F9F8;
-  --parchment: #F6F1E2;
+  --parchment: #FAF6F1;
   --red-500: #E35050;
   --green-500: #499B7D;
 
@@ -508,7 +508,7 @@
 
 วิธีใช้ในหน้าใหม่ (ดู `login.tsx`, `onboarding-inconnected.tsx`):
 ```tsx
-const { leaving, leaveTo } = usePageLeave()          // components/use-page-leave.ts
+const { leaving, leaveTo } = usePageLeave()          // shared/hooks/use-page-leave.ts
 <div className={leaving ? 'animate-page-out motion-reduce:animate-none' : ''}> ...เนื้อหา... </div>
 <button onClick={() => leaveTo(onBack)}>…</button>  // ห่อ callback นำทางทุกตัวด้วย leaveTo
 ```
@@ -526,7 +526,7 @@ const { leaving, leaveTo } = usePageLeave()          // components/use-page-leav
 | 2600ms | ทั้งหน้า | `page-out` 250ms แล้วเรียก `onFinish` |
 
 ### 14.5 Modal (`modals/`)
-- ใช้ `modal-frame.tsx` เป็นกรอบเสมอ: ฉากหลัง `bg-black/40` จางเข้า (`animate-scrim-in` 200ms), การ์ดเด้งขึ้น `animate-modal-pop` (600ms: 0.6 → 1.06 → .97 → 1 + ลอยขึ้น 24px), ปิดด้วย `animate-modal-out` 200ms (ย่อ .92 + จาง)
+- ใช้ `shared/modal/modal-frame.tsx` เป็นกรอบเสมอ (รับ `cardClassName` เปลี่ยนขนาด/การจัดข้อความได้ ค่าเริ่มต้นเป็นกล่องแจ้งผลกว้าง 464 จัดกึ่งกลาง; modal ฟอร์มใช้ `max-w-190 p-5 text-left min-[640px]:p-8`): ฉากหลัง `bg-black/40` จางเข้า (`animate-scrim-in` 200ms), การ์ดเด้งขึ้น `animate-modal-pop` (600ms: 0.6 → 1.06 → .97 → 1 + ลอยขึ้น 24px), ปิดด้วย `animate-modal-out` 200ms (ย่อ .92 + จาง)
 - Modal แจ้งสำเร็จใช้ `success-check.tsx`: วงกลมเด้ง `animate-circle-pop` (เริ่ม 250ms) แล้วเครื่องหมายถูกถูกวาดตาม `animate-check-draw` (เริ่ม 650ms ใช้ `pathLength={1}` + `stroke-dashoffset`)
 - การ์ด: กว้างสูงสุด 464 (`max-w-116`), `rounded-3xl`, `px-12 py-10`, ขนาดวงกลมใช้ `clamp(...)` ตามความสูงหน้าต่าง
 - พฤติกรรมที่ต้องมี: `role="dialog"` + `aria-modal` + `aria-labelledby/describedby`, กัก focus ในกล่อง (Tab วนในกล่อง), ปิดด้วย Esc, โฟกัสปุ่มที่มี `data-autofocus` ตอนเปิด
@@ -560,13 +560,13 @@ const { leaving, leaveTo } = usePageLeave()          // components/use-page-leav
 ### 14.9 Component ร่วมที่มีอยู่แล้ว (ใช้ซ้ำก่อนเขียนใหม่)
 | ไฟล์ (`frontend/src/onboarding/`) | หน้าที่ |
 |---|---|
-| `components/use-page-leave.ts` | hook `usePageLeave()` ให้ `{ leaving, leaveTo }` สำหรับแอนิเมชันออกก่อนเปลี่ยนหน้า |
+| `shared/hooks/use-page-leave.ts` | hook `usePageLeave()` ให้ `{ leaving, leaveTo }` สำหรับแอนิเมชันออกก่อนเปลี่ยนหน้า |
 | `components/onboarding-header.tsx` | แถบหัว: จุด + ชื่อแอป + เส้นคั่น (นิ่ง ไม่มีแอนิเมชัน) |
 | `components/onboarding-shell.tsx` | โครงหน้า Onboarding: ลิงก์สลับ + แบนเนอร์ + หัวข้อ + คำโปรย + slot ล่าง |
 | `components/auth-layout.tsx` | โครงหน้า Login/Register: ปุ่มกลับ + หัวข้อ + การ์ด (วาฬซ้าย ฟอร์มขวา) + slot modal |
 | `components/auth-field.tsx` | `TextField`, `PasswordField`, `FieldError` |
 | `components/onboarding-button.tsx` | ปุ่มใหญ่ Primary/Secondary |
-| `modals/modal-frame.tsx` | กรอบ modal (scrim, เด้ง, กัก focus, Esc) |
+| `shared/modal/modal-frame.tsx` | กรอบ modal (scrim, เด้ง, กัก focus, Esc) ใช้ทุกหน้า |
 | `modals/success-check.tsx` | วงกลมเช็กเด้ง + เครื่องหมายถูกถูกวาด |
 | `modals/login-success-modal.tsx`, `modals/register-success-modal.tsx` | ตัวอย่างการใช้ `ModalFrame` |
 
@@ -616,9 +616,10 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 
 ### 14.13 AppShell (`frontend/src/shared/app-shell/app-shell.tsx`)
 โครงของทุกหน้าหลังเข้าสู่ระบบ: `<AppShell sidebar={<Sidebar …/>} topBar={<TopBar …/>}>เนื้อหาหน้า</AppShell>`
-- **ระยะขอบหน้าต่างซ้ายและขวาเท่ากันเสมอ = 16** (`p-4` บน `bg-paper`): ซ้ายคือขอบของ Sidebar, ขวาคือขอบของ TopBar/เนื้อหา ห้ามเพิ่ม padding แนวนอนให้ TopBar หรือหน้า ที่ทำให้ขอบขวาไม่เท่ากับขอบซ้าย (ถ้าหน้าต้องการช่องไฟภายใน ให้ใส่ที่การ์ดหรือเนื้อหาของหน้าเอง)
+- **ระยะขอบหน้าต่างซ้ายและขวาเท่ากันเสมอ = 24** (`px-6` บน `bg-paper` บนล่าง 16): ซ้ายคือขอบของ Sidebar, ขวาคือขอบของ TopBar/เนื้อหา ห้ามเพิ่ม padding แนวนอนให้ TopBar หรือหน้า ที่ทำให้ขอบขวาไม่เท่ากับขอบซ้าย (ถ้าหน้าต้องการช่องไฟภายใน ให้ใส่ที่การ์ดหรือเนื้อหาของหน้าเอง)
 - Sidebar กับคอลัมน์ขวาห่างกัน 24 (`gap-6`)
 - คอลัมน์ขวา = TopBar (สูง 56 อยู่กับที่) + เนื้อหา (`overflow-y-auto` เลื่อนเฉพาะส่วนนี้) Sidebar และ TopBar จึงไม่เลื่อนตาม
+- **ซ่อนแถบเลื่อน** ด้วย utility `no-scrollbar` (ประกาศใน `index.css` ด้วย `@utility`) เลื่อนด้วยล้อเมาส์/ทัชแพด/คีย์บอร์ดได้ตามปกติ ใช้กับพื้นที่เลื่อนอื่นที่ไม่ต้องการแถบเลื่อนได้
 - หน้า Onboarding / Login / Register / Loading ไม่ใช้ AppShell (หน้าเต็มจอ ไม่มี Sidebar)
 
 ### 14.14 Avatar (`frontend/src/shared/avatar/avatar.tsx`)
@@ -628,3 +629,63 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 - ใช้สีจาก token เท่านั้น (`fill-blue-200`) ไม่ใส่ hex และไม่มีแอนิเมชัน
 - เป็นภาพตกแต่ง (`aria-hidden`) ชื่อผู้ใช้ต้องแสดงเป็นข้อความอยู่ข้างๆ เสมอ
 - ต่างจากการ์ดบัญชีในหน้า Onboarding (สถานะ connected) ที่ใช้อักษรย่อ `TW` ตาม Figma ซึ่งยังไม่ได้เปลี่ยนมาใช้ `Avatar`
+
+### 14.15 อีโมจิอารมณ์และ AppLayout (`frontend/src/shared/`)
+- **`shared/emotion/emotions.ts`**: type `Emotion` (`overjoyed | happy | neutral | worried | sad`), รายการ `EMOTIONS` (ลำดับและชื่อที่แสดง) และ `NO_EMOTION_LABEL` ใช้ร่วมกับหน้า Journaling
+- **`shared/emotion/emotion-icon.tsx`**: แบบ `filled` ใช้รูปอีโมจิ Fluent Emoji (3D) จาก `assets/emotions/*.png` (128 × 128 นิ่ง ที่มาและสัญญาอนุญาตใน `assets/emotions/SOURCE.md`) สำหรับป้ายบนการ์ดและหน้า Journaling; แบบ `outline` เป็นหน้าแบบเส้นวาดเป็น SVG ในโค้ด สำหรับชิปกรองตาม Figma; `emotion={null}` = ไม่ระบุ (ใช้รูป neutral สีเทาจาง `opacity-45 grayscale`)
+- **สีพื้นป้ายอารมณ์** เป็น token ใน `@theme`: `bg-mood-overjoyed`, `bg-mood-happy`, `bg-mood-neutral`, `bg-mood-worried`, `bg-mood-sad` (ค่าจากหัวข้อ 9.2)
+- **`shared/app-shell/app-layout.tsx`**: `<AppLayout active user reminderBadge onNavigate onLogout>` ประกอบ `AppShell` + `Sidebar` + `TopBar` ให้ครบในตัวเดียว **ทุกหน้าหลังเข้าสู่ระบบใช้ตัวนี้** แล้วใส่เนื้อหาหน้าเป็น children
+- **`shared/hooks/use-page-leave.ts`**: ย้ายมาจาก Onboarding เพราะหน้าหลังเข้าสู่ระบบใช้ด้วย (การเปลี่ยนหน้าแบบเดียวกัน หัวข้อ 14.3 แต่ Sidebar/TopBar อยู่นิ่ง ลอยออกเฉพาะเนื้อหา)
+
+### 14.16 หน้า My Journals (`frontend/src/my-journal/`)
+โครงเป็นตัวอย่างของหน้าหลังเข้าสู่ระบบ: `my-journal.tsx` ประกอบ component ใน `components/` ข้อมูลผ่าน hook, ใช้ข้อมูลจำลองแต่สลับเป็น backend จริงได้โดยแก้ไฟล์เดียว
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `my-journal.tsx` | หน้าเต็ม: `AppLayout` + ส่วนหัว + ค้นหา/กรอง + รายการ; ถือ state `query`, `mood`; กรองด้วย `useMemo` (ค้นใน title/content ไม่สนตัวพิมพ์, เรียงใหม่ → เก่า) |
+| `data/journal-notes.ts` | `fetchJournalNotes()` คืนข้อมูลจำลอง 12 โน้ต (หน่วง 500ms) และ `createJournalNote(values)` สร้างโน้ตใหม่ (จำลอง เก็บในหน่วยความจำ) **สองฟังก์ชันนี้คือจุดเดียวที่ต้องแก้ตอนต่อ backend** (มีตัวอย่าง `fetch('/api/notes')` และ POST ในคอมเมนต์) |
+| `use-journal-notes.ts` | hook `{ notes, status: 'loading' \| 'ready' \| 'error', reload, addNote }` (`addNote` สร้างแล้วเพิ่มโน้ตใหม่ไว้หัวรายการ) |
+| `types/journal.ts` | `JournalNote` (รูปเดียวกับตาราง Note, `createdAt` ISO UTC), `MoodFilterValue`, `JournalLoadStatus` |
+| `format-note-date.ts` | `21 Sep 2026 \| 21:31` แปลงตามเขตเวลาผู้ใช้ (`timeZone` prop จาก `User.timezone`) |
+| `components/journal-header.tsx` | Welcome back + ป้าย Safe Haven + คำเตือนใจ + กล่องข้อความฮีลใจ (ข้อความคงที่) |
+| `components/journal-toolbar.tsx` | ช่องค้นหา + ป้าย Dividend Yield + ปุ่ม New Note |
+| `components/mood-filter.tsx` | ชิป All + 5 อารมณ์ พร้อมจำนวน (จำนวนไม่ขึ้นกับคำค้นหา) |
+| `components/journal-card.tsx` | การ์ดโน้ต (ดูด้านล่าง) |
+| `modals/new-note-modal.tsx` | modal "New Journal Book" ครอบ `NoteForm` เปิดจากปุ่ม New Note (และปุ่มในสถานะยังไม่มีโน้ต) บันทึกสำเร็จแล้วปิดและโน้ตใหม่ขึ้นหัวรายการ; render **นอก** wrapper ที่มี transform เพราะ `position: fixed` ภายใน element ที่มี `transform` จะอ้างอิง element นั้นแทนหน้าต่าง |
+| `components/journal-list.tsx` | กริด 3 คอลัมน์ (หน้าต่างกว้าง < 1100 เหลือ 2) ช่องว่างแนวนอน 32 + สถานะ กำลังโหลด (การ์ดโครงสีจาง `animate-pulse`) / ผิดพลาด + Try again / ยังไม่มีโน้ต + New Note / ค้นหาไม่เจอ + Clear filters |
+
+**การ์ดโน้ต** (สูง 224 กว้างตามกริด จึงเป็นสี่เหลี่ยมผืนผ้า, มน 16, padding 20)
+- ทั้งใบเป็น `<a href="/journal/:id">` ตัวเดียว (กัน default แล้วเรียก `onOpen(id)`; พร้อมเปลี่ยนเป็น router link) ไม่มีปุ่มซ้อนข้างใน จึง **ไม่มี Quick Mood Change บนการ์ด** ตามหัวข้อ 9.3 (เปลี่ยนอารมณ์ในหน้าแก้โน้ต) และ **ไม่แสดงป้าย Buy Reason** ตามหัวข้อ 9.1
+- ป้ายอารมณ์ (`bg-mood-*` + `EmotionIcon` 16), ชื่อ 22/28 bold ตัดบรรทัดเดียว (ว่าง → "Today Journal"), ตัวอย่าง 12/16 ตัด 4 บรรทัด, เส้นแบ่ง + วันที่ ดันลงล่าง
+- กระดาษซ้อนด้านหลังเป็น `<span>` แยกใน wrapper `group` (ไม่ใช้ `-z-10` เพราะซ้อนทับพื้นการ์ดผิด) สี blue-200 เลื่อน (10, 10)
+- **Hover (นุ่ม ใช้ `group-hover`):**
+
+| ส่วน | การเปลี่ยน | เวลา / easing |
+|---|---|---|
+| พื้นการ์ด | → `blue-500` (ข้อความตัวอย่างและวันที่ขาว 100%) | 300ms `--ease-soft` |
+| การ์ด | ลอยขึ้น 4px + เงา `shadow-lg` | 300ms `--ease-soft` |
+| กระดาษด้านหลัง | เลื่อนออกเป็น (14, 12) และเอียง 2° (origin มุมขวาล่าง) | 500ms `--ease-soft` |
+| คลิปทอง | ขยับขึ้น 2px และแกว่ง −12° (origin ปลายล่าง) | 500ms `--ease-soft` |
+| กด | `scale(0.98)` | — |
+
+  ทั้งหมดปิดเมื่อ `motion-reduce` การ์ดเป็น `<a>` จึงไม่โดนกฎเด้งของ `<button>` (หัวข้อ 14.6) และมี transition ของตัวเอง
+- เหตุที่ไม่ใช้ `<button>`: กฎ transition ส่วนกลางของปุ่มจะทับ `transition-property` ที่การ์ดต้องใช้ (`translate`)
+
+**ที่ข้อกำหนดขัดกัน (ตัดสินใจแล้ว)**
+- ป้าย **Dividend Yield at Cost** อยู่ใน Figma และ `my-journals-page.md` แต่ `database.md` ข้อ 9 ห้ามหน้า Journal แสดงตัวเลขที่คำนวณจากพอร์ต: ทำเป็น prop `dividendYield?` (ค่าเริ่มต้นจำลอง `6.84%`) ถ้าไม่ส่งจะไม่แสดงป้าย ต้องตัดสินใจกับผู้ใช้ก่อนต่อ backend
+- **เพิ่มอีโมจิชุดใหม่:** ไฟล์ต้นฉบับจาก Animated Fluent Emojis เป็น PNG เคลื่อนไหว 256 px ขนาด 1–3 MB ให้ย่อเป็น 128 px นิ่งก่อนใส่ (`sips -Z 128 file.png --out file.png` ได้เฟรมแรก ~20 KB) เพราะแสดงจริงที่ 16–40 px และต้องติดไปกับแอปเพื่อทำงานออฟไลน์ (ห้ามลิงก์รูปจากเว็บ)
+
+### 14.17 ฟอร์มโน้ต (`frontend/src/shared/note-form/`)
+ฟอร์มกลางสำหรับ **สร้างและแก้โน้ต** ใช้ร่วมกันระหว่าง modal New Journal Book (หน้า My Journals) และหน้า Journaling ในอนาคต: `<NoteForm initialValues? onSubmit onCancel onDelete? submitLabel? />` ค่าที่ได้เป็น `NoteFormValues` (`shared/types/note-form.ts`: `title`, `content`, `emotion`) ตรงกับฟิลด์ที่เขียนลงตาราง Note
+
+| ฟิลด์ | บังคับ | รายละเอียด |
+|---|---|---|
+| อารมณ์ (`MoodPicker`) | ไม่ | ปุ่มอีโมจิ 5 แบบตามหัวข้อ 8.3: กล่อง `blue-50` มน 20 padding 8, ช่องสูง 56 (≥ 640 = 64) อีโมจิ 36–40; hover พื้น `blue-100` + อีโมจิ `scale(1.1)`, กด `scale(0.9)`, เลือกอยู่ = พื้น `blue-100` + ขอบ 2px `blue-500`; กดซ้ำที่ตัวเลือก = ยกเลิก (ไม่ระบุ); ใต้กล่องแสดงชื่ออารมณ์ที่เลือก (`aria-live`); ปุ่มใส่ `data-no-bounce` เพราะมีเอฟเฟกต์ขยายอีโมจิของตัวเอง |
+| TITLE | ไม่ | ช่องแคปซูลขอบ 2px `blue-500` สูง 48, ตัวอักษร 17 semibold, ยาวสุด 120 ตัวอักษร, placeholder "Today Journal" (ถ้าเว้นว่าง ระบบใช้ชื่อเริ่มต้นนี้ตอนแสดง) |
+| REFLECTIVE THOUGHTS | **ใช่** | textarea พื้น `parchment` ไม่มีขอบ มน 12 padding 16 ตัวอักษร 15/26 สูงขั้นต่ำ 208 (จอเตี้ย 144) ปรับความสูงเองได้; ตัวนับคำ "N words" ด้านขวาของป้ายชื่อ (`Intl.Segmenter` รองรับภาษาไทย) |
+
+- ป้ายชื่อช่อง (TITLE, REFLECTIVE THOUGHTS) เป็น overline 11/16 semibold ตัวพิมพ์ใหญ่ สี `text-muted`
+- **ปุ่มท้ายฟอร์ม:** Cancel (Secondary) + ปุ่มบันทึก (Primary, ข้อความตั้งได้ด้วย `submitLabel`, ค่าเริ่มต้น "Save Changes"; ตอนสร้างใหม่ใช้ "Save Note") ชิดขวา; ปุ่ม **Delete note** (ขอบแดง + ไอคอนถังขยะ) อยู่ซ้ายสุดเฉพาะเมื่อส่ง `onDelete` (แก้โน้ตเดิม) การลบต้องมี modal ยืนยันแยกต่างหากตามข้อกำหนดระบบ
+- **การตรวจ:** ตรวจตอนกดบันทึกเท่านั้น เนื้อหาว่าง → ข้อความ "Please write a few thoughts before saving." ใต้ช่อง (ขอบแดง + ไอคอน) ข้อผิดพลาดจากระบบ (`onSubmit` throw `Error`) แสดงเหนือปุ่มด้วย `role="alert"`; ระหว่างบันทึกปุ่มถูกปิด; ค่า `title`/`content` ถูก trim ก่อนส่ง
+- โฟกัสไปที่ช่อง TITLE ตอนเปิด (`data-autofocus`)
+- **ยังไม่ทำ** (อยู่ใน journaling-page.md ให้ทำตอนสร้างหน้า Journaling): คำสั่ง `/` แบบ Notion, บันทึกฉบับร่างอัตโนมัติ (`NoteDraft`) และป้าย "Draft Autosaved" — modal สร้างโน้ตใหม่จึงยังไม่เก็บฉบับร่าง ถ้าปิดกลางทางข้อความที่พิมพ์จะหาย
