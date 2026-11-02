@@ -52,24 +52,42 @@ model Note {
   id               Int       @id @default(autoincrement())
   userId           Int
   title            String?
-  content          String
+  content          String // เอกสารของตัวแก้ไข TipTap เป็น JSON string (โน้ตเก่าเป็นข้อความธรรมดาก็เปิดได้)
+  contentText      String    @default("") // ข้อความล้วนที่ดึงจาก content ใช้ค้นหา ตัวอย่างบนการ์ด นับคำ และ export CSV
   emotion          String? // overjoyed / happy / neutral / worried / sad / null
   emotionChangedAt DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  drafts NoteDraft[]
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  drafts      NoteDraft[]
+  attachments NoteAttachment[]
 
   @@index([userId, createdAt])
   @@index([userId, emotion])
+}
+
+// ไฟล์แนบของโน้ต (ภาพ/ไฟล์) ตัวไฟล์เก็บในโฟลเดอร์ข้อมูลของแอป ไม่เก็บในไฟล์ .db ลิงก์ (URL) เก็บอยู่ในเนื้อโน้ตเท่านั้น
+model NoteAttachment {
+  id        Int      @id @default(autoincrement())
+  noteId    Int
+  kind      String // image / file
+  path      String // ที่อยู่ไฟล์สัมพัทธ์ใต้ userData/attachments
+  name      String // ชื่อไฟล์เดิมที่ผู้ใช้แนบ
+  mime      String
+  size      Int // ไบต์
+  createdAt DateTime @default(now())
+
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@index([noteId])
 }
 
 model NoteDraft {
   id      Int      @id @default(autoincrement())
   userId  Int
   noteId  Int? // null = ร่างของโน้ตใหม่
-  data    String // JSON: emotion, title, content
+  data    String // JSON: emotion, title, content (content เป็น JSON string ของตัวแก้ไข)
   savedAt DateTime
 
   user User  @relation(fields: [userId], references: [id], onDelete: Cascade)

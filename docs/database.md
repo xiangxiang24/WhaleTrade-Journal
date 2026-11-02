@@ -8,7 +8,7 @@
 - ตำแหน่งไฟล์ตอนพัฒนา: `dev.db` ที่ root (ค่า `DATABASE_URL="file:./dev.db"` ใน `.env`)
 - ชื่อฟิลด์ในเอกสารนี้ใช้ camelCase ให้ตรงกับ `prisma/schema.prisma`
 
-> สถานะ: เวอร์ชันสมบูรณ์ — `prisma/schema.prisma` มีครบทุกตาราง 11 ตาราง ได้แก่ `User`, `Asset`, `Note`, `NoteDraft`, `Portfolio`, `Transaction`, `CalcPlan`, `PlanPhase`, `PlanAsset`, `Reminder`, `Task` และทุกคอลัมน์ตามหัวข้อ 2 (รวม `fullName`, `avatar`, `language`, `timezone`, `recoveryCode` ของ User)
+> สถานะ: เวอร์ชันสมบูรณ์ — `prisma/schema.prisma` มีครบทุกตาราง 12 ตาราง ได้แก่ `User`, `Asset`, `Note`, `NoteAttachment`, `NoteDraft`, `Portfolio`, `Transaction`, `CalcPlan`, `PlanPhase`, `PlanAsset`, `Reminder`, `Task` และทุกคอลัมน์ตามหัวข้อ 2 (รวม `fullName`, `avatar`, `language`, `timezone`, `recoveryCode` ของ User)
 
 ---
 
@@ -80,14 +80,33 @@
 | id | Int PK | |
 | userId | Int FK → User | ลบ user = ลบโน้ตทั้งหมด |
 | title | String? | ช่อง TITLE ว่างได้ ถ้าว่างหน้าจอแสดงชื่อเริ่มต้นตามภาษา (เช่น "Today Journal") |
-| content | String | เนื้อหาในช่อง "Reflective thoughts" |
+| content | String | เนื้อหาในช่อง "Reflective thoughts" เก็บเป็น **JSON string ของเอกสารตัวแก้ไข TipTap** (หัวข้อ รายการ เช็กลิสต์ อ้างอิง เส้นคั่น ตาราง ภาพ ไฟล์แนบ ลิงก์ และตัวหนา/เอียง/ขีดเส้นใต้/สี) โน้ตเก่าที่เป็นข้อความธรรมดายังเปิดได้ (แสดงเป็นย่อหน้า แล้วบันทึกเป็น JSON ตอน Save) |
+| contentText | String | ค่าเริ่มต้น `""` **ข้อความล้วนที่ดึงจาก `content`** (ไม่มีรูปแบบ) ให้ backend อัปเดตทุกครั้งที่บันทึก ใช้กับค้นหา ตัวอย่างบนการ์ด นับคำ และ export CSV เพื่อไม่ต้องแกะ JSON ทุกครั้ง |
 | emotion | String? | `overjoyed` / `happy` / `neutral` / `worried` / `sad` ว่าง (null) = ไม่ระบุ (แสดงเป็นอีโมจิสีเทา + สถานะ "ไม่ระบุ") ดูตารางอารมณ์ด้านล่าง |
 | emotionChangedAt | DateTime? | เวลาที่เปลี่ยนอารมณ์ล่าสุด (เก็บเบื้องหลัง ไม่แสดง) |
 | createdAt / updatedAt | DateTime | `createdAt` คือวันเวลาที่แสดงบนการ์ด ("21 Sep 2026 \| 21:31") และใช้เรียงไทม์ไลน์ |
 - index `(userId, createdAt)` สำหรับไทม์ไลน์ และ `(userId, emotion)` สำหรับกรองอารมณ์
 - ลบโน้ต = ลบจริง (ไม่มีถังขยะของโน้ต) ต้องถามยืนยันก่อน
 - โน้ตเป็นการเขียนอิสระ ไม่มีประเภท ไม่มีช่องเสริม และไม่ผูกกับหุ้น/กองทุนหรือพอร์ตใดเลย (มีแค่ผู้เขียน อารมณ์ หัวข้อ เนื้อหา)
-- ไม่เก็บ: จำนวนคำ ("352 words"), ข้อความตัวอย่างย่อบนการ์ด, จำนวนในชิปกรองอารมณ์ (คำนวณตอนแสดง)
+- ไม่เก็บ: จำนวนคำ ("352 words"), ข้อความตัวอย่างย่อบนการ์ด, จำนวนในชิปกรองอารมณ์ (คำนวณตอนแสดง จาก `contentText`)
+- **ตัวแก้ไข** ใช้ฟอนต์เดียวกับแอป ไม่มีการเลือกฟอนต์ เปลี่ยนได้เพียงความหนา (ตัวหนา) เอียง ขีดเส้นใต้ และสีตัวอักษร (ค่าสีเก็บเป็น CSS variable ของ token เช่น `var(--color-red-500)`) พิมพ์ `/` เรียกคำสั่งสร้างบล็อก: Text, Heading 1–3, Bulleted List, Numbered List, Check Item, Quote, Horizontal Line, Table, Attachment (ภาพ / ไฟล์ / ลิงก์)
+- **โน้ตว่าง** = ไม่มีทั้งข้อความและภาพ/ไฟล์แนบ (โน้ตที่มีแต่ภาพบันทึกได้)
+
+### NoteAttachment — ไฟล์แนบของโน้ต (ภาพและไฟล์)
+| ฟิลด์ | ชนิด | หมายเหตุ |
+|---|---|---|
+| id | Int PK | |
+| noteId | Int FK → Note | ลบโน้ต = ลบแถวนี้ (cascade) และ **backend ต้องลบไฟล์จริงบนดิสก์ตามด้วย** |
+| kind | String | `image` / `file` |
+| path | String | ที่อยู่ไฟล์สัมพัทธ์ใต้ `app.getPath('userData')/attachments/` (ห้ามเก็บไฟล์ในไฟล์ `.db`) |
+| name | String | ชื่อไฟล์เดิมที่ผู้ใช้แนบ (ใช้ตอนดาวน์โหลด) |
+| mime | String | ชนิดไฟล์ เช่น `image/png`, `application/pdf` |
+| size | Int | ไบต์ (ไม่เกิน 25 MB จึงใช้ `Int` พอ) |
+| createdAt | DateTime | |
+- index `(noteId)`
+- **ข้อจำกัด:** ภาพไม่เกิน **10 MB** (ต้องเป็น `image/*`), ไฟล์ไม่เกิน **25 MB** ตรวจทั้งฝั่งหน้าจอและ backend
+- ในเนื้อโน้ต (`content`) ภาพและไฟล์อ้างถึงไฟล์ผ่าน URL/ที่อยู่ของไฟล์ที่ backend ให้มา; **ลิงก์ (URL) เก็บอยู่ในเนื้อโน้ตเท่านั้น** ไม่มีแถวในตารางนี้ และต้องเป็น `http:` / `https:` / `mailto:`
+- ไฟล์แนบ **ไม่รวมใน export CSV** (CSV ครอบคลุมข้อความล้วนเท่านั้น) จึงต้องสำรองโฟลเดอร์ `attachments/` ควบคู่กับไฟล์ `.db`
 
 ### NoteDraft — ฉบับร่างที่บันทึกอัตโนมัติ ("Draft Autosaved • Just now")
 | ฟิลด์ | ชนิด | หมายเหตุ |
@@ -221,6 +240,7 @@
 ```
 User 1 ──< Note, NoteDraft, Portfolio, Reminder, Task, CalcPlan   (ลบ User = cascade ทั้งหมด)
 Note 0..1 ──< NoteDraft   (ร่างของการแก้โน้ตเดิม; noteId ว่าง = ร่างโน้ตใหม่; ลบ Note = cascade)
+Note 1 ──< NoteAttachment   (ลบ Note = cascade และลบไฟล์จริงบนดิสก์ตาม)
 Portfolio 1 ──< Transaction   (ลบพอร์ตถาวร = cascade)
 Portfolio 0..1 ──< CalcPlan   (อ้างอิงแบบไม่บังคับ; ลบพอร์ตถาวร = SetNull)
 CalcPlan 1 ──< PlanPhase, PlanAsset   (cascade)
@@ -309,7 +329,7 @@ Asset 1 ──< Transaction, PlanAsset   (Restrict: ลบ Asset ที่ถู
 | Sign up / Log in | User | User (สร้างบัญชี, `recoveryCode`) |
 | Forgot password | User (`recoveryCode` เทียบ) | User (`passwordHash`, `tokenVersion`) |
 | My Journals (การ์ด, ชิปอารมณ์, ค้นหา) | Note | — (export CSV อ่าน Note) |
-| Write / Edit Note | Note, NoteDraft | Note (สร้าง/แก้/ลบ), NoteDraft (บันทึกอัตโนมัติ/ลบเมื่อ Save/Cancel) |
+| Write / Edit Note | Note, NoteDraft, NoteAttachment | Note (สร้าง/แก้/ลบ รวม `content` JSON และ `contentText`), NoteDraft (บันทึกอัตโนมัติ/ลบเมื่อ Save/Cancel), NoteAttachment (แนบภาพ/ไฟล์) |
 | Portfolio List (การ์ดพอร์ต) | Portfolio (deletedAt ว่าง), Transaction (Run-Rate, DCA, จำนวน entries) | Portfolio (สร้าง/แก้ชื่อ tagline icon, ลบ = ตั้ง deletedAt) |
 | Trash | Portfolio (deletedAt มีค่า) | Portfolio (restore ล้าง deletedAt / ลบถาวร) |
 | Portfolio Detail: การ์ด Annual Dividend Goal | Portfolio, Transaction (dividend) | Portfolio (`annualDividendGoal`) |
@@ -333,7 +353,7 @@ Asset 1 ──< Transaction, PlanAsset   (Restrict: ลบ Asset ที่ถู
 
 ## 6. Schema และ Migration
 
-- `prisma/schema.prisma` มีครบทั้ง 11 ตารางตามหัวข้อ 2 แล้ว ไม่ต้องทยอยเพิ่มตามฟีเจอร์
+- `prisma/schema.prisma` มีครบทั้ง 12 ตารางตามหัวข้อ 2 แล้ว (migration ล่าสุด `rich_notes_and_attachments` เพิ่ม `Note.contentText` และตาราง `NoteAttachment`) ไม่ต้องทยอยเพิ่มตามฟีเจอร์
 - ถ้าเครื่องไหนยังมี migration เก่าที่มีแค่ตาราง User: รัน `npx prisma migrate dev --name complete_schema` ครั้งเดียวเพื่อสร้างตารางที่เหลือ แล้ว `npx prisma generate`
 - แก้ `schema.prisma` ครั้งต่อไป: `npx prisma migrate dev --name <ชื่อ>` แล้ว `npx prisma generate` และอัปเดตเอกสารนี้ให้ตรงกันทุกครั้ง
 
@@ -342,5 +362,5 @@ Asset 1 ──< Transaction, PlanAsset   (Restrict: ลบ Asset ที่ถู
 ## 7. Seed และการสำรองข้อมูล
 
 - `seed/assets.json` สร้างตอนพัฒนาด้วย `scripts/import-assets.js` ติดไปกับแอป นำเข้าครั้งแรกที่เปิดแอป (ทำซ้ำได้ ไม่ซ้ำรายการเพราะ unique `(market, ticker)`)
-- Export CSV: transaction ของพอร์ต (ไม่รวมพอร์ตในถังขยะ) และโน้ตทั้งหมด ใส่ UTF-8 BOM ให้ภาษาไทยเปิดใน Excel ได้ ไม่รวมแผนเครื่องคำนวณ
+- Export CSV: transaction ของพอร์ต (ไม่รวมพอร์ตในถังขยะ) และโน้ตทั้งหมด (ใช้ `contentText` ข้อความล้วน ไม่รวมภาพ/ไฟล์แนบ) ใส่ UTF-8 BOM ให้ภาษาไทยเปิดใน Excel ได้ ไม่รวมแผนเครื่องคำนวณ
 - สำรองไฟล์ `.db` ทั้งไฟล์ควบคู่กัน (CSV ไม่ครอบคลุมแผนที่บันทึก)
