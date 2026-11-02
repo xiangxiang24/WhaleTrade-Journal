@@ -1,47 +1,54 @@
 import type { Portfolio, PortfolioFormValues } from '../types/portfolio'
+import { summarizePortfolio } from './transactions'
 
 // ที่เก็บข้อมูลจำลองของพอร์ต (ในหน่วยความจำ ใช้ร่วมกันทุกหน้า เช่น Trash / Portfolio Detail ภายหลัง)
 // ไฟล์เดียวที่ต้องแก้ตอนต่อ backend; รีเฟรชแล้วกลับเป็นค่าเริ่มต้น
-let store: Portfolio[] = [
+type StoredPortfolio = Omit<Portfolio, 'reached' | 'totalDca' | 'entries'>
+
+// reached / totalDca / entries คำนวณจาก transaction ทุกครั้งที่ขอ (ไม่เก็บเป็นตัวเลขแยก) จึงตรงกับหน้า Transaction Logs เสมอ
+let store: StoredPortfolio[] = [
   {
     id: 1,
     name: 'Dividend Sanctuary',
     tagline: 'Anchor Portfolio',
+    description:
+      'Sheltered from market volatility. Cultivating patient capital where cashflow ripens at its own organic pace.',
     icon: 'leaf',
-    annualGoal: 2_000_000,
-    reached: 800_000,
-    totalDca: 1_450_000,
-    entries: 28,
-    updatedAt: '2026-10-08T05:00:00Z',
+    annualGoal: 250_000,
+    updatedAt: '2026-01-05T05:00:00Z',
     deletedAt: null,
   },
   {
     id: 2,
     name: 'Rainy Day Nest',
     tagline: 'Safe Cushion',
+    description: 'A calm cushion for the unexpected. Small, steady, and always within reach.',
     icon: 'bag',
-    annualGoal: 300_000,
-    reached: 300_000,
-    totalDca: 300_000,
-    entries: 19,
-    updatedAt: '2026-09-30T05:00:00Z',
+    annualGoal: 20_000,
+    updatedAt: '2026-01-05T05:00:00Z',
     deletedAt: null,
   },
   {
     id: 3,
     name: 'Quiet Growth',
     tagline: 'Core Compounding',
+    description: 'Core holdings left to compound quietly, one monthly deposit at a time.',
     icon: 'pot',
-    annualGoal: 1_000_000,
-    reached: 650_000,
-    totalDca: 620_000,
-    entries: 41,
-    updatedAt: '2026-10-04T05:00:00Z',
+    annualGoal: 60_000,
+    updatedAt: '2026-01-05T05:00:00Z',
     deletedAt: null,
   },
 ]
 
 let nextId = 4
+
+// รวมค่าที่คำนวณจาก transaction เข้ากับข้อมูลพอร์ต; Last updated = ล่าสุดระหว่างพอร์ตเองกับ transaction
+function withSummary(portfolio: StoredPortfolio): Portfolio {
+  const summary = summarizePortfolio(portfolio.id)
+  const updatedAt =
+    summary.lastChange && summary.lastChange > portfolio.updatedAt ? summary.lastChange : portfolio.updatedAt
+  return { ...portfolio, updatedAt, reached: summary.reached, totalDca: summary.totalDca, entries: summary.entries }
+}
 
 const LATENCY_MS = 350
 const delay = () => new Promise((resolve) => setTimeout(resolve, LATENCY_MS))
@@ -49,26 +56,31 @@ const delay = () => new Promise((resolve) => setTimeout(resolve, LATENCY_MS))
 // GET /portfolios (เฉพาะ deletedAt ว่าง) จำลองความหน่วงให้เห็นสถานะกำลังโหลด
 export async function fetchPortfolios(): Promise<Portfolio[]> {
   await delay()
-  return store.filter((portfolio) => portfolio.deletedAt === null).map((portfolio) => ({ ...portfolio }))
+  return store.filter((portfolio) => portfolio.deletedAt === null).map(withSummary)
+}
+
+// GET /portfolios/:id (ไม่พบหรืออยู่ในถังขยะ = null)
+export async function fetchPortfolio(id: number): Promise<Portfolio | null> {
+  await delay()
+  const found = store.find((portfolio) => portfolio.id === id && portfolio.deletedAt === null)
+  return found ? withSummary(found) : null
 }
 
 // POST /portfolios พอร์ตใหม่ยังไม่มี transaction
 export async function createPortfolio(values: PortfolioFormValues): Promise<Portfolio> {
   await delay()
-  const created: Portfolio = {
+  const created: StoredPortfolio = {
     id: nextId++,
     name: values.name,
     tagline: values.tagline || null,
+    description: values.description || null,
     icon: values.icon,
     annualGoal: values.annualGoal,
-    reached: 0,
-    totalDca: 0,
-    entries: 0,
     updatedAt: new Date().toISOString(),
     deletedAt: null,
   }
   store = [...store, created]
-  return { ...created }
+  return withSummary(created)
 }
 
 // PATCH /portfolios/:id
@@ -76,16 +88,17 @@ export async function updatePortfolio(id: number, values: PortfolioFormValues): 
   await delay()
   const current = store.find((portfolio) => portfolio.id === id)
   if (!current) throw new Error('This portfolio no longer exists.')
-  const updated: Portfolio = {
+  const updated: StoredPortfolio = {
     ...current,
     name: values.name,
     tagline: values.tagline || null,
+    description: values.description || null,
     icon: values.icon,
     annualGoal: values.annualGoal,
     updatedAt: new Date().toISOString(),
   }
   store = store.map((portfolio) => (portfolio.id === id ? updated : portfolio))
-  return { ...updated }
+  return withSummary(updated)
 }
 
 // DELETE /portfolios/:id = soft delete (ตั้ง deletedAt) transaction ไม่ถูกลบ
@@ -103,7 +116,7 @@ export async function restorePortfolio(id: number): Promise<Portfolio> {
   await delay()
   const current = store.find((portfolio) => portfolio.id === id)
   if (!current) throw new Error('This portfolio no longer exists.')
-  const restored: Portfolio = { ...current, deletedAt: null }
+  const restored: StoredPortfolio = { ...current, deletedAt: null }
   store = store.map((portfolio) => (portfolio.id === id ? restored : portfolio))
-  return { ...restored }
+  return withSummary(restored)
 }

@@ -9,10 +9,11 @@ import RecoveryPassword from './onboarding/recovery-password'
 import MyJournal from './my-journal/my-journal'
 import Journaling from './journaling/journaling'
 import PortfolioPage from './portfolio/portfolio'
+import TransactionLogs from './transaction-logs/transaction-logs'
 import type { SidebarKey } from './shared/types/sidebar'
 import type { LoginCredentials } from './onboarding/types/login'
 
-type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio'
+type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio' | 'transaction-logs'
 
 // ชั่วคราว: ข้อมูลตัวอย่างไว้ดูหน้า Onboarding จนกว่าจะมี router และระบบ auth จริง
 const SAMPLE_ACCOUNT = { displayName: 'Thomas W.' }
@@ -38,6 +39,7 @@ function screenForMenu(key: SidebarKey): Screen | null {
 function App() {
   const [screen, setScreen] = useState<Screen>('opening')
   const [openNoteId, setOpenNoteId] = useState<number | null>(null)
+  const [openPortfolioId, setOpenPortfolioId] = useState<number | null>(null)
 
   if (screen === 'opening') {
     return <OpeningPage onFinish={() => setScreen('inconnected')} />
@@ -99,6 +101,22 @@ function App() {
         user={SAMPLE_ACCOUNT}
         reminderBadge={2}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'portfolio')}
+        onLogout={() => setScreen('inconnected')}
+        onOpenPortfolio={(id) => {
+          setOpenPortfolioId(id)
+          setScreen('transaction-logs')
+        }}
+      />
+    )
+  }
+  if (screen === 'transaction-logs' && openPortfolioId !== null) {
+    return (
+      <TransactionLogs
+        portfolioId={openPortfolioId}
+        user={SAMPLE_ACCOUNT}
+        reminderBadge={2}
+        onBack={() => setScreen('portfolio')}
+        onNavigate={(key) => setScreen(screenForMenu(key) ?? 'transaction-logs')}
         onLogout={() => setScreen('inconnected')}
       />
     )

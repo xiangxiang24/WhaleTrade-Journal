@@ -10,6 +10,8 @@ export type Portfolio = {
   name: string
   /** ข้อความสั้นใต้ชื่อ เช่น "Anchor Portfolio" */
   tagline: string | null
+  /** คำอธิบายยาวใต้ชื่อในหน้ารายละเอียด */
+  description: string | null
   icon: PortfolioIconKey
   /** เป้าหมายต่อปี (THB) ว่าง = ยังไม่ตั้ง Goal */
   annualGoal: number | null
@@ -29,6 +31,7 @@ export type Portfolio = {
 export type PortfolioFormValues = {
   name: string
   tagline: string
+  description: string
   icon: PortfolioIconKey
   annualGoal: number | null
 }

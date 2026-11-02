@@ -756,3 +756,22 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 - ลิงก์เปิดแท็บใหม่ด้วย `rel="noopener noreferrer nofollow"`
 
 **ผลต่อส่วนอื่น:** ตัวอย่างบนการ์ดโน้ต ค้นหา นับคำ และตรวจ "โน้ตว่าง" ใช้ **ข้อความล้วน** จาก `contentToPlainText(content)` เสมอ (โน้ตที่มีแต่ภาพ/ไฟล์ไม่ถือว่าว่าง); ตรวจว่า "มีการเปลี่ยนแปลง" (ปุ่ม Save Changes) เทียบด้วย `canonicalContent` จึงไม่เพี้ยนเมื่อโน้ตเดิมเป็นข้อความธรรมดา
+
+### 14.20 หน้า Transaction Logs — รายละเอียดพอร์ต (`frontend/src/transaction-logs/`)
+เปิดจากปุ่ม Open ในหน้า Portfolio (`<TransactionLogs portfolioId user onBack onNavigate onLogout />`) ใช้ `AppLayout` โดย Sidebar เลือก "Portfolio" ตัวเลขทุกค่าคำนวณจาก transaction ทุกครั้ง (สูตรอยู่ที่ `shared/data/portfolio-math.ts` ใช้ร่วมกับการ์ดในหน้า Portfolio จึงตรงกันเสมอ)
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `transaction-logs.tsx` | หน้าเต็ม: ถือ state ตัวกรอง/modal, คำนวณสรุปด้วย `useMemo`, สถานะ กำลังโหลด / ผิดพลาด / ไม่พบพอร์ต / ยังไม่มี transaction / ค้นหาไม่เจอ |
+| `types/use-portfolio-detail.ts` | hook โหลดพอร์ต + transaction และ add / edit / remove / editPortfolio |
+| `types/export-csv.ts` | สร้างและดาวน์โหลด CSV ฝั่งเครื่อง (UTF-8 BOM, กัน CSV injection) |
+| `components/` | `detail-header`, `goal-card`, `dca-card` (+ `sparkline`), `yield-card`, `holdings-strip`, `log-toolbar`, `transaction-table`, `type-badge` |
+| `modals/` | `transaction-form-modal` (ซื้อ/ขาย/ปันผล), `delete-transaction-modal`, `goal-modal`; แก้ชื่อพอร์ตใช้ `PortfolioFormModal` ของหน้า Portfolio |
+| `shared/asset-picker/` | ช่องเลือกหุ้น/กองทุน (combobox ค้นหา + ลูกศร/Enter/Esc) ใช้ซ้ำในหน้าอื่นได้ |
+
+- **เลย์เอาต์การ์ดสรุป:** ≥ 1360 = Goal (2fr) + DCA (1fr) + Yield (1fr) ในแถวเดียว; น้อยกว่านั้น Goal เต็มแถว แล้ว DCA + Yield 2 คอลัมน์; < 640 เรียงเป็นคอลัมน์เดียว
+- **การ์ด Goal:** แถบความคืบหน้ามีขีดขาว 25 / 50 / 75% (หัวข้อ 7.4), ถึงเป้า = แถบเขียว + ป้าย "Goal reached", ยังไม่ตั้งเป้า = กล่อง "No goal yet" + ปุ่ม Set goal
+- **ตาราง:** เลื่อนแนวนอนในการ์ด (ขั้นต่ำ 980) คอลัมน์หุ้นติดซ้าย แบ่งกลุ่มรายเดือนใหม่ → เก่า; ประเภท = ป้ายสี + ไอคอน + ข้อความ; ยอดมีเครื่องหมาย `−` (ซื้อ) / `+` (ขาย, ปันผล); ยอดต่อเดือน "/ mo" แสดงเฉพาะปันผล (database.md); คอลัมน์ Percent unit = Yield on cost ของ asset นั้น (— ถ้าไม่ได้ถืออยู่)
+- **แท็บกรอง** = All (n) + sector ของหุ้นในพอร์ต, มีช่องค้นหาชื่อ/ticker และเลือกเดือน (requirement.md)
+- **ข้อควรระวังเรื่องข้อมูลจำลอง:** ตัวเลขใน Figma (Run-Rate 800,000 บนต้นทุน 1,450,000 แต่ Yield 6.85%) ขัดกันเองตามสูตร จึงปรับข้อมูลจำลองให้ตรงสูตร (พอร์ตแรก Run-Rate 100,000 / เป้า 250,000 = 40% / Yield ≈ 7.2%)
+- ค่าเฉลี่ยตลาด SET (`SET_INDEX_AVG_YIELD` = 3.2%) เป็นค่าคงที่ใน `types/transaction-logs.ts` เพราะแอปออฟไลน์

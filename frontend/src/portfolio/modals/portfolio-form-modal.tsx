@@ -19,14 +19,16 @@ type PortfolioFormModalProps = {
 const EXIT_MS = 200
 const NAME_MAX = 40
 const TAGLINE_MAX = 48
+const DESCRIPTION_MAX = 160
 const GOAL_MAX = 999_999_999_999
 
-type Errors = { name?: string; tagline?: string; goal?: string }
+type Errors = { name?: string; tagline?: string; description?: string; goal?: string }
 
 function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 'open'>) {
   const editing = Boolean(portfolio)
   const [name, setName] = useState(portfolio?.name ?? '')
   const [tagline, setTagline] = useState(portfolio?.tagline ?? '')
+  const [description, setDescription] = useState(portfolio?.description ?? '')
   const [goalText, setGoalText] = useState(portfolio?.annualGoal ? formatAmount(portfolio.annualGoal) : '')
   const [icon, setIcon] = useState<PortfolioIconKey>(portfolio?.icon ?? 'leaf')
   const [errors, setErrors] = useState<Errors>({})
@@ -37,6 +39,7 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
   const descId = useId()
   const nameId = useId()
   const taglineId = useId()
+  const descriptionId = useId()
   const goalId = useId()
   const goalErrorId = `${goalId}-error`
 
@@ -58,6 +61,7 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
     if (!trimmedName) found.name = 'Please give your portfolio a name.'
     else if (trimmedName.length > NAME_MAX) found.name = `Keep the name within ${NAME_MAX} characters.`
     if (tagline.trim().length > TAGLINE_MAX) found.tagline = `Keep the description within ${TAGLINE_MAX} characters.`
+    if (description.trim().length > DESCRIPTION_MAX) found.description = `Keep the story within ${DESCRIPTION_MAX} characters.`
     const digits = goalText.replace(/\D/g, '')
     const goal = digits ? Number(digits) : null
     if (goal !== null && (goal <= 0 || goal > GOAL_MAX)) found.goal = 'Enter a goal greater than 0.'
@@ -73,7 +77,7 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
     if (Object.keys(result.errors).length > 0) return
     setSubmitting(true)
     try {
-      await onSubmit({ name: name.trim(), tagline: tagline.trim(), icon, annualGoal: result.goal })
+      await onSubmit({ name: name.trim(), tagline: tagline.trim(), description: description.trim(), icon, annualGoal: result.goal })
       setClosing(true)
     } catch (caught) {
       setSubmitError(caught instanceof Error ? caught.message : 'Could not save this portfolio. Please try again.')
@@ -117,6 +121,25 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
           error={errors.tagline}
           placeholder="e.g. Anchor Portfolio"
         />
+
+        <div>
+          <label htmlFor={descriptionId} className="block text-[12px] leading-4 font-semibold text-navy-900">
+            About this portfolio (optional)
+          </label>
+          <textarea
+            id={descriptionId}
+            rows={3}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder="A few words about why this garden exists"
+            aria-invalid={Boolean(errors.description)}
+            aria-describedby={errors.description ? `${descriptionId}-error` : undefined}
+            className={`mt-1.5 w-full resize-none rounded-md border-2 bg-surface px-4 py-3 text-[14px] leading-5 text-navy-900 outline-none transition-shadow duration-150 placeholder:text-text-muted focus:shadow-focus ${
+              errors.description ? 'border-red-500' : 'border-blue-500'
+            }`}
+          />
+          {errors.description && <FieldError id={`${descriptionId}-error`}>{errors.description}</FieldError>}
+        </div>
 
         <div>
           <label htmlFor={goalId} className="block text-[12px] leading-4 font-semibold text-navy-900">
