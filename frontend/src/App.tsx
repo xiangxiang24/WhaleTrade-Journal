@@ -10,10 +10,12 @@ import MyJournal from './my-journal/my-journal'
 import Journaling from './journaling/journaling'
 import PortfolioPage from './portfolio/portfolio'
 import TransactionLogs from './transaction-logs/transaction-logs'
+import ReminderPage from './reminder/reminder'
+import { countDueReminders } from './shared/data/reminders'
 import type { SidebarKey } from './shared/types/sidebar'
 import type { LoginCredentials } from './onboarding/types/login'
 
-type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio' | 'transaction-logs'
+type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio' | 'transaction-logs' | 'reminder'
 
 // ชั่วคราว: ข้อมูลตัวอย่างไว้ดูหน้า Onboarding จนกว่าจะมี router และระบบ auth จริง
 const SAMPLE_ACCOUNT = { displayName: 'Thomas W.' }
@@ -33,6 +35,7 @@ async function mockLogin({ email, password }: LoginCredentials) {
 function screenForMenu(key: SidebarKey): Screen | null {
   if (key === 'my-journals') return 'journals'
   if (key === 'portfolio') return 'portfolio'
+  if (key === 'reminder') return 'reminder'
   return null
 }
 
@@ -85,7 +88,7 @@ function App() {
     return (
       <MyJournal
         user={SAMPLE_ACCOUNT}
-        reminderBadge={2}
+        reminderBadge={countDueReminders()}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'journals')}
         onLogout={() => setScreen('inconnected')}
         onOpenNote={(id) => {
@@ -99,7 +102,7 @@ function App() {
     return (
       <PortfolioPage
         user={SAMPLE_ACCOUNT}
-        reminderBadge={2}
+        reminderBadge={countDueReminders()}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'portfolio')}
         onLogout={() => setScreen('inconnected')}
         onOpenPortfolio={(id) => {
@@ -109,12 +112,22 @@ function App() {
       />
     )
   }
+  if (screen === 'reminder') {
+    return (
+      <ReminderPage
+        user={SAMPLE_ACCOUNT}
+        reminderBadge={countDueReminders()}
+        onNavigate={(key) => setScreen(screenForMenu(key) ?? 'reminder')}
+        onLogout={() => setScreen('inconnected')}
+      />
+    )
+  }
   if (screen === 'transaction-logs' && openPortfolioId !== null) {
     return (
       <TransactionLogs
         portfolioId={openPortfolioId}
         user={SAMPLE_ACCOUNT}
-        reminderBadge={2}
+        reminderBadge={countDueReminders()}
         onBack={() => setScreen('portfolio')}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'transaction-logs')}
         onLogout={() => setScreen('inconnected')}
@@ -126,7 +139,7 @@ function App() {
       <Journaling
         noteId={openNoteId}
         user={SAMPLE_ACCOUNT}
-        reminderBadge={2}
+        reminderBadge={countDueReminders()}
         onLogout={() => setScreen('inconnected')}
         onBack={() => setScreen('journals')}
         onDeleted={() => setScreen('journals')}

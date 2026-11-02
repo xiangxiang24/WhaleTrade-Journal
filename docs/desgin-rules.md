@@ -775,3 +775,20 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 - **แท็บกรอง** = All (n) + sector ของหุ้นในพอร์ต, มีช่องค้นหาชื่อ/ticker และเลือกเดือน (requirement.md)
 - **ข้อควรระวังเรื่องข้อมูลจำลอง:** ตัวเลขใน Figma (Run-Rate 800,000 บนต้นทุน 1,450,000 แต่ Yield 6.85%) ขัดกันเองตามสูตร จึงปรับข้อมูลจำลองให้ตรงสูตร (พอร์ตแรก Run-Rate 100,000 / เป้า 250,000 = 40% / Yield ≈ 7.2%)
 - ค่าเฉลี่ยตลาด SET (`SET_INDEX_AVG_YIELD` = 3.2%) เป็นค่าคงที่ใน `types/transaction-logs.ts` เพราะแอปออฟไลน์
+
+### 14.21 หน้า Reminder (`frontend/src/reminder/`)
+`<ReminderPage user reminderBadge? timeZone? onNavigate onLogout />` ใช้ `AppLayout` โดย Sidebar เลือก "Reminder" ข้อมูลจำลองอยู่ใน `shared/data/reminders.ts` (ไฟล์เดียวที่ต้องแก้ตอนต่อ backend)
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `reminder.tsx` | หน้าเต็ม: ถือวันที่เลือก/เดือนที่ดู/modal, คำนวณ "N due this week", จุดในปฏิทิน, รายการของวัน, badge |
+| `types/datetime.ts` | ตัวช่วยวัน/เวลาตามเขตเวลาผู้ใช้ (`dayKey`, `zonedToUtc`, `monthGrid` เริ่มวันจันทร์, `formatRemindAt`) |
+| `types/use-reminders.ts`, `types/use-now.ts` | hook การเตือน + task, เวลาปัจจุบันที่อัปเดตทุกนาที |
+| `components/` | `reminder-header`, `calm-banner`, `month-calendar`, `day-reminders` + `reminder-card`, `todo-card` |
+| `modals/` | `reminder-form-modal` (ตั้ง/แก้ พร้อมปุ่ม Delete), `delete-reminder-modal` |
+
+- **ปฏิทิน** ตามหัวข้อ 7.7: วันนี้ = วงกลม `blue-500`, วันที่เลือก = ขอบ 2px, จุดฟ้า = มีรายการค้าง, จุดฟ้าอ่อน = มีแต่รายการที่เสร็จแล้ว, วันนอกเดือนจาง; ปุ่ม Today โผล่เมื่อดูเดือนอื่น
+- **Scheduled In Day** แสดงรายการของวันที่เลือก (ค้างก่อน เสร็จแล้วท้าย); เลือกวันนี้ = รวมรายการค้างที่เลยเวลาจากวันก่อน (ป้าย "Due") ให้ตรงกับตัวเลข badge
+- **Badge** ที่ Sidebar = จำนวนที่ถึงเวลาแล้วและยังไม่เสร็จ คำนวณสดทุกนาที; หน้าอื่นอ่านผ่าน `countDueReminders()`
+- **Gentle To-Dos** พื้น parchment, task ค้างก่อน เสร็จแล้วขีดฆ่า + พื้นเขียวอ่อนอยู่ท้าย, ปุ่ม Add กดไม่ได้เมื่อช่องว่าง
+- **ยังไม่ทำ:** macOS Notification ตอนถึงเวลา (ต้องทำในโปรเซสหลักของ Electron ตอนต่อ backend)
