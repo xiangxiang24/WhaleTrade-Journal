@@ -792,3 +792,20 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 - **Badge** ที่ Sidebar = จำนวนที่ถึงเวลาแล้วและยังไม่เสร็จ คำนวณสดทุกนาที; หน้าอื่นอ่านผ่าน `countDueReminders()`
 - **Gentle To-Dos** พื้น parchment, task ค้างก่อน เสร็จแล้วขีดฆ่า + พื้นเขียวอ่อนอยู่ท้าย, ปุ่ม Add กดไม่ได้เมื่อช่องว่าง
 - **ยังไม่ทำ:** macOS Notification ตอนถึงเวลา (ต้องทำในโปรเซสหลักของ Electron ตอนต่อ backend)
+
+### 14.22 หน้า Target Calculator (`frontend/src/target-amount/`)
+`<TargetAmount user reminderBadge? onNavigate onLogout />` ใช้ `AppLayout` โดย Sidebar เลือก "Target Amount" ฟอร์ม 3 ขั้นตอน (ซ้าย) + Sanctuary Summary (ขวา) แล้วผลประมาณการ (Your Estimate) ด้านล่างหลังกด Calculate
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `target-amount.tsx` | หน้าเต็ม: ต่อ hook + modal บันทึกแผน + toast, เลื่อนไปที่ผลหลังคำนวณ |
+| `types/use-calculator.ts` | state ฟอร์มทั้งหมด (2 โหมดแหล่งหุ้น, ตัวเลข, เฟส), ตัวเลขสรุปสด, ตรวจข้อมูลตอนกด Calculate, ตรวจว่าผลล้าสมัย (`stale`) |
+| `types/calculate.ts` | **ตัวคำนวณชั่วคราว** (ฟังก์ชันล้วน: `CalcInput` → `CalcOutput`) ตรรกะจริงให้ไปทำที่ backend ตามที่ตกลง; ผู้เรียกมีจุดเดียวใน `use-calculator.ts` |
+| `components/` | `target-header`, `source-step` (+ `add-asset-control`, `asset-yield-row`), `numbers-step`, `phases-step`, `summary-card`, `estimate-section` (+ `expected-banner`, `proportion-card`), `step-card`, `number-field` |
+| `modals/save-plan-modal.tsx` | ตั้งชื่อและบันทึกแผน → `shared/data/calc-plans.ts` (ที่เก็บจำลอง ใช้กับหน้า Saved Plan ภายหลัง) |
+
+- **ขั้นตอนที่ 1 สองโหมด:** *Use a portfolio* ดึง Holdings ของพอร์ตที่เลือกมาใส่ตาราง (ปันผลเริ่มต้น = Yield on cost ของหุ้นนั้น แก้ได้) ปุ่มเส้นประ "Add Dividend and Ticker" เพิ่มหุ้นอื่นได้; *Enter manually* ค้นหาจากรายการกลางด้วย `AssetPicker` แล้วกด Add ทั้งสองโหมดเก็บรายการแยกกัน
+- **เปิดเฟส:** ช่อง Monthly DCA และ Duration ในขั้นตอนที่ 2 ถูกกำหนดจากเฟส (กรอกไม่ได้) ปิดเฟส = 1 เฟสจาก Duration + Monthly DCA (ตรงกับ `database.md` หัวข้อ PlanPhase)
+- **เลย์เอาต์:** ≥ 1280 การ์ดสรุปติดขวา (กว้าง 320 `sticky`); น้อยกว่านั้นการ์ดสรุปขึ้นไปอยู่บนฟอร์มเป็นแถบแนวนอน (หัวข้อ 5.2); ช่องในแถวเฟสเรียง 2 คอลัมน์ตั้งแต่ 1024
+- **ผลลัพธ์:** ก่อนกดคำนวณแสดงข้อความรอ; แก้ค่าหลังคำนวณแล้วปุ่มเป็น Recalculate พร้อมแถบแจ้งว่าผลล้าสมัย
+- **ยังไม่ทำ:** Export PDF / Export image (ต้องใช้โปรเซสหลักของ Electron ตอนนี้แสดง toast แจ้ง)
