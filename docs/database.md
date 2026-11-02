@@ -126,11 +126,11 @@
 |---|---|---|
 | id | Int PK | |
 | userId | Int FK → User | ลบ user = ลบพอร์ตทั้งหมด |
-| name | String | เช่น "Dividend Sanctuary" |
-| tagline | String? | ข้อความสั้นใต้ชื่อบนการ์ด เช่น "Anchor Portfolio" (หน้ารายละเอียดใช้แสดงเป็นป้ายเหนือชื่อพอร์ตด้วย) |
+| name | String | เช่น "Dividend Sanctuary" บังคับ ยาวสุด 40 ตัวอักษร (ฟอร์มสร้าง/แก้พอร์ตตรวจก่อนบันทึก) |
+| tagline | String? | ข้อความสั้นใต้ชื่อบนการ์ด เช่น "Anchor Portfolio" ยาวสุด 48 ตัวอักษร ไม่บังคับ (หน้ารายละเอียดใช้แสดงเป็นป้ายเหนือชื่อพอร์ตด้วย) |
 | description | String? | คำอธิบายยาวใต้ชื่อในหน้ารายละเอียด |
-| icon | String? | คีย์ไอคอนที่เลือกจากชุดที่แอปมี เช่น `leaf`, `bag`, `pot` (ไม่เก็บรูป) |
-| annualDividendGoal | BigInt? | เป้าเงินปันผลต่อปี หน่วยสตางค์ ว่าง = ยังไม่ตั้ง Goal |
+| icon | String? | คีย์ไอคอนที่เลือกจากชุดที่แอปมี: `leaf` (ค่าเริ่มต้น), `bag`, `pot`, `anchor`, `gem`, `landmark` (ไม่เก็บรูป) ค่าว่างหรือไม่รู้จักให้แสดงเป็น `leaf` ตรวจค่าที่อนุญาตในโค้ด backend |
+| annualDividendGoal | BigInt? | เป้าเงินปันผลต่อปี หน่วยสตางค์ ว่าง = ยังไม่ตั้ง Goal (การ์ดแสดง "No goal yet" แทนแถบ) ถ้ากรอกต้อง > 0 ฟอร์มรับเป็นบาทเต็มหน่วยแล้วคูณ 100 ก่อนเก็บ |
 | deletedAt | DateTime? | มีค่า = อยู่ในถังขยะ |
 | createdAt | DateTime | |
 | updatedAt | DateTime | ใช้แสดง "Last updated" บนการ์ด ต้องอัปเดตเมื่อพอร์ตหรือ transaction ของพอร์ตถูกเพิ่ม/แก้/ลบ (service สั่ง touch พอร์ตเอง) |
@@ -265,7 +265,24 @@ Asset 1 ──< Transaction, PlanAsset   (Restrict: ลบ Asset ที่ถู
 - **Avg. Yield on Cost** (ระดับพอร์ต) = Run-Rate ของ asset ที่ยังถืออยู่ ÷ Σ ต้นทุนที่ถืออยู่
 - **Yield (% ปันผลต่อปี)** คอลัมน์ในตาราง Port log = ปันผล 12 เดือนล่าสุดของ asset นั้น ÷ ต้นทุนที่ถืออยู่ของ asset นั้น ได้ค่าเดียวกันทุกแถวของ asset เดียวกัน (ซื้อ/ขาย/ปันผล) ถ้าไม่มีหน่วยที่ถืออยู่ให้แสดง "—" ไม่ใช่ปันผลของแถวนั้นแถวเดียว เพราะปันผลครั้งเดียวไม่บอกอัตราต่อปี
 - **ยอดต่อเดือนใต้ AMOUNT** = `amount` ÷ 12 (ตามภาพ คือแสดงเป็นยอดเทียบรายเดือน)
-- **ข้อมูลบนการ์ดในหน้ารายการพอร์ต**: ANNUAL GOAL = `annualDividendGoal`, "reached" = Run-Rate, % = ความคืบหน้า Goal, Total recorded DCA, "N entries" = จำนวน transaction ทั้งหมดของพอร์ต, "Last updated" = `Portfolio.updatedAt`, ป้าย "3 portfolios" = จำนวนพอร์ตที่ `deletedAt` ว่าง
+- **ข้อมูลบนการ์ดในหน้ารายการพอร์ต** (หน้า Your Portfolios) ทุกค่าอ่านจากตาราง ไม่มีคอลัมน์สรุปแยก:
+
+| ที่แสดงบนการ์ด | มาจาก | หมายเหตุ |
+|---|---|---|
+| ไอคอน / ชื่อ / คำอธิบายใต้ชื่อ | `icon` / `name` / `tagline` | `tagline` ว่าง = ไม่แสดงบรรทัดนั้น |
+| ANNUAL GOAL | `annualDividendGoal` | ว่าง = "No goal yet" + ข้อความชวนตั้งเป้า ไม่แสดงแถบ |
+| "N reached" | Run-Rate (สูตรด้านบน) | ปันผลที่บันทึกใน 12 เดือนล่าสุด ไม่ใช่เงินต้น + DCA |
+| % และความกว้างแถบ | `min(100, floor(Run-Rate ÷ Goal × 100))` | ปัดลงเพื่อไม่ขึ้น 100% ก่อนถึงเป้าจริง |
+| ป้าย "100% full" + แถบเขียว | Run-Rate ≥ Goal | เปอร์เซ็นต์ไม่เกิน 100 แม้ Run-Rate มากกว่า Goal |
+| Total recorded DCA | Σ ต้นทุน `buy` | |
+| Transactions "N entries" | `count(Transaction)` ของพอร์ต | ทุก type (buy / sell / dividend) |
+| Last updated | `Portfolio.updatedAt` | service ต้อง touch เมื่อพอร์ตหรือ transaction ถูกเพิ่ม/แก้/ลบ |
+| ป้าย "N portfolios" | `count(Portfolio where userId, deletedAt = null)` | ไม่นับพอร์ตในถังขยะ |
+
+- **รูปที่ API ส่งให้หน้ารายการพอร์ต** (เงินส่งเป็นสตางค์ในรูป string เพราะ BigInt, ฟรอนต์แปลงเป็นบาท): `{ id, name, tagline, icon, annualGoal, reached, totalDca, entries, updatedAt }` ตรงกับ type `Portfolio` ใน `frontend/src/shared/types/portfolio.ts` ซึ่งใช้ข้อมูลจำลองอยู่ใน `shared/data/portfolios.ts` (ไฟล์เดียวที่ต้องแก้ตอนต่อ API)
+- **การดึงรายการ**: query เดียวกรอง `userId` + `deletedAt` ว่าง แล้วรวมค่าจาก `Transaction` ด้วย `groupBy portfolioId` (ใช้ index `(portfolioId, date)`) ห้ามวน query ทีละพอร์ต; เรียงตาม `id` น้อย → มาก
+- **การกระทำบนการ์ด**: สร้าง = insert `Portfolio` (ยังไม่มี transaction จึง reached/DCA = 0, entries = 0), แก้ = update `name` / `tagline` / `icon` / `annualDividendGoal` แล้ว touch `updatedAt`, Move to Trash = ตั้ง `deletedAt` (transaction ไม่ถูกแตะ), Undo / Restore = ล้าง `deletedAt`
+- ปุ่ม "Preview empty slate" เป็นโหมดดูตัวอย่างของหน้าจอเท่านั้น ไม่อ่านหรือเขียนข้อมูล
 - **แท็บกรองในตาราง** = "All (n)" + ค่า `sector` ที่ไม่ซ้ำของ asset ในพอร์ตนั้น; **ช่องค้นหา** ค้นจากชื่อ/ticker ของ asset
 
 ### หน้า My Journals และหน้าเขียน/แก้โน้ต (คำนวณจาก Note ของผู้ใช้ ตาม timezone ที่ตั้งไว้)
