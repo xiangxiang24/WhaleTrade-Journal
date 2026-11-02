@@ -2,11 +2,12 @@ import { ASSET_BY_ID } from '../../shared/data/assets'
 import { txAmount } from '../../shared/data/portfolio-math'
 import type { Transaction } from '../../shared/types/transaction'
 
-const BOM = String.fromCharCode(0xfeff)
+export const CSV_BOM = String.fromCharCode(0xfeff)
+const BOM = CSV_BOM
 const HEADER = ['Date', 'Type', 'Ticker', 'Name', 'Market', 'Sector', 'Tag', 'Price', 'Units', 'Fee', 'Amount (THB)', 'Note']
 
 // ป้องกัน CSV injection: เซลล์ที่ขึ้นต้นด้วย = + - @ จะถูก Excel ตีเป็นสูตร จึงนำหน้าด้วย '
-function cell(value: string | number | null | undefined) {
+export function cell(value: string | number | null | undefined) {
   if (value === null || value === undefined) return ''
   const text = String(value)
   const safe = /^[=+\-@]/.test(text) ? `'${text}` : text

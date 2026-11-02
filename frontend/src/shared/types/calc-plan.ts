@@ -23,3 +23,29 @@ export type CalcPlan = {
   phases: PlanPhase[]
   assets: PlanAsset[]
 }
+
+/** ช่วงที่ส่งเข้าตัวคำนวณ */
+export type PhaseInput = { years: number; monthlyDca: number }
+
+export type CalcInput = {
+  principal: number
+  phases: PhaseInput[]
+  /** ปันผลเฉลี่ยต่อปี (เปอร์เซ็นต์) */
+  avgYieldPct: number
+}
+
+export type CalcOutput = {
+  totalInvested: number
+  totalDca: number
+  /** ปันผลทบต้นที่คาดว่าจะได้รับ */
+  dividends: number
+  total: number
+  /** เพิ่มขึ้นเทียบกับเงินที่ลงทุนไป (เปอร์เซ็นต์) */
+  increasePct: number
+  /** สัดส่วนของยอดรวมปลายทาง (เปอร์เซ็นต์ ผลรวม 100) */
+  shares: { principal: number; dca: number; dividends: number }
+  /** DCA สะสมของแต่ละเฟส */
+  phaseTotals: number[]
+  years: number
+}
+

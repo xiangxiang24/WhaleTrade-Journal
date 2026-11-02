@@ -15,29 +15,8 @@ export type PhaseRow = {
   dcaText: string
 }
 
-export type PhaseInput = { years: number; monthlyDca: number }
-
-export type CalcInput = {
-  principal: number
-  phases: PhaseInput[]
-  /** ปันผลเฉลี่ยต่อปี (เปอร์เซ็นต์) */
-  avgYieldPct: number
-}
-
-export type CalcOutput = {
-  totalInvested: number
-  totalDca: number
-  /** ปันผลทบต้นที่คาดว่าจะได้รับ */
-  dividends: number
-  total: number
-  /** เพิ่มขึ้นเทียบกับเงินที่ลงทุนไป (เปอร์เซ็นต์) */
-  increasePct: number
-  /** สัดส่วนของยอดรวมปลายทาง (เปอร์เซ็นต์ ผลรวม 100) */
-  shares: { principal: number; dca: number; dividends: number }
-  /** DCA สะสมของแต่ละเฟส */
-  phaseTotals: number[]
-  years: number
-}
+export type { CalcInput, CalcOutput, PhaseInput } from '../../shared/types/calc-plan'
+import type { CalcInput, CalcOutput } from '../../shared/types/calc-plan'
 
 /** ผลลัพธ์ที่แสดง + ลายเซ็นของค่าในฟอร์มตอนกดคำนวณ (ไว้ตรวจว่าผลล้าสมัยหรือยัง) */
 export type CalcResult = {

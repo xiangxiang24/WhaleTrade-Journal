@@ -809,3 +809,22 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 - **เลย์เอาต์:** ≥ 1280 การ์ดสรุปติดขวา (กว้าง 320 `sticky`); น้อยกว่านั้นการ์ดสรุปขึ้นไปอยู่บนฟอร์มเป็นแถบแนวนอน (หัวข้อ 5.2); ช่องในแถวเฟสเรียง 2 คอลัมน์ตั้งแต่ 1024
 - **ผลลัพธ์:** ก่อนกดคำนวณแสดงข้อความรอ; แก้ค่าหลังคำนวณแล้วปุ่มเป็น Recalculate พร้อมแถบแจ้งว่าผลล้าสมัย
 - **ยังไม่ทำ:** Export PDF / Export image (ต้องใช้โปรเซสหลักของ Electron ตอนนี้แสดง toast แจ้ง)
+
+### 14.23 หน้า Saved Plan และหน้าสรุปแผน (`frontend/src/saved-plan/`)
+สองหน้าในโฟลเดอร์เดียว: `saved-plan.tsx` (รายการการ์ด) และ `plan-detail.tsx` (หน้าสรุปผลของแผนเดียว เปิดจากปุ่ม Open) ทั้งคู่ใช้ `AppLayout` โดย Sidebar เลือก "Saved Plan" ข้อมูลจำลองอยู่ใน `shared/data/calc-plans.ts` (มีแผนตัวอย่าง 3 แผน) ไฟล์เดียวที่ต้องแก้ตอนต่อ backend
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `saved-plan.tsx` | หน้ารายการ: ป้ายจำนวนแผน, ปุ่ม New plan (ไป Target Calculator), กริดการ์ด, modal เปลี่ยนชื่อ/ลบ |
+| `plan-detail.tsx` | หน้าสรุปแผน: คำนวณใหม่จาก principal + phases + assets ทุกครั้งที่เปิด (`resultAmount` ไว้โชว์ในรายการเท่านั้น) |
+| `components/` | `plan-header`, `plan-card`, `plan-grid`; หน้าสรุป: `detail-header`, `stat-strip`, `inputs-card` (ใช้ `ExpectedBanner` และ `ProportionCard` ของหน้า Target Amount ซ้ำ จึงหน้าตาผลลัพธ์เหมือนกันทุกที่) |
+| `modals/` | `rename-plan-modal`, `delete-plan-modal` (ถามยืนยันก่อนลบทุกครั้ง) |
+| `types/use-saved-plans.ts`, `types/use-plan-detail.ts` | hook โหลด/เปลี่ยนชื่อ/ลบ |
+| `types/export-plan.ts` | ส่งออก CSV (UTF-8 BOM, กัน CSV injection) และรูป PNG วาดบน canvas ฝั่งเครื่อง (สีอ่านจาก token ใน runtime) |
+
+- **การ์ด:** ชื่อ + "Saved <วันที่>" + เมนู 3 จุด (Rename plan / Delete plan) → Expected amount → ป้ายระยะเวลา (ผลรวม years ของเฟส) + แหล่งที่มา (ชื่อพอร์ต หรือ "Manual Portfolio") → ปุ่ม Delete (ขอบแดง) + Open
+- **กริด:** `minmax(280px, 1fr)` → 2 / 3 / 4 คอลัมน์ ตามหัวข้อ 5.2
+- **หน้าสรุป:** แถบ 4 ช่อง (เงินต้น / DCA รวม / ระยะเวลา / ปันผลเฉลี่ย) → Expected amount → สัดส่วนและตารางสรุป (ซ้าย) + Plan inputs (ขวา ตั้งแต่ 1360) → ปุ่ม Export CSV / Export image / Export PDF / Delete
+- **พฤติกรรมที่ต่างจาก `saved-plan-page.md`:** สเปกให้ Open โหลดแผนกลับเข้าฟอร์ม Target Amount แต่ตกลงให้ Open เป็นหน้าสรุปผลของตัวเองแทน (ปรับแผนในเครื่องคำนวณยังไม่ทำ)
+- **ยังไม่ทำ:** Export PDF (ต้องใช้โปรเซสหลักของ Electron ตอนนี้แสดง toast แจ้ง)
+- เมนู Sidebar ที่มีหน้าแล้ว: My Journals, Portfolio, Reminder, Saved Plan, Target Amount (Trash / Setting ยัง)

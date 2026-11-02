@@ -50,6 +50,11 @@ function withSummary(portfolio: StoredPortfolio): Portfolio {
   return { ...portfolio, updatedAt, reached: summary.reached, totalDca: summary.totalDca, entries: summary.entries }
 }
 
+/** ชื่อพอร์ตทั้งหมดรวมที่อยู่ในถังขยะ (แผนที่บันทึกยังอ้างอิงพอร์ตในถังขยะได้ ตาม database.md) key = id */
+export function getPortfolioNames() {
+  return new Map(store.map((portfolio) => [portfolio.id, portfolio.name]))
+}
+
 const LATENCY_MS = 350
 const delay = () => new Promise((resolve) => setTimeout(resolve, LATENCY_MS))
 

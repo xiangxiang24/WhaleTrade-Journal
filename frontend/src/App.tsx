@@ -12,11 +12,13 @@ import PortfolioPage from './portfolio/portfolio'
 import TransactionLogs from './transaction-logs/transaction-logs'
 import ReminderPage from './reminder/reminder'
 import TargetAmount from './target-amount/target-amount'
+import SavedPlan from './saved-plan/saved-plan'
+import PlanDetail from './saved-plan/plan-detail'
 import { countDueReminders } from './shared/data/reminders'
 import type { SidebarKey } from './shared/types/sidebar'
 import type { LoginCredentials } from './onboarding/types/login'
 
-type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio' | 'transaction-logs' | 'reminder' | 'target-amount'
+type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio' | 'transaction-logs' | 'reminder' | 'target-amount' | 'saved-plan' | 'plan-detail'
 
 // ชั่วคราว: ข้อมูลตัวอย่างไว้ดูหน้า Onboarding จนกว่าจะมี router และระบบ auth จริง
 const SAMPLE_ACCOUNT = { displayName: 'Thomas W.' }
@@ -38,6 +40,7 @@ function screenForMenu(key: SidebarKey): Screen | null {
   if (key === 'portfolio') return 'portfolio'
   if (key === 'reminder') return 'reminder'
   if (key === 'target-amount') return 'target-amount'
+  if (key === 'saved-plan') return 'saved-plan'
   return null
 }
 
@@ -45,6 +48,7 @@ function App() {
   const [screen, setScreen] = useState<Screen>('opening')
   const [openNoteId, setOpenNoteId] = useState<number | null>(null)
   const [openPortfolioId, setOpenPortfolioId] = useState<number | null>(null)
+  const [openPlanId, setOpenPlanId] = useState<number | null>(null)
 
   if (screen === 'opening') {
     return <OpeningPage onFinish={() => setScreen('inconnected')} />
@@ -111,6 +115,32 @@ function App() {
           setOpenPortfolioId(id)
           setScreen('transaction-logs')
         }}
+      />
+    )
+  }
+  if (screen === 'saved-plan') {
+    return (
+      <SavedPlan
+        user={SAMPLE_ACCOUNT}
+        reminderBadge={countDueReminders()}
+        onNavigate={(key) => setScreen(screenForMenu(key) ?? 'saved-plan')}
+        onLogout={() => setScreen('inconnected')}
+        onOpenPlan={(id) => {
+          setOpenPlanId(id)
+          setScreen('plan-detail')
+        }}
+      />
+    )
+  }
+  if (screen === 'plan-detail' && openPlanId !== null) {
+    return (
+      <PlanDetail
+        planId={openPlanId}
+        user={SAMPLE_ACCOUNT}
+        reminderBadge={countDueReminders()}
+        onBack={() => setScreen('saved-plan')}
+        onNavigate={(key) => setScreen(screenForMenu(key) ?? 'plan-detail')}
+        onLogout={() => setScreen('inconnected')}
       />
     )
   }

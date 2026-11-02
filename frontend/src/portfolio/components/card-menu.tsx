@@ -2,7 +2,11 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { EllipsisVertical, Pencil, Trash2 } from 'lucide-react'
 
 type CardMenuProps = {
+  /** ชื่อที่ใช้ใน aria-label ของปุ่มและเมนู (ชื่อพอร์ต/ชื่อแผน) */
   portfolioName: string
+  /** ข้อความของรายการแก้ไข/ลบ (ค่าเริ่มต้นสำหรับการ์ดพอร์ต) */
+  editLabel?: string
+  trashLabel?: string
   onOpenChange?: (open: boolean) => void
   onEdit: () => void
   onTrash: () => void
@@ -12,7 +16,14 @@ const ITEM =
   'flex h-10 w-full items-center gap-3 rounded-md px-3 text-left text-[14px] leading-5 font-medium transition-colors duration-150 focus-visible:bg-blue-50 hover:bg-blue-50'
 
 // เมนู 3 จุดของการ์ด: แก้ชื่อ/คำอธิบาย/เป้าหมาย และย้ายไปถังขยะ (Soft Delete)
-export default function CardMenu({ portfolioName, onOpenChange, onEdit, onTrash }: CardMenuProps) {
+export default function CardMenu({
+  portfolioName,
+  editLabel = 'Edit details',
+  trashLabel = 'Move to Trash',
+  onOpenChange,
+  onEdit,
+  onTrash,
+}: CardMenuProps) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -85,7 +96,7 @@ export default function CardMenu({ portfolioName, onOpenChange, onEdit, onTrash 
             className={`${ITEM} text-navy-900`}
           >
             <Pencil size={16} strokeWidth={1.75} aria-hidden="true" className="text-navy-700" />
-            Edit details
+            {editLabel}
           </button>
           <button
             type="button"
@@ -98,7 +109,7 @@ export default function CardMenu({ portfolioName, onOpenChange, onEdit, onTrash 
             className={`${ITEM} text-navy-900 hover:bg-red-50 focus-visible:bg-red-50`}
           >
             <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" className="text-red-500" />
-            Move to Trash
+            {trashLabel}
           </button>
         </div>
       )}

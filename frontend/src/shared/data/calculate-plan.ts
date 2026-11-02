@@ -1,4 +1,4 @@
-import type { CalcInput, CalcOutput } from './target-amount'
+import type { CalcInput, CalcOutput } from '../types/calc-plan'
 
 // ตัวคำนวณชั่วคราวสำหรับข้อมูลจำลอง: ปันผลเฉลี่ยทบต้นรายเดือนบนยอดสะสม (ไม่สมมติราคาหุ้นโต)
 // ตรรกะจริงให้ไปทำที่ backend ตามที่ตกลงไว้ ฟังก์ชันนี้เป็นฟังก์ชันล้วน (เหมือนที่ database.md ระบุ) จึงย้ายได้โดยไม่แตะหน้าจอ:

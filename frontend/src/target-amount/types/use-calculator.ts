@@ -4,7 +4,7 @@ import { fetchPortfolios } from '../../shared/data/portfolios'
 import { fetchTransactions } from '../../shared/data/transactions'
 import type { Portfolio } from '../../shared/types/portfolio'
 import type { Asset } from '../../shared/types/transaction'
-import { calculatePlan } from './calculate'
+import { calculatePlan } from '../../shared/data/calculate-plan'
 import {
   MAX_PHASES,
   MAX_YEARS,
