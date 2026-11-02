@@ -1,8 +1,8 @@
 import { Paperclip } from 'lucide-react'
-import EmotionIcon from '../../shared/emotion/emotion-icon'
-import { EMOTIONS, NO_EMOTION_LABEL, type Emotion } from '../../shared/emotion/emotions'
+import type { Emotion } from '../../shared/emotion/emotions'
+import MoodBadge from '../../shared/emotion/mood-badge'
 import { formatNoteDate } from '../types/format-note-date'
-import type { JournalNote } from '../types/journal'
+import type { JournalNote } from '../../shared/types/journal-note'
 
 type JournalCardProps = {
   note: JournalNote
@@ -11,7 +11,7 @@ type JournalCardProps = {
   onOpen: (id: number) => void
 }
 
-// สีพื้นการ์ดและป้ายตามอารมณ์ (design rules หัวข้อ 9.2) เขียน class เต็มเพื่อให้ Tailwind สแกนเจอ
+// สีพื้นการ์ดตามอารมณ์ (design rules หัวข้อ 9.2; สีป้ายอยู่ใน MoodBadge) เขียน class เต็มเพื่อให้ Tailwind สแกนเจอ
 const CARD_BG: Record<Emotion | 'none', string> = {
   overjoyed: 'bg-navy-900',
   happy: 'bg-navy-700',
@@ -20,22 +20,12 @@ const CARD_BG: Record<Emotion | 'none', string> = {
   sad: 'bg-navy-900',
   none: 'bg-navy-700',
 }
-const BADGE_BG: Record<Emotion | 'none', string> = {
-  overjoyed: 'bg-mood-overjoyed',
-  happy: 'bg-mood-happy',
-  neutral: 'bg-mood-neutral',
-  worried: 'bg-mood-worried',
-  sad: 'bg-mood-sad',
-  none: 'bg-surface/15',
-}
-
 const DEFAULT_TITLE = 'Today Journal'
 
 // การ์ดโน้ต 1 ใบ: ทั้งใบเป็นลิงก์เดียว มีกระดาษซ้อนด้านหลังและคลิปทอง
 // Hover: พื้นเปลี่ยนเป็นฟ้าอย่างนุ่ม การ์ดลอยขึ้นเล็กน้อย กระดาษด้านหลังเลื่อนออกและเอียง คลิปแกว่ง
 export default function JournalCard({ note, timeZone, onOpen }: JournalCardProps) {
   const key = note.emotion ?? 'none'
-  const emotionLabel = EMOTIONS.find((item) => item.id === note.emotion)?.label ?? NO_EMOTION_LABEL
   const title = note.title?.trim() || DEFAULT_TITLE
 
   return (
@@ -62,12 +52,7 @@ export default function JournalCard({ note, timeZone, onOpen }: JournalCardProps
           className="pointer-events-none absolute -top-2.5 right-3 origin-bottom text-gold-400 transition-transform duration-500 ease-(--ease-soft) group-hover:-translate-y-0.5 group-hover:-rotate-12 motion-reduce:transition-none"
         />
 
-        <span
-          className={`inline-flex h-6 w-fit items-center gap-1.5 rounded-pill px-2.5 text-[12px] leading-4 font-semibold ${BADGE_BG[key]}`}
-        >
-          <EmotionIcon emotion={note.emotion} className="size-4" />
-          {emotionLabel}
-        </span>
+        <MoodBadge emotion={note.emotion} />
 
         <h3 className="m-0 mt-3 truncate text-[22px] leading-7 font-bold">{title}</h3>
         <p className="m-0 mt-2 line-clamp-4 text-[12px] leading-4 text-surface/85 transition-colors duration-300 group-hover:text-surface">

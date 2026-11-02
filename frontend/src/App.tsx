@@ -7,9 +7,10 @@ import Register from './onboarding/register'
 import Loading from './onboarding/loading'
 import RecoveryPassword from './onboarding/recovery-password'
 import MyJournal from './my-journal/my-journal'
+import Journaling from './journaling/journaling'
 import type { LoginCredentials } from './onboarding/types/login'
 
-type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals'
+type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling'
 
 // ชั่วคราว: ข้อมูลตัวอย่างไว้ดูหน้า Onboarding จนกว่าจะมี router และระบบ auth จริง
 const SAMPLE_ACCOUNT = { displayName: 'Thomas W.' }
@@ -27,6 +28,7 @@ async function mockLogin({ email, password }: LoginCredentials) {
 
 function App() {
   const [screen, setScreen] = useState<Screen>('opening')
+  const [openNoteId, setOpenNoteId] = useState<number | null>(null)
 
   if (screen === 'opening') {
     return <OpeningPage onFinish={() => setScreen('inconnected')} />
@@ -74,6 +76,22 @@ function App() {
         user={SAMPLE_ACCOUNT}
         reminderBadge={2}
         onLogout={() => setScreen('inconnected')}
+        onOpenNote={(id) => {
+          setOpenNoteId(id)
+          setScreen('journaling')
+        }}
+      />
+    )
+  }
+  if (screen === 'journaling' && openNoteId !== null) {
+    return (
+      <Journaling
+        noteId={openNoteId}
+        user={SAMPLE_ACCOUNT}
+        reminderBadge={2}
+        onLogout={() => setScreen('inconnected')}
+        onBack={() => setScreen('journals')}
+        onDeleted={() => setScreen('journals')}
       />
     )
   }

@@ -1,6 +1,7 @@
 import { useId, useMemo, useState, type FormEvent } from 'react'
 import { CircleAlert, Trash2 } from 'lucide-react'
 import type { NoteFormValues } from '../types/note-form'
+import { countWords } from './count-words'
 import MoodPicker from './mood-picker'
 
 type NoteFormProps = {
@@ -18,15 +19,6 @@ const EMPTY: NoteFormValues = { title: '', content: '', emotion: null }
 const TITLE_MAX = 120
 
 const LABEL = 'text-[11px] leading-4 font-semibold tracking-[0.08em] text-text-muted uppercase'
-
-// นับคำ (ภาษาไทยไม่มีช่องว่างคั่นคำ จึงใช้ Intl.Segmenter ตัดคำ)
-function countWords(text: string): number {
-  if (!text.trim()) return 0
-  const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' })
-  let count = 0
-  for (const part of segmenter.segment(text)) if (part.isWordLike) count += 1
-  return count
-}
 
 // ฟอร์มสร้าง/แก้โน้ต: เลือกอารมณ์ (ไม่บังคับ) → TITLE (ไม่บังคับ) → REFLECTIVE THOUGHTS (บังคับ) → ปุ่ม
 export default function NoteForm({

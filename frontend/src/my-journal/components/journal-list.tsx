@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { PenLine } from 'lucide-react'
 import logo from '../../assets/Logo.png'
-import type { JournalLoadStatus, JournalNote } from '../types/journal'
+import type { JournalNote } from '../../shared/types/journal-note'
+import type { JournalLoadStatus } from '../types/journal'
 import JournalCard from './journal-card'
 
 type JournalListProps = {

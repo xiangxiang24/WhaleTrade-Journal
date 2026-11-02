@@ -643,9 +643,9 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 | ไฟล์ | หน้าที่ |
 |---|---|
 | `my-journal.tsx` | หน้าเต็ม: `AppLayout` + ส่วนหัว + ค้นหา/กรอง + รายการ; ถือ state `query`, `mood`; กรองด้วย `useMemo` (ค้นใน title/content ไม่สนตัวพิมพ์, เรียงใหม่ → เก่า) |
-| `data/journal-notes.ts` | `fetchJournalNotes()` คืนข้อมูลจำลอง 12 โน้ต (หน่วง 500ms) และ `createJournalNote(values)` สร้างโน้ตใหม่ (จำลอง เก็บในหน่วยความจำ) **สองฟังก์ชันนี้คือจุดเดียวที่ต้องแก้ตอนต่อ backend** (มีตัวอย่าง `fetch('/api/notes')` และ POST ในคอมเมนต์) |
+| `shared/data/journal-notes.ts` | ที่เก็บข้อมูลจำลองของโน้ต **ใช้ร่วมกันทุกหน้า** (ย้ายมาจาก `my-journal/data/`): `fetchJournalNotes`, `fetchJournalNote`, `createJournalNote`, `updateJournalNote`, `deleteJournalNote` และฉบับร่าง `loadNoteDraft`, `saveNoteDraft`, `deleteNoteDraft` เก็บในหน่วยความจำจึงเห็นการสร้าง/แก้/ลบข้ามหน้า (รีเฟรชแล้วกลับค่าเริ่มต้น) **ไฟล์เดียวที่ต้องแก้ตอนต่อ backend** (มี endpoint ตัวอย่างในคอมเมนต์ของแต่ละฟังก์ชัน) |
 | `types/use-journal-notes.ts` | hook `{ notes, status: 'loading' \| 'ready' \| 'error', reload, addNote }` (`addNote` สร้างแล้วเพิ่มโน้ตใหม่ไว้หัวรายการ) |
-| `types/journal.ts` | `JournalNote` (รูปเดียวกับตาราง Note, `createdAt` ISO UTC), `MoodFilterValue`, `JournalLoadStatus` |
+| `types/journal.ts` | `MoodFilterValue`, `JournalLoadStatus` (type `JournalNote` ย้ายไป `shared/types/journal-note.ts`; รูปเดียวกับตาราง Note, `createdAt` ISO UTC) |
 | `types/format-note-date.ts` | `21 Sep 2026 \| 21:31` แปลงตามเขตเวลาผู้ใช้ (`timeZone` prop จาก `User.timezone`) |
 | `components/journal-header.tsx` | Welcome back + ป้าย Safe Haven + คำเตือนใจ + กล่องข้อความฮีลใจ (ข้อความคงที่) |
 | `components/journal-toolbar.tsx` | ช่องค้นหา + ป้าย Dividend Yield + ปุ่ม New Note |
@@ -656,7 +656,7 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 
 **การ์ดโน้ต** (สูง 224 กว้างตามกริด จึงเป็นสี่เหลี่ยมผืนผ้า, มน 16, padding 20)
 - ทั้งใบเป็น `<a href="/journal/:id">` ตัวเดียว (กัน default แล้วเรียก `onOpen(id)`; พร้อมเปลี่ยนเป็น router link) ไม่มีปุ่มซ้อนข้างใน จึง **ไม่มี Quick Mood Change บนการ์ด** ตามหัวข้อ 9.3 (เปลี่ยนอารมณ์ในหน้าแก้โน้ต) และ **ไม่แสดงป้าย Buy Reason** ตามหัวข้อ 9.1
-- ป้ายอารมณ์ (`bg-mood-*` + `EmotionIcon` 16), ชื่อ 22/28 bold ตัดบรรทัดเดียว (ว่าง → "Today Journal"), ตัวอย่าง 12/16 ตัด 4 บรรทัด, เส้นแบ่ง + วันที่ ดันลงล่าง
+- ป้ายอารมณ์ (`MoodBadge` size `sm` จาก `shared/emotion/mood-badge.tsx`), ชื่อ 22/28 bold ตัดบรรทัดเดียว (ว่าง → "Today Journal"), ตัวอย่าง 12/16 ตัด 4 บรรทัด, เส้นแบ่ง + วันที่ ดันลงล่าง
 - กระดาษซ้อนด้านหลังเป็น `<span>` แยกใน wrapper `group` (ไม่ใช้ `-z-10` เพราะซ้อนทับพื้นการ์ดผิด) สี blue-200 เลื่อน (10, 10)
 - **Hover (นุ่ม ใช้ `group-hover`):**
 
@@ -689,3 +689,37 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 - **การตรวจ:** ตรวจตอนกดบันทึกเท่านั้น เนื้อหาว่าง → ข้อความ "Please write a few thoughts before saving." ใต้ช่อง (ขอบแดง + ไอคอน) ข้อผิดพลาดจากระบบ (`onSubmit` throw `Error`) แสดงเหนือปุ่มด้วย `role="alert"`; ระหว่างบันทึกปุ่มถูกปิด; ค่า `title`/`content` ถูก trim ก่อนส่ง
 - โฟกัสไปที่ช่อง TITLE ตอนเปิด (`data-autofocus`)
 - **ยังไม่ทำ** (อยู่ใน journaling-page.md ให้ทำตอนสร้างหน้า Journaling): คำสั่ง `/` แบบ Notion, บันทึกฉบับร่างอัตโนมัติ (`NoteDraft`) และป้าย "Draft Autosaved" — modal สร้างโน้ตใหม่จึงยังไม่เก็บฉบับร่าง ถ้าปิดกลางทางข้อความที่พิมพ์จะหาย
+
+### 14.18 หน้า Journaling — เขียน/ดู/แก้โน้ต (`frontend/src/journaling/`)
+เปิดจากการกดการ์ดในหน้า My Journals (`onOpenNote(id)` → `<Journaling noteId …/>`) ใช้ `AppLayout` โดย Sidebar เลือก "My Journals"
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `journaling.tsx` | หน้าเต็ม: ประกอบส่วนหัว + ฟอร์ม; จัดการ save/cancel/delete และสถานะ กำลังโหลด / ไม่พบโน้ต / ผิดพลาด (ปุ่ม Try again) |
+| `types/use-journal-editor.ts` | hook ตัวแก้โน้ต: โหลดโน้ต + ฉบับร่างค้าง, `values`, `dirty`, `draftState`, `change`, `save`, `discard`, `remove` |
+| `types/format-relative-time.ts`, `types/journaling.ts` | "Just now / N min ago", type สถานะ |
+| `components/journaling-header.tsx` | ปุ่ม Back to Journals + ชื่อ "Write Reflection Journal" + คำโปรย + `DraftStatus` |
+| `components/draft-status.tsx` | ป้ายสถานะร่าง (ด้านล่าง) |
+| `components/mood-section.tsx` | `MoodBadge` size `lg` + "Parchment Edition" (ตกแต่ง) + คำถาม + ข้อความปลอบใจ + `MoodOptions` size `lg` |
+| `components/entry-fields.tsx` | ช่อง TITLE (พื้น `blue-50` ไม่มีขอบ มน 12 ตัว 17–20 bold) + REFLECTIVE THOUGHTS (พื้น `parchment`, 15–17/28–30, ตัวนับคำ) |
+| `components/editor-footer.tsx` | Delete journal (ซ้ายสุด) / Cancel + Save Changes (ขวา) |
+| `modals/delete-journal-modal.tsx` | กล่องยืนยันลบ |
+
+- **Save Changes กดไม่ได้เมื่อยังไม่มีการเปลี่ยนแปลง** (`dirty` = ค่าในฟอร์มต่างจากค่าที่บันทึกไว้ในอารมณ์/ชื่อ/เนื้อหาอย่างใดอย่างหนึ่ง; แก้กลับมาเท่าเดิม = กดไม่ได้อีก) พร้อมสไตล์ disabled (`blue-200`, ไม่มีเงา) ตอนกดแล้วเนื้อหาว่างจะขึ้นข้อความ error ใต้ช่อง
+- **ลบโน้ต:** ปุ่มชื่อ **"Delete journal"** (ไม่ใช่ Delete note) เปิดกล่องยืนยัน (หัวข้อ 7.6: กว้าง 420, padding 24, Cancel = Secondary, Delete = Danger solid `red-500` hover สว่างขึ้น) ฟอกัสที่ปุ่ม Cancel เป็นค่าเริ่มต้นกันกดลบพลาด ลบสำเร็จแล้วเนื้อหาลอยออกและกลับหน้า My Journals; ถ้า backend ล้มเหลวแสดงข้อความในกล่อง
+- **ฉบับร่างอัตโนมัติ (NoteDraft):** หยุดพิมพ์ 0.8 วินาทีแล้วบันทึกร่าง; เปิดโน้ตซ้ำจะกู้ร่างที่ค้างมาแสดง; **Save Changes** = เขียนลงโน้ตแล้วลบร่าง, **Cancel** = ลบร่างแล้วกลับหน้ารวม, **Back to Journals** = กลับโดยเก็บร่างไว้
+- **ป้ายสถานะร่าง** (`DraftStatus`): `Draft Autosaved • Just now` (ไอคอนเมฆ, เวลาอัปเดตเองทุก 30 วินาที) / `Saving draft…` (เมฆอัปโหลด) / `No unsaved changes` (เมฆติ๊กถูก) ป้าย `blue-100` ตัว navy-700; จอกว้าง < 640 ย้ายลงใต้ชื่อหน้า
+
+**แถบเลือกอารมณ์** (`MoodOptions` ใน `shared/note-form/mood-picker.tsx` ใช้ทั้ง modal และหน้า Journaling; ตามภาพ Figma "While hovering / pressing")
+
+| สถานะ | สเปก |
+|---|---|
+| ปกติ | ช่องโปร่งใส อีโมจิ 56 (จอ < 640 = 44) |
+| Hover | กล่องมน 16 เต็มความกว้างช่อง พื้น `blue-100` + อีโมจิขยาย `scale(1.1)` |
+| กด (pressing) | กล่องพื้น `blue-100` + อีโมจิย่อ `scale(0.9)` |
+| เลือกอยู่ | กล่อง `blue-100` + ขอบ 2px `blue-500` อีโมจิขนาดปกติ |
+| โฟกัสคีย์บอร์ด | ใช้ focus ring ส่วนกลาง |
+
+- แถบแบ่งเป็น 5 ช่อง **กว้างเท่าๆ กันเต็มความยาวแถบ** กล่อง hover/เลือกกว้างเท่าช่อง (ไม่ใช่สี่เหลี่ยมจัตุรัสเล็ก) เพื่อให้เป้ากดใหญ่ กดง่าย; สูง 56 / 64 (ฟอร์ม modal) และ 64 / 72 (หน้า Journaling) ตามความกว้างจอ; กดซ้ำที่ตัวเลือก = ยกเลิก (ไม่ระบุ); ปุ่มใส่ `data-no-bounce` เพราะอีโมจิขยายเอง
+
+**Responsive:** ชื่อหน้า 28 → 36 → 40, คำถามอารมณ์ 22 → 28 → 32, การ์ดฟอร์ม padding 20 → 32, ข้อความปลอบใจย้ายลงใต้คำถามในจอแคบ, แถวปุ่มท้ายห่อบรรทัดได้ (ที่ความสูง < 760 ช่องเขียนสูงขั้นต่ำ 160)

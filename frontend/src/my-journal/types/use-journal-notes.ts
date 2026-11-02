@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
+import { createJournalNote, fetchJournalNotes } from '../../shared/data/journal-notes'
+import type { JournalNote } from '../../shared/types/journal-note'
 import type { NoteFormValues } from '../../shared/types/note-form'
-import { createJournalNote, fetchJournalNotes } from '../data/journal-notes'
-import type { JournalLoadStatus, JournalNote } from './journal'
+import type { JournalLoadStatus } from './journal'
 
 // โหลดโน้ตของผู้ใช้ พร้อมสถานะ loading / ready / error, reload และ addNote
 export function useJournalNotes() {
