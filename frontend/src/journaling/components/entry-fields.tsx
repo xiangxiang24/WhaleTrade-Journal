@@ -1,5 +1,7 @@
 import { useId, useMemo } from 'react'
 import { CircleAlert } from 'lucide-react'
+import { contentToPlainText } from '../../shared/note-editor/content'
+import NoteEditor from '../../shared/note-editor/note-editor'
 import { countWords } from '../../shared/note-form/count-words'
 
 type EntryFieldsProps = {
@@ -24,7 +26,8 @@ export default function EntryFields({
 }: EntryFieldsProps) {
   const titleId = useId()
   const contentId = useId()
-  const wordCount = useMemo(() => countWords(content), [content])
+  const contentLabelId = useId()
+  const wordCount = useMemo(() => countWords(contentToPlainText(content)), [content])
 
   return (
     <>
@@ -45,24 +48,23 @@ export default function EntryFields({
 
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex items-center justify-between gap-3">
-          <label htmlFor={contentId} className={LABEL}>
+          <span id={contentLabelId} className={LABEL}>
             Reflective thoughts
-          </label>
+          </span>
           <span className="text-[12px] leading-4 text-text-muted tabular-nums" aria-live="polite">
             {wordCount} {wordCount === 1 ? 'word' : 'words'}
           </span>
         </div>
-        <textarea
-          id={contentId}
-          value={content}
-          onChange={(event) => onContentChange(event.target.value)}
-          placeholder="Why did you invest? What would change your mind? What will you measure?"
-          aria-invalid={Boolean(contentError)}
-          aria-describedby={contentError ? `${contentId}-error` : undefined}
-          className={`mt-1.5 min-h-64 w-full flex-1 resize-y rounded-md bg-parchment p-4 text-[15px] leading-[28px] text-navy-900 outline-none transition-shadow duration-150 placeholder:text-text-muted focus:shadow-focus short:min-h-40 min-[640px]:text-[17px] min-[640px]:leading-[30px] ${
-            contentError ? 'ring-2 ring-red-500' : ''
-          }`}
-        />
+        <div className="mt-1.5">
+          <NoteEditor
+            value={content}
+            onChange={onContentChange}
+            labelledBy={contentLabelId}
+            describedBy={contentError ? `${contentId}-error` : undefined}
+            invalid={Boolean(contentError)}
+            minHeightClass="min-h-64 short:min-h-40"
+          />
+        </div>
         {contentError && (
           <p
             id={`${contentId}-error`}

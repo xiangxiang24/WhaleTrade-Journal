@@ -7,6 +7,7 @@ import {
   saveNoteDraft,
   updateJournalNote,
 } from '../../shared/data/journal-notes'
+import { canonicalContent } from '../../shared/note-editor/content'
 import type { JournalNote } from '../../shared/types/journal-note'
 import type { DraftState, EditorLoadStatus, EditorValues } from './journaling'
 
@@ -18,7 +19,11 @@ function toValues(note: JournalNote): EditorValues {
 }
 
 function isSame(a: EditorValues, b: EditorValues) {
-  return a.title === b.title && a.content === b.content && a.emotion === b.emotion
+  return (
+    a.title === b.title &&
+    a.emotion === b.emotion &&
+    canonicalContent(a.content) === canonicalContent(b.content)
+  )
 }
 
 // ตัวแก้โน้ต 1 เล่ม: โหลดโน้ต + ฉบับร่างค้าง, บันทึกร่างอัตโนมัติเมื่อมีการแก้, บันทึก/ยกเลิก/ลบ
@@ -94,7 +99,7 @@ export function useJournalEditor(noteId: number) {
   const save = useCallback(async () => {
     const updated = await updateJournalNote(noteId, {
       title: values.title.trim(),
-      content: values.content.trim(),
+      content: values.content,
       emotion: values.emotion,
     })
     await deleteNoteDraft(noteId)

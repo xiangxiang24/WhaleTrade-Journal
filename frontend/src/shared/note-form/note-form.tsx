@@ -1,6 +1,8 @@
 import { useId, useMemo, useState, type FormEvent } from 'react'
 import { CircleAlert, Trash2 } from 'lucide-react'
 import type { NoteFormValues } from '../types/note-form'
+import { contentToPlainText, isContentEmpty } from '../note-editor/content'
+import NoteEditor from '../note-editor/note-editor'
 import { countWords } from './count-words'
 import MoodPicker from './mood-picker'
 
@@ -36,13 +38,14 @@ export default function NoteForm({
   const [submitting, setSubmitting] = useState(false)
   const titleId = useId()
   const contentId = useId()
+  const contentLabelId = useId()
 
-  const wordCount = useMemo(() => countWords(content), [content])
+  const wordCount = useMemo(() => countWords(contentToPlainText(content)), [content])
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (submitting) return
-    if (!content.trim()) {
+    if (isContentEmpty(content)) {
       setContentError('Please write a few thoughts before saving.')
       return
     }
@@ -50,7 +53,7 @@ export default function NoteForm({
     setFormError(undefined)
     setSubmitting(true)
     try {
-      await onSubmit({ title: title.trim(), content: content.trim(), emotion })
+      await onSubmit({ title: title.trim(), content, emotion })
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Could not save your note. Please try again.')
       setSubmitting(false)
@@ -79,27 +82,26 @@ export default function NoteForm({
 
       <div>
         <div className="flex items-center justify-between gap-3">
-          <label htmlFor={contentId} className={LABEL}>
+          <span id={contentLabelId} className={LABEL}>
             Reflective thoughts
-          </label>
+          </span>
           <span className="text-[12px] leading-4 text-text-muted tabular-nums" aria-live="polite">
             {wordCount} {wordCount === 1 ? 'word' : 'words'}
           </span>
         </div>
-        <textarea
-          id={contentId}
-          value={content}
-          onChange={(event) => {
-            setContent(event.target.value)
-            if (contentError) setContentError(undefined)
-          }}
-          placeholder="Why did you invest? What would change your mind? What will you measure?"
-          aria-invalid={Boolean(contentError)}
-          aria-describedby={contentError ? `${contentId}-error` : undefined}
-          className={`mt-1.5 min-h-52 w-full resize-y rounded-md bg-parchment p-4 text-[15px] leading-[26px] text-navy-900 outline-none transition-shadow duration-150 placeholder:text-text-muted focus:shadow-focus short:min-h-36 ${
-            contentError ? 'ring-2 ring-red-500' : ''
-          }`}
-        />
+        <div className="mt-1.5">
+          <NoteEditor
+            value={content}
+            onChange={(next) => {
+              setContent(next)
+              if (contentError) setContentError(undefined)
+            }}
+            labelledBy={contentLabelId}
+            describedBy={contentError ? `${contentId}-error` : undefined}
+            invalid={Boolean(contentError)}
+            minHeightClass="min-h-52 short:min-h-36"
+          />
+        </div>
         {contentError && (
           <p
             id={`${contentId}-error`}
@@ -123,7 +125,7 @@ export default function NoteForm({
           <button
             type="button"
             onClick={onDelete}
-            className="inline-flex h-11 items-center gap-2 rounded-pill border border-red-500 bg-surface px-5 text-[14px] leading-5 font-semibold text-red-500 transition-colors duration-150 hover:bg-red-50 active:bg-red-50"
+            className="inline-flex h-11 items-center gap-2 rounded-pill border-2 border-red-500 bg-surface px-5 text-[14px] leading-5 font-semibold text-red-500 transition-colors duration-150 hover:bg-red-50 active:bg-red-50"
           >
             <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
             Delete note
@@ -135,7 +137,7 @@ export default function NoteForm({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex h-11 items-center rounded-pill border border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:bg-blue-50 active:bg-blue-100"
+            className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
           >
             Cancel
           </button>

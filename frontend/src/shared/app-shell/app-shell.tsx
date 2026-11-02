@@ -15,7 +15,8 @@ export default function AppShell({ sidebar, topBar, children }: AppShellProps) {
       {sidebar}
       <div className="flex min-w-0 flex-1 flex-col">
         {topBar}
-        <main className="no-scrollbar min-h-0 flex-1 overflow-y-auto">{children}</main>
+        {/* -mx-3 px-3: เผื่อที่ซ้าย-ขวา 12px ภายในพื้นที่เลื่อน (เนื้อหายังตรงแนวเดิม) กันปุ่ม/การ์ดที่ขยายหรือมีเงาตอน hover โดนตัดที่ขอบ (overflow ของพื้นที่เลื่อนจะตัดทุกอย่างที่ล้นขอบ) */}
+        <main className="no-scrollbar -mx-3 min-h-0 flex-1 overflow-y-auto px-3">{children}</main>
       </div>
     </div>
   )

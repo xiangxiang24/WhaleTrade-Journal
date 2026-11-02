@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import AppLayout from '../shared/app-shell/app-layout'
 import { EMOTIONS } from '../shared/emotion/emotions'
+import { contentToPlainText } from '../shared/note-editor/content'
 import { usePageLeave } from '../shared/hooks/use-page-leave'
 import type { SidebarKey, SidebarUser } from '../shared/types/sidebar'
 import JournalHeader from './components/journal-header'
@@ -56,7 +57,7 @@ export default function MyJournal({
         (note) =>
           !keyword ||
           (note.title ?? '').toLowerCase().includes(keyword) ||
-          note.content.toLowerCase().includes(keyword),
+          contentToPlainText(note.content).toLowerCase().includes(keyword),
       )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   }, [notes, mood, query])

@@ -1,5 +1,6 @@
 import { Paperclip } from 'lucide-react'
 import type { Emotion } from '../../shared/emotion/emotions'
+import { contentToPlainText } from '../../shared/note-editor/content'
 import MoodBadge from '../../shared/emotion/mood-badge'
 import { formatNoteDate } from '../types/format-note-date'
 import type { JournalNote } from '../../shared/types/journal-note'
@@ -56,7 +57,7 @@ export default function JournalCard({ note, timeZone, onOpen }: JournalCardProps
 
         <h3 className="m-0 mt-3 truncate text-[22px] leading-7 font-bold">{title}</h3>
         <p className="m-0 mt-2 line-clamp-4 text-[12px] leading-4 text-surface/85 transition-colors duration-300 group-hover:text-surface">
-          {note.content}
+          {contentToPlainText(note.content)}
         </p>
 
         <div className="mt-auto border-t border-surface/25 pt-2.5">

@@ -69,7 +69,7 @@ function Dialog({ onConfirm, onClose }: Omit<DeleteJournalModalProps, 'open'>) {
           type="button"
           disabled={deleting}
           onClick={() => setClosing(true)}
-          className="inline-flex h-11 items-center rounded-pill border border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
+          className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
         >
           Cancel
         </button>

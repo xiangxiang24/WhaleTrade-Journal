@@ -10,7 +10,7 @@ const variants: Record<Variant, string> = {
   primary:
     'bg-blue-500 text-surface hover:bg-navy-700 active:bg-navy-900 disabled:bg-blue-200 disabled:hover:bg-blue-200',
   secondary:
-    'border-2 border-blue-200 bg-surface text-blue-500 hover:bg-blue-50 active:bg-blue-100',
+    'border-2 border-blue-200 bg-surface text-blue-500 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100',
 }
 
 type OnboardingButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

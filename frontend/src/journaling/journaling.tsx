@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import logo from '../assets/Logo.png'
 import AppLayout from '../shared/app-shell/app-layout'
+import { isContentEmpty } from '../shared/note-editor/content'
 import { usePageLeave } from '../shared/hooks/use-page-leave'
 import type { SidebarKey, SidebarUser } from '../shared/types/sidebar'
 import BackButton from './components/back-button'
@@ -46,7 +47,7 @@ export default function Journaling({
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (saving || !editor.dirty) return
-    if (!editor.values.content.trim()) {
+    if (isContentEmpty(editor.values.content)) {
       setContentError('Please write a few thoughts before saving.')
       return
     }

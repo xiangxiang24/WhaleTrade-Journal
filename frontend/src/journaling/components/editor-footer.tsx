@@ -15,7 +15,7 @@ export default function EditorFooter({ canSave, saving, onDelete, onCancel }: Ed
       <button
         type="button"
         onClick={onDelete}
-        className="inline-flex h-11 items-center gap-2 rounded-pill border border-red-500 bg-surface px-5 text-[14px] leading-5 font-semibold text-red-500 transition-colors duration-150 hover:bg-red-50 active:bg-red-50"
+        className="inline-flex h-11 items-center gap-2 rounded-pill border-2 border-red-500 bg-surface px-5 text-[14px] leading-5 font-semibold text-red-500 transition-colors duration-150 hover:bg-red-50 active:bg-red-50"
       >
         <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
         Delete journal
@@ -25,7 +25,7 @@ export default function EditorFooter({ canSave, saving, onDelete, onCancel }: Ed
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex h-11 items-center rounded-pill border border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:bg-blue-50 active:bg-blue-100"
+          className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
         >
           Cancel
         </button>

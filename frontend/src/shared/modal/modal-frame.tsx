@@ -58,7 +58,7 @@ export default function ModalFrame({
             first.focus()
           }
         }}
-        className={`max-h-full w-full overflow-y-auto rounded-3xl bg-surface shadow-lg ${cardClassName} ${
+        className={`no-scrollbar max-h-full w-full overflow-y-auto rounded-3xl bg-surface shadow-lg ${cardClassName} ${
           closing ? 'animate-modal-out' : 'animate-modal-pop'
         } motion-reduce:animate-none`}
       >
