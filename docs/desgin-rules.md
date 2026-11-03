@@ -827,7 +827,7 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 - **หน้าสรุป:** แถบ 4 ช่อง (เงินต้น / DCA รวม / ระยะเวลา / ปันผลเฉลี่ย) → Expected amount → สัดส่วนและตารางสรุป (ซ้าย) + Plan inputs (ขวา ตั้งแต่ 1360) → ปุ่ม Export CSV / Export image / Export PDF / Delete
 - **พฤติกรรมที่ต่างจาก `saved-plan-page.md`:** สเปกให้ Open โหลดแผนกลับเข้าฟอร์ม Target Amount แต่ตกลงให้ Open เป็นหน้าสรุปผลของตัวเองแทน (ปรับแผนในเครื่องคำนวณยังไม่ทำ)
 - **ยังไม่ทำ:** Export PDF (ต้องใช้โปรเซสหลักของ Electron ตอนนี้แสดง toast แจ้ง)
-- เมนู Sidebar ที่มีหน้าแล้ว: My Journals, Portfolio, Reminder, Saved Plan, Target Amount (Trash / Setting ยัง)
+- เมนู Sidebar ที่มีหน้าแล้ว: My Journals, Portfolio, Reminder, Saved Plan, Target Amount, Trash, Setting (ครบทุกเมนู)
 
 ### 14.24 หน้า Setting (`frontend/src/setting-page/`)
 `<SettingPage user reminderBadge? onNavigate onLogout onAccountChange onAccountDeleted />` ใช้ `AppLayout` โดย Sidebar เลือก "Setting" หน้าเดียว 3 section คอลัมน์เดียวกว้างสูงสุด 960 ชิดซ้ายแนวเดียวกับหัวข้อ (โฟลเดอร์ใช้ชื่อ `setting-page` ตามที่ scaffold ไว้)
@@ -855,3 +855,18 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 - คำแปลไทยอยู่ที่ `shared/i18n/th.ts` (ไม่มี key = แสดงอังกฤษเดิม) เพิ่มข้อความใหม่แล้วต้องเพิ่มคำแปลคู่กัน
 - ไม่แปล: ข้อความที่ผู้ใช้เขียนเอง (โน้ต ชื่อพอร์ต/แผน แท็ก) และไฟล์ที่ส่งออก (CSV / รูป)
 - วันที่ใช้ `locale` จาก `useI18n()` (ปฏิทินคริสต์ศักราชเสมอ) ตัวเลขใช้รูปแบบ en-US
+
+### 14.26 หน้า Trash (`frontend/src/trash/`)
+หน้าเดียว 2 แท็บ (Journals / Portfolios) ใช้ `AppLayout` โดย Sidebar เลือก "Trash" ข้อมูลจำลองอยู่ใน `shared/data/journal-notes.ts` (โน้ตในถังขยะ) และ `shared/data/portfolios.ts` (พอร์ตที่ `deletedAt` มีค่า) ลบโน้ตจากหน้า Journaling = ย้ายเข้าถังขยะแล้ว
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `trash-page.tsx` | หน้า: หัว, กล่องอธิบาย, แถบแท็บ/ค้นหา/ล้างถังขยะ, รายการ, modal และ toast |
+| `components/` | `trash-header`, `trash-notice`, `trash-toolbar`, `trash-list` (loading / error / ว่าง / ค้นไม่เจอ), `trashed-note-card`, `trashed-portfolio-card`, `card-actions` |
+| `modals/` | `note-view-modal` (อ่านอย่างเดียว + กู้คืน/ลบถาวร), `delete-forever-modal` (พอร์ตบอกจำนวน transaction/แผนที่ได้รับผลกระทบ), `empty-trash-modal` (ต้องพิมพ์ DELETE) |
+| `types/use-trash.ts` | โหลดสองรายการพร้อมกัน + กู้คืน/ลบถาวร/ล้าง |
+
+- **การ์ด:** ขอบประสีฟ้า พื้นขาว เนื้อหาจาง (opacity 0.7) แต่ปุ่ม Restore / Delete forever ไม่จาง; การ์ดพอร์ตกดเข้าหน้าพอร์ตไม่ได้ การ์ดโน้ตกดเพื่ออ่านเต็ม
+- **กู้คืน:** ไม่ถามยืนยัน แสดง toast (ไม่มี Undo) / **ลบถาวร:** ถามยืนยันเสมอ / **ล้างถังขยะ:** ล้างเฉพาะแท็บที่เปิด ซ่อนปุ่มเมื่อแท็บว่าง
+- ลบพอร์ตถาวร: ลบ transaction ทั้งหมด และแผนที่อ้างอิงเปลี่ยนเป็น Manual Portfolio (`portfolioId = null`)
+- เนื้อโน้ตในหน้าต่างอ่านแสดงเป็นข้อความล้วน (ยังไม่แสดงรูป/ไฟล์แนบ)

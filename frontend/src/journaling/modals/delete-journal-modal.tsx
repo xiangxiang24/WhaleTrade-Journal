@@ -55,7 +55,7 @@ function Dialog({ onConfirm, onClose }: Omit<DeleteJournalModalProps, 'open'>) {
         {t('Delete this journal?')}
       </h2>
       <p id={descId} className="m-0 mt-2 text-[14px] leading-6 text-navy-700">
-        {t('This journal and its draft will be permanently deleted. This action cannot be undone.')}
+        {t('This journal will be moved to the Trash and its draft will be discarded. You can restore it from the Trash.')}
       </p>
 
       {error && (

@@ -1,4 +1,4 @@
-import type { JournalNote } from '../types/journal-note'
+import type { JournalNote, TrashedNote } from '../types/journal-note'
 import type { NoteFormValues } from '../types/note-form'
 
 // ข้อมูลจำลองไว้ดู UI ครบทุกอารมณ์ (จำนวนตรง Figma: Overjoyed 2, Happy 5, Neutral 3, Worried 1, Sad 1)
@@ -102,6 +102,46 @@ let store: JournalNote[] = [
   },
 ]
 
+// โน้ตในถังขยะ (Note.deletedAt มีค่า) ไม่ปนกับ store เพื่อให้ไม่โผล่ในไทม์ไลน์ ตัวกรองอารมณ์ และการค้นหา
+// id ไม่ซ้ำกับโน้ตปกติ เพื่อให้กู้คืนกลับไปที่เดิมได้
+let trashed: TrashedNote[] = [
+  {
+    id: 15,
+    title: 'Should I sell the tech fund?',
+    content:
+      'Everyone on the forum is panicking about rates. I feel the urge to sell, but my plan says hold for ten years. Writing this so I do not act on fear.',
+    emotion: 'worried',
+    createdAt: '2026-09-02T10:12:00Z',
+    deletedAt: '2026-10-20T08:30:00Z',
+  },
+  {
+    id: 14,
+    title: null,
+    content: 'Quick note: bought a little extra of the REIT today because it looked cheap. No real reason written down yet.',
+    emotion: null,
+    createdAt: '2026-08-27T13:45:00Z',
+    deletedAt: '2026-10-14T16:05:00Z',
+  },
+  {
+    id: 13,
+    title: 'Missed the dividend date',
+    content:
+      'I forgot the ex-dividend date and bought the day after. A small lesson: set a reminder two days before the date next time, and check the calendar every Sunday.',
+    emotion: 'sad',
+    createdAt: '2026-08-15T09:20:00Z',
+    deletedAt: '2026-10-02T11:00:00Z',
+  },
+  {
+    id: 16,
+    title: 'First full year of DCA',
+    content:
+      'Twelve straight months without skipping a deposit. The balance is not big yet, but the habit finally feels automatic and calm.',
+    emotion: 'overjoyed',
+    createdAt: '2026-07-30T18:00:00Z',
+    deletedAt: '2026-09-25T07:40:00Z',
+  },
+]
+
 const MOCK_DELAY_MS = 400
 
 function delay(ms = MOCK_DELAY_MS) {
@@ -132,7 +172,7 @@ export async function fetchJournalNote(id: number): Promise<JournalNote | null> 
 export async function createJournalNote(values: NoteFormValues): Promise<JournalNote> {
   await delay()
   const created: JournalNote = {
-    id: store.reduce((max, note) => Math.max(max, note.id), 0) + 1,
+    id: [...store, ...trashed].reduce((max, note) => Math.max(max, note.id), 0) + 1,
     title: values.title || null,
     content: values.content,
     emotion: values.emotion,
@@ -158,11 +198,47 @@ export async function updateJournalNote(id: number, values: NoteFormValues): Pro
   return updated
 }
 
-// ลบโน้ต (ลบจริง ไม่มีถังขยะของโน้ต)   DELETE /api/notes/:id (backend ลบ NoteDraft ที่ผูกอยู่ตาม)
+// ลบโน้ต = ย้ายไปถังขยะ (Soft delete ตั้ง Note.deletedAt)   DELETE /api/notes/:id (backend ลบ NoteDraft ที่ผูกอยู่ตาม)
 export async function deleteJournalNote(id: number): Promise<void> {
   await delay()
+  const current = store.find((note) => note.id === id)
   store = store.filter((note) => note.id !== id)
+  if (current) trashed = [{ ...current, deletedAt: new Date().toISOString() }, ...trashed]
   drafts.delete(id)
+}
+
+// ===== ถังขยะของโน้ต =====
+// GET /api/notes?trashed=true (ลบล่าสุดก่อน)
+export async function fetchTrashedNotes(): Promise<TrashedNote[]> {
+  await delay()
+  return [...trashed].sort((a, b) => b.deletedAt.localeCompare(a.deletedAt))
+}
+
+// POST /api/notes/:id/restore กลับไปอยู่ในไทม์ไลน์ (เรียงตามวันที่เขียนอยู่แล้ว จึงอยู่ตำแหน่งเดิม)
+export async function restoreJournalNote(id: number): Promise<JournalNote> {
+  await delay()
+  const current = trashed.find((note) => note.id === id)
+  if (!current) throw new Error('This journal is no longer in the trash.')
+  const { deletedAt, ...note } = current
+  void deletedAt
+  trashed = trashed.filter((item) => item.id !== id)
+  store = [...store, note].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  return note
+}
+
+// DELETE /api/notes/:id?permanent=true ลบถาวร (ผู้ใช้กดเองเท่านั้น)
+export async function purgeJournalNote(id: number): Promise<void> {
+  await delay()
+  if (!trashed.some((note) => note.id === id)) throw new Error('This journal is no longer in the trash.')
+  trashed = trashed.filter((note) => note.id !== id)
+}
+
+// DELETE /api/notes/trash ล้างถังขยะของโน้ต แล้วคืนจำนวนที่ลบ
+export async function emptyJournalTrash(): Promise<number> {
+  await delay()
+  const count = trashed.length
+  trashed = []
+  return count
 }
 
 // ===== ฉบับร่างที่บันทึกอัตโนมัติ (ตาราง NoteDraft) =====

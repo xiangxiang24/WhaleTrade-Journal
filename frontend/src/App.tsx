@@ -15,6 +15,7 @@ import TargetAmount from './target-amount/target-amount'
 import SavedPlan from './saved-plan/saved-plan'
 import PlanDetail from './saved-plan/plan-detail'
 import SettingPage from './setting-page/setting-page'
+import TrashPage from './trash/trash-page'
 import { getAccount } from './shared/data/account'
 import I18nProvider from './shared/i18n/i18n-provider'
 import type { Account } from './shared/types/account'
@@ -22,7 +23,7 @@ import { countDueReminders } from './shared/data/reminders'
 import type { SidebarKey } from './shared/types/sidebar'
 import type { LoginCredentials } from './onboarding/types/login'
 
-type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio' | 'transaction-logs' | 'reminder' | 'target-amount' | 'saved-plan' | 'plan-detail' | 'setting'
+type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio' | 'transaction-logs' | 'reminder' | 'target-amount' | 'saved-plan' | 'plan-detail' | 'setting' | 'trash'
 
 // ชั่วคราว (ลบทิ้งเมื่อต่อ backend): บัญชีจำลองไว้ทดสอบ Login → modal → Loading → My Journals
 const MOCK_EMAIL = 'demo@whaletrade.app'
@@ -43,6 +44,7 @@ function screenForMenu(key: SidebarKey): Screen | null {
   if (key === 'target-amount') return 'target-amount'
   if (key === 'saved-plan') return 'saved-plan'
   if (key === 'setting') return 'setting'
+  if (key === 'trash') return 'trash'
   return null
 }
 
@@ -138,6 +140,17 @@ function Screens({ account, setAccount }: ScreensProps) {
         onLogout={() => setScreen('inconnected')}
         onAccountChange={setAccount}
         onAccountDeleted={() => setScreen('opening')}
+      />
+    )
+  }
+  if (screen === 'trash') {
+    return (
+      <TrashPage
+        user={sidebarUser}
+        timeZone={timeZone}
+        reminderBadge={countDueReminders()}
+        onNavigate={(key) => setScreen(screenForMenu(key) ?? 'trash')}
+        onLogout={() => setScreen('inconnected')}
       />
     )
   }

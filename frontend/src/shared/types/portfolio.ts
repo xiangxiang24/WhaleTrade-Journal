@@ -35,3 +35,9 @@ export type PortfolioFormValues = {
   icon: PortfolioIconKey
   annualGoal: number | null
 }
+
+/** พอร์ตในถังขยะ + จำนวนแผนที่บันทึกไว้ซึ่งอ้างอิงพอร์ตนี้ (ใช้บอกผลกระทบก่อนลบถาวร) */
+export type TrashedPortfolio = Portfolio & {
+  deletedAt: string
+  planCount: number
+}

@@ -1,5 +1,6 @@
-import type { Portfolio, PortfolioFormValues } from '../types/portfolio'
-import { summarizePortfolio } from './transactions'
+import type { Portfolio, PortfolioFormValues, TrashedPortfolio } from '../types/portfolio'
+import { countPlansOfPortfolio, detachPlansFromPortfolio } from './calc-plans'
+import { deleteTransactionsOfPortfolio, summarizePortfolio } from './transactions'
 
 // ที่เก็บข้อมูลจำลองของพอร์ต (ในหน่วยความจำ ใช้ร่วมกันทุกหน้า เช่น Trash / Portfolio Detail ภายหลัง)
 // ไฟล์เดียวที่ต้องแก้ตอนต่อ backend; รีเฟรชแล้วกลับเป็นค่าเริ่มต้น
@@ -38,9 +39,30 @@ let store: StoredPortfolio[] = [
     updatedAt: '2026-01-05T05:00:00Z',
     deletedAt: null,
   },
+  // อยู่ในถังขยะ (ไว้ดูหน้า Trash)
+  {
+    id: 4,
+    name: 'Old Thai Dividend Set',
+    tagline: 'Retired Strategy',
+    description: 'An earlier set of Thai dividend stocks I stopped adding to after changing my strategy.',
+    icon: 'landmark',
+    annualGoal: 40_000,
+    updatedAt: '2026-08-12T05:00:00Z',
+    deletedAt: '2026-10-22T09:15:00Z',
+  },
+  {
+    id: 5,
+    name: 'Test Portfolio',
+    tagline: null,
+    description: null,
+    icon: 'pot',
+    annualGoal: null,
+    updatedAt: '2026-06-03T05:00:00Z',
+    deletedAt: '2026-09-30T14:00:00Z',
+  },
 ]
 
-let nextId = 4
+let nextId = 6
 
 // รวมค่าที่คำนวณจาก transaction เข้ากับข้อมูลพอร์ต; Last updated = ล่าสุดระหว่างพอร์ตเองกับ transaction
 function withSummary(portfolio: StoredPortfolio): Portfolio {
@@ -124,4 +146,36 @@ export async function restorePortfolio(id: number): Promise<Portfolio> {
   const restored: StoredPortfolio = { ...current, deletedAt: null }
   store = store.map((portfolio) => (portfolio.id === id ? restored : portfolio))
   return withSummary(restored)
+}
+
+// ===== ถังขยะของพอร์ต =====
+// GET /portfolios?trashed=true (ลบล่าสุดก่อน) พร้อมจำนวนแผนที่อ้างอิงพอร์ต
+export async function fetchTrashedPortfolios(): Promise<TrashedPortfolio[]> {
+  await delay()
+  return store
+    .filter((portfolio): portfolio is StoredPortfolio & { deletedAt: string } => portfolio.deletedAt !== null)
+    .sort((a, b) => b.deletedAt.localeCompare(a.deletedAt))
+    .map((portfolio) => ({ ...withSummary(portfolio), deletedAt: portfolio.deletedAt, planCount: countPlansOfPortfolio(portfolio.id) }))
+}
+
+// DELETE /portfolios/:id?permanent=true ลบพอร์ต + transaction ถาวร แผนที่อ้างอิงเปลี่ยนเป็น "กรอกเอง"
+export async function purgePortfolio(id: number): Promise<void> {
+  await delay()
+  const current = store.find((portfolio) => portfolio.id === id && portfolio.deletedAt !== null)
+  if (!current) throw new Error('This portfolio is no longer in the trash.')
+  store = store.filter((portfolio) => portfolio.id !== id)
+  deleteTransactionsOfPortfolio(id)
+  detachPlansFromPortfolio(id)
+}
+
+// DELETE /portfolios/trash ล้างถังขยะของพอร์ต แล้วคืนจำนวนที่ลบ
+export async function emptyPortfolioTrash(): Promise<number> {
+  await delay()
+  const ids = store.filter((portfolio) => portfolio.deletedAt !== null).map((portfolio) => portfolio.id)
+  store = store.filter((portfolio) => portfolio.deletedAt === null)
+  ids.forEach((id) => {
+    deleteTransactionsOfPortfolio(id)
+    detachPlansFromPortfolio(id)
+  })
+  return ids.length
 }

@@ -101,6 +101,10 @@ seed(1, { assets: [1, 2, 3, 5, 4], buys: { count: 18, total: 1_450_000, spanMont
 seed(2, { assets: [5, 8, 7], buys: { count: 15, total: 300_000, spanMonths: 15 }, dividends: [6_000, 5_000, 4_500, 5_500], sells: 0 })
 seed(3, { assets: [6, 9, 7, 8, 4, 1], buys: { count: 30, total: 620_000, spanMonths: 30 }, dividends: [4_000, 3_500, 4_500, 3_000, 4_000, 3_500, 4_000, 3_500, 4_500, 4_500], sells: 1 })
 
+// พอร์ต 4-5 อยู่ในถังขยะ (ไว้ดูหน้า Trash) transaction ยังอยู่ครบ
+seed(4, { assets: [6, 9, 7], buys: { count: 8, total: 160_000, spanMonths: 8 }, dividends: [2_500, 3_000], sells: 0 })
+seed(5, { assets: [4, 1], buys: { count: 3, total: 45_000, spanMonths: 3 }, dividends: [], sells: 0 })
+
 const LATENCY_MS = 300
 const delay = () => new Promise((resolve) => setTimeout(resolve, LATENCY_MS))
 
@@ -171,4 +175,10 @@ export function summarizePortfolio(portfolioId: number) {
     entries: own.length,
     lastChange: lastChange.get(portfolioId) ?? null,
   }
+}
+
+/** ลบ transaction ทั้งหมดของพอร์ต (ตอนลบพอร์ตถาวร) */
+export function deleteTransactionsOfPortfolio(portfolioId: number) {
+  store = store.filter((tx) => tx.portfolioId !== portfolioId)
+  lastChange.delete(portfolioId)
 }

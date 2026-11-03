@@ -41,7 +41,7 @@ let plans: CalcPlan[] = [
   }),
   seedPlan({
     id: 3,
-    portfolioId: 1,
+    portfolioId: 4,
     name: 'Faster DCA',
     principal: 100_000,
     phases: [
@@ -98,4 +98,14 @@ export async function deleteCalcPlan(id: number): Promise<void> {
   await delay()
   if (!plans.some((plan) => plan.id === id)) throw new Error('This plan no longer exists.')
   plans = plans.filter((plan) => plan.id !== id)
+}
+
+/** จำนวนแผนที่บันทึกไว้ซึ่งอ้างอิงพอร์ตนี้ (ใช้บอกผลกระทบตอนลบพอร์ตถาวร) */
+export function countPlansOfPortfolio(portfolioId: number) {
+  return plans.filter((plan) => plan.portfolioId === portfolioId).length
+}
+
+/** ตอนลบพอร์ตถาวร แผนไม่ถูกลบ แต่เปลี่ยนแหล่งที่มาเป็น "กรอกเอง" (portfolioId = null) */
+export function detachPlansFromPortfolio(portfolioId: number) {
+  plans = plans.map((plan) => (plan.portfolioId === portfolioId ? { ...plan, portfolioId: null } : plan))
 }

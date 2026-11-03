@@ -9,3 +9,9 @@ export type JournalNote = {
   emotion: Emotion | null
   createdAt: string
 }
+
+/** โน้ตในถังขยะ (Note.deletedAt มีค่า) */
+export type TrashedNote = JournalNote & {
+  /** วันที่ย้ายเข้าถังขยะ (ISO UTC) */
+  deletedAt: string
+}
