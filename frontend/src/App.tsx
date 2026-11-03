@@ -14,14 +14,14 @@ import ReminderPage from './reminder/reminder'
 import TargetAmount from './target-amount/target-amount'
 import SavedPlan from './saved-plan/saved-plan'
 import PlanDetail from './saved-plan/plan-detail'
+import SettingPage from './setting-page/setting-page'
+import { getAccount } from './shared/data/account'
+import type { Account } from './shared/types/account'
 import { countDueReminders } from './shared/data/reminders'
 import type { SidebarKey } from './shared/types/sidebar'
 import type { LoginCredentials } from './onboarding/types/login'
 
-type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio' | 'transaction-logs' | 'reminder' | 'target-amount' | 'saved-plan' | 'plan-detail'
-
-// ชั่วคราว: ข้อมูลตัวอย่างไว้ดูหน้า Onboarding จนกว่าจะมี router และระบบ auth จริง
-const SAMPLE_ACCOUNT = { displayName: 'Thomas W.' }
+type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio' | 'transaction-logs' | 'reminder' | 'target-amount' | 'saved-plan' | 'plan-detail' | 'setting'
 
 // ชั่วคราว (ลบทิ้งเมื่อต่อ backend): บัญชีจำลองไว้ทดสอบ Login → modal → Loading → My Journals
 const MOCK_EMAIL = 'demo@whaletrade.app'
@@ -41,6 +41,7 @@ function screenForMenu(key: SidebarKey): Screen | null {
   if (key === 'reminder') return 'reminder'
   if (key === 'target-amount') return 'target-amount'
   if (key === 'saved-plan') return 'saved-plan'
+  if (key === 'setting') return 'setting'
   return null
 }
 
@@ -49,6 +50,10 @@ function App() {
   const [openNoteId, setOpenNoteId] = useState<number | null>(null)
   const [openPortfolioId, setOpenPortfolioId] = useState<number | null>(null)
   const [openPlanId, setOpenPlanId] = useState<number | null>(null)
+  // บัญชีที่ล็อกอินอยู่ (ชื่อ รูป เขตเวลา) หน้า Setting แก้แล้วทุกหน้าเห็นทันที
+  const [account, setAccount] = useState<Account>(() => getAccount())
+  const sidebarUser = { displayName: account.displayName, avatarUrl: account.avatarUrl ?? undefined }
+  const timeZone = account.timezone
 
   if (screen === 'opening') {
     return <OpeningPage onFinish={() => setScreen('inconnected')} />
@@ -93,7 +98,8 @@ function App() {
   if (screen === 'journals') {
     return (
       <MyJournal
-        user={SAMPLE_ACCOUNT}
+        user={sidebarUser}
+        timeZone={timeZone}
         reminderBadge={countDueReminders()}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'journals')}
         onLogout={() => setScreen('inconnected')}
@@ -107,7 +113,8 @@ function App() {
   if (screen === 'portfolio') {
     return (
       <PortfolioPage
-        user={SAMPLE_ACCOUNT}
+        user={sidebarUser}
+        timeZone={timeZone}
         reminderBadge={countDueReminders()}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'portfolio')}
         onLogout={() => setScreen('inconnected')}
@@ -118,10 +125,23 @@ function App() {
       />
     )
   }
+  if (screen === 'setting') {
+    return (
+      <SettingPage
+        user={sidebarUser}
+        reminderBadge={countDueReminders()}
+        onNavigate={(key) => setScreen(screenForMenu(key) ?? 'setting')}
+        onLogout={() => setScreen('inconnected')}
+        onAccountChange={setAccount}
+        onAccountDeleted={() => setScreen('opening')}
+      />
+    )
+  }
   if (screen === 'saved-plan') {
     return (
       <SavedPlan
-        user={SAMPLE_ACCOUNT}
+        user={sidebarUser}
+        timeZone={timeZone}
         reminderBadge={countDueReminders()}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'saved-plan')}
         onLogout={() => setScreen('inconnected')}
@@ -136,7 +156,8 @@ function App() {
     return (
       <PlanDetail
         planId={openPlanId}
-        user={SAMPLE_ACCOUNT}
+        user={sidebarUser}
+        timeZone={timeZone}
         reminderBadge={countDueReminders()}
         onBack={() => setScreen('saved-plan')}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'plan-detail')}
@@ -147,7 +168,7 @@ function App() {
   if (screen === 'target-amount') {
     return (
       <TargetAmount
-        user={SAMPLE_ACCOUNT}
+        user={sidebarUser}
         reminderBadge={countDueReminders()}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'target-amount')}
         onLogout={() => setScreen('inconnected')}
@@ -157,7 +178,8 @@ function App() {
   if (screen === 'reminder') {
     return (
       <ReminderPage
-        user={SAMPLE_ACCOUNT}
+        user={sidebarUser}
+        timeZone={timeZone}
         reminderBadge={countDueReminders()}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'reminder')}
         onLogout={() => setScreen('inconnected')}
@@ -168,7 +190,7 @@ function App() {
     return (
       <TransactionLogs
         portfolioId={openPortfolioId}
-        user={SAMPLE_ACCOUNT}
+        user={sidebarUser}
         reminderBadge={countDueReminders()}
         onBack={() => setScreen('portfolio')}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'transaction-logs')}
@@ -180,7 +202,7 @@ function App() {
     return (
       <Journaling
         noteId={openNoteId}
-        user={SAMPLE_ACCOUNT}
+        user={sidebarUser}
         reminderBadge={countDueReminders()}
         onLogout={() => setScreen('inconnected')}
         onBack={() => setScreen('journals')}
@@ -194,7 +216,7 @@ function App() {
   }
   return (
     <OnboardingConnected
-      account={SAMPLE_ACCOUNT}
+      account={{ displayName: account.displayName }}
       onStart={() => setScreen('journals')}
       onSwitch={() => setScreen('inconnected')}
     />

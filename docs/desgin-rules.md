@@ -828,3 +828,21 @@ component ที่ใช้ข้ามหลายหน้าอยู่ใ�
 - **พฤติกรรมที่ต่างจาก `saved-plan-page.md`:** สเปกให้ Open โหลดแผนกลับเข้าฟอร์ม Target Amount แต่ตกลงให้ Open เป็นหน้าสรุปผลของตัวเองแทน (ปรับแผนในเครื่องคำนวณยังไม่ทำ)
 - **ยังไม่ทำ:** Export PDF (ต้องใช้โปรเซสหลักของ Electron ตอนนี้แสดง toast แจ้ง)
 - เมนู Sidebar ที่มีหน้าแล้ว: My Journals, Portfolio, Reminder, Saved Plan, Target Amount (Trash / Setting ยัง)
+
+### 14.24 หน้า Setting (`frontend/src/setting-page/`)
+`<SettingPage user reminderBadge? onNavigate onLogout onAccountChange onAccountDeleted />` ใช้ `AppLayout` โดย Sidebar เลือก "Setting" หน้าเดียว 3 section คอลัมน์เดียวกว้างสูงสุด 960 ชิดซ้ายแนวเดียวกับหัวข้อ (โฟลเดอร์ใช้ชื่อ `setting-page` ตามที่ scaffold ไว้)
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `setting-page.tsx` | หน้าเต็ม: ต่อ hook + modal + toast, สถานะ กำลังโหลด / ผิดพลาด |
+| `types/use-account.ts` | โหลดบัญชี + ค่าที่ยังไม่บันทึก (draft) แยกส่วน Account / Language & Display (`profileDirty`, `prefsDirty`), บันทึก/ยกเลิก |
+| `types/setting.ts` | รายการประเทศ + เขตเวลา (ธงสร้างจากรหัสประเทศ, ป้าย "Thailand (UTC+07:00 Bangkok)" คำนวณจากเขตเวลา), `initialsOf` ทำตัวอักษรย่อ |
+| `components/` | `setting-header`, `section-card`, `account-section` (+ `avatar-editor`), `language-section`, `security-section` |
+| `modals/` | `change-password-modal`, `change-email-modal` (ต้องกรอกรหัสผ่านปัจจุบัน ตาม database.md), `delete-account-modal` (ต้องพิมพ์ `DELETE` ตัวพิมพ์ใหญ่ตรงตัวจึงกดลบได้) |
+| `shared/data/account.ts`, `shared/types/account.ts` | ที่เก็บบัญชีจำลอง (ไฟล์เดียวที่ต้องแก้ตอนต่อ backend) |
+
+- **ผลต่อทั้งแอป:** `App.tsx` ถือบัญชีเป็น state กลาง หน้า Setting แจ้ง `onAccountChange` หลังบันทึก → ชื่อ/รูปใน Sidebar + TopBar และ `timeZone` ของหน้า My Journals / Portfolio / Reminder / Saved Plan เปลี่ยนตามทันที
+- **Account:** ไม่มีรูป = ตัวอักษรย่อ (เช่น TW) ในวงกลม `blue-500`; รูปที่เลือก (ภาพ ไม่เกิน 2 MB) เป็นร่างจนกว่าจะกด Save Changes; Save Changes / Cancel กดได้เมื่อมีการแก้ไขเท่านั้น; อีเมลแสดงอย่างเดียว แก้ผ่านปุ่มดินสอ
+- **Language & Display:** สวิตช์ ไทย / English เก็บค่า `language` ได้แล้ว แต่ **ระบบแปลภาษายังไม่ได้ติดตั้ง** ข้อความทั้งแอปจึงยังเป็นอังกฤษ (ดูหัวข้อ 14.1)
+- **Danger zone:** พื้น `red-50` ปุ่มขอบแดง ลบสำเร็จแล้วกลับหน้าแรกของแอป
+- **ยังไม่ทำ:** Show recovery code (database.md ข้อ 10 ต้องยืนยันรหัสผ่านก่อนแสดง) ตอนนี้ไม่อยู่ในดีไซน์ของหน้านี้
