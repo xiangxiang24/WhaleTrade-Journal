@@ -1,5 +1,6 @@
 import { ArrowLeft, Cloud, Download, Pencil, Plus, Sprout } from 'lucide-react'
 import type { Portfolio } from '../../shared/types/portfolio'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type DetailHeaderProps = {
   portfolio: Portfolio
@@ -13,6 +14,7 @@ type DetailHeaderProps = {
 
 // ส่วนหัว: ปุ่มกลับ / ป้าย tagline / ชื่อพอร์ต + ปุ่มแก้ / คำอธิบาย / ปุ่ม Export CSV + Add Transaction
 export default function DetailHeader({ portfolio, canExport, onBack, onEdit, onExport, onAdd }: DetailHeaderProps) {
+  const { t } = useI18n()
   return (
     <div>
       <button
@@ -21,7 +23,7 @@ export default function DetailHeader({ portfolio, canExport, onBack, onEdit, onE
         className="inline-flex h-10 items-center gap-2 rounded-pill bg-surface px-4 text-[14px] leading-5 font-medium text-navy-700 shadow-md transition-colors duration-150 hover:bg-blue-50 active:bg-blue-100"
       >
         <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-        Back to Portfolios
+        {t('Back to Portfolios')}
       </button>
 
       {portfolio.tagline && (
@@ -39,7 +41,7 @@ export default function DetailHeader({ portfolio, canExport, onBack, onEdit, onE
             <button
               type="button"
               onClick={onEdit}
-              aria-label={`Edit ${portfolio.name} details`}
+              aria-label={t('Edit {name} details', { name: portfolio.name })}
               className="inline-flex size-9 shrink-0 items-center justify-center rounded-pill text-navy-700 hover:bg-blue-100 active:bg-blue-100"
             >
               <Pencil size={18} strokeWidth={1.75} aria-hidden="true" />
@@ -60,7 +62,7 @@ export default function DetailHeader({ portfolio, canExport, onBack, onEdit, onE
             className="inline-flex h-11 items-center gap-2 rounded-pill border-2 border-blue-500 bg-surface px-5 text-[15px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:bg-blue-50 active:bg-blue-100 disabled:border-blue-200 disabled:text-text-muted disabled:opacity-60 max-[639px]:flex-1 max-[639px]:justify-center"
           >
             <Download size={16} strokeWidth={1.75} aria-hidden="true" />
-            Export CSV
+            {t('Export CSV')}
           </button>
           <button
             type="button"
@@ -68,7 +70,7 @@ export default function DetailHeader({ portfolio, canExport, onBack, onEdit, onE
             className="inline-flex h-11 items-center gap-2 rounded-pill bg-blue-500 px-6 text-[16px] leading-6 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900 max-[639px]:flex-1 max-[639px]:justify-center"
           >
             <Plus size={18} strokeWidth={1.75} aria-hidden="true" />
-            Add Transaction
+            {t('Add Transaction')}
           </button>
         </div>
       </div>

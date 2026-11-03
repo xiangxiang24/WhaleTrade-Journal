@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { EllipsisVertical, Pencil, Trash2 } from 'lucide-react'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type CardMenuProps = {
   /** ชื่อที่ใช้ใน aria-label ของปุ่มและเมนู (ชื่อพอร์ต/ชื่อแผน) */
@@ -18,12 +19,15 @@ const ITEM =
 // เมนู 3 จุดของการ์ด: แก้ชื่อ/คำอธิบาย/เป้าหมาย และย้ายไปถังขยะ (Soft Delete)
 export default function CardMenu({
   portfolioName,
-  editLabel = 'Edit details',
-  trashLabel = 'Move to Trash',
+  editLabel,
+  trashLabel,
   onOpenChange,
   onEdit,
   onTrash,
 }: CardMenuProps) {
+  const { t } = useI18n()
+  const editText = editLabel ?? t('Edit details')
+  const trashText = trashLabel ?? t('Move to Trash')
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -68,7 +72,7 @@ export default function CardMenu({
       <button
         ref={triggerRef}
         type="button"
-        aria-label={`More options for ${portfolioName}`}
+        aria-label={t('More options for {name}', { name: portfolioName })}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
@@ -82,7 +86,7 @@ export default function CardMenu({
         <div
           id={menuId}
           role="menu"
-          aria-label={`${portfolioName} options`}
+          aria-label={t('{name} options', { name: portfolioName })}
           className="absolute top-full right-0 z-20 mt-1 w-52 animate-scrim-in rounded-lg border border-line bg-surface p-1 shadow-lg motion-reduce:animate-none"
         >
           <button
@@ -96,7 +100,7 @@ export default function CardMenu({
             className={`${ITEM} text-navy-900`}
           >
             <Pencil size={16} strokeWidth={1.75} aria-hidden="true" className="text-navy-700" />
-            {editLabel}
+            {editText}
           </button>
           <button
             type="button"
@@ -109,7 +113,7 @@ export default function CardMenu({
             className={`${ITEM} text-navy-900 hover:bg-red-50 focus-visible:bg-red-50`}
           >
             <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" className="text-red-500" />
-            {trashLabel}
+            {trashText}
           </button>
         </div>
       )}

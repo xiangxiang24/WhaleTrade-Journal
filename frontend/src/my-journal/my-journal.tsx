@@ -11,6 +11,7 @@ import MoodFilter from './components/mood-filter'
 import NewNoteModal from './modals/new-note-modal'
 import type { MoodFilterValue } from './types/journal'
 import { useJournalNotes } from './types/use-journal-notes'
+import { useI18n } from '../shared/i18n/use-i18n'
 
 type MyJournalProps = {
   user: SidebarUser
@@ -35,6 +36,7 @@ export default function MyJournal({
   onLogout,
   onOpenNote,
 }: MyJournalProps) {
+  const { t } = useI18n()
   const { notes, status, reload, addNote } = useJournalNotes()
   const [newNoteOpen, setNewNoteOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -85,7 +87,7 @@ export default function MyJournal({
           </div>
 
           <section
-            aria-label="Search and filter"
+            aria-label={t('Search and filter')}
             className="mt-6 animate-fade-up rounded-xl bg-surface p-4 shadow-sm [animation-delay:80ms] min-[640px]:mt-8 motion-reduce:animate-none"
           >
             <JournalToolbar
@@ -100,7 +102,7 @@ export default function MyJournal({
           </section>
 
           <section
-            aria-label="Journal notes"
+            aria-label={t('Journal notes')}
             className="mt-8 animate-fade-up [animation-delay:160ms] min-[640px]:mt-10 motion-reduce:animate-none"
           >
             <JournalList

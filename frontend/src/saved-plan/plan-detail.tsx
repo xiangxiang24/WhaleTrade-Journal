@@ -15,6 +15,7 @@ import RenamePlanModal from './modals/rename-plan-modal'
 import { exportPlanCsv, exportPlanImage } from './types/export-plan'
 import { planSource, type PlanToast } from './types/saved-plan'
 import { usePlanDetail } from './types/use-plan-detail'
+import { useI18n } from '../shared/i18n/use-i18n'
 
 type PlanDetailProps = {
   /** แผนที่เปิดดู (กด Open จากหน้า Saved Plans) */
@@ -42,6 +43,7 @@ export default function PlanDetail({
   onNavigate,
   onLogout,
 }: PlanDetailProps) {
+  const { t } = useI18n()
   const { plan, names, result, status, reload, rename, remove } = usePlanDetail(planId)
   const { leaving, leaveTo } = usePageLeave()
   const [renameOpen, setRenameOpen] = useState(false)
@@ -58,20 +60,20 @@ export default function PlanDetail({
     const source = planSource(plan, names)
     if (kind === 'CSV') {
       exportPlanCsv(plan, source, result.output)
-      showToast('Plan exported as CSV')
+      showToast(t('Plan exported as CSV'))
     } else if (kind === 'image') {
       setExportingImage(true)
       try {
         await exportPlanImage(plan, source, result.output)
-        showToast('Plan exported as an image')
+        showToast(t('Plan exported as an image'))
       } catch (caught) {
-        showToast(caught instanceof Error ? caught.message : 'Could not create the image. Please try again.')
+        showToast(t(caught instanceof Error ? caught.message : 'Could not create the image. Please try again.'))
       } finally {
         setExportingImage(false)
       }
     } else {
       // PDF ต้องใช้โปรเซสหลักของ Electron จึงทำตอนต่อ backend (ตอนนี้แจ้งผู้ใช้)
-      showToast('Export PDF will be available once the app is connected.')
+      showToast(t('Export PDF will be available once the app is connected.'))
     }
   }
 
@@ -89,7 +91,7 @@ export default function PlanDetail({
       <>
         <div className={`pt-2 pb-6 ${leaving ? 'animate-page-out motion-reduce:animate-none' : ''}`}>
           {status === 'loading' && (
-            <div role="status" aria-label="Loading your plan" className="flex flex-col gap-4">
+            <div role="status" aria-label={t('Loading your plan')} className="flex flex-col gap-4">
               <div className="h-10 w-52 animate-pulse rounded-pill bg-blue-100 motion-reduce:animate-none" />
               <div className="h-16 w-full max-w-lg animate-pulse rounded-3xl bg-blue-100 motion-reduce:animate-none" />
               <div className="grid grid-cols-2 gap-3 min-[1024px]:grid-cols-4">
@@ -105,15 +107,15 @@ export default function PlanDetail({
             <div className="flex flex-col items-center rounded-4xl bg-surface px-6 py-12 text-center shadow-md">
               <img className="h-36 w-auto min-[640px]:h-44" src={banner} alt="" />
               <p className="m-0 mt-4 text-[18px] leading-7 font-bold text-navy-900">
-                {status === 'missing' ? 'This plan is not here anymore' : 'Could not load this plan'}
+                {status === 'missing' ? t('This plan is not here anymore') : t('Could not load this plan')}
               </p>
               <p className="m-0 mt-1 max-w-110 text-[14px] leading-6 text-text-muted">
                 {status === 'missing'
-                  ? 'It may have been deleted. Head back to your saved plans to pick another one.'
-                  : 'Something went wrong. Please try again.'}
+                  ? t('It may have been deleted. Head back to your saved plans to pick another one.')
+                  : t('Something went wrong. Please try again.')}
               </p>
               <button type="button" onClick={status === 'missing' ? goBack : reload} className={`${PRIMARY_BUTTON} mt-6`}>
-                {status === 'missing' ? 'Back to Saved Plans' : 'Try again'}
+                {status === 'missing' ? t('Back to Saved Plans') : t('Try again')}
               </button>
             </div>
           )}
@@ -143,7 +145,7 @@ export default function PlanDetail({
                 </div>
                 <p className="m-0 flex items-center justify-center gap-2 text-[12px] leading-5 text-text-muted">
                   <ShieldCheck size={16} strokeWidth={1.75} aria-hidden="true" />
-                  Verified 100% Client-Side Simulation
+                  {t('Verified 100% Client-Side Simulation')}
                 </p>
               </div>
             </>
@@ -155,7 +157,7 @@ export default function PlanDetail({
           plan={renameOpen ? plan : null}
           onSubmit={async (_plan, name) => {
             await rename(name)
-            showToast(`Renamed to “${name}”`)
+            showToast(t('Renamed to “{name}”', { name }))
           }}
           onClose={() => setRenameOpen(false)}
         />

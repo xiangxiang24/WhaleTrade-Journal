@@ -14,8 +14,8 @@ export const formatPercent = (value: number, digits = 1) => `${value.toFixed(dig
 const asDate = (value: string) => new Date(`${value}T00:00:00Z`)
 
 /** 2026-10-12 → "12 Oct 2026" (en-US ให้ชื่อเดือนย่อสม่ำเสมอ เช่น Sep ไม่ใช่ Sept) */
-export function formatTxDate(value: string) {
-  const parts = new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).formatToParts(
+export function formatTxDate(value: string, locale = 'en-US') {
+  const parts = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).formatToParts(
     asDate(value),
   )
   const pick = (type: string) => parts.find((part) => part.type === type)?.value ?? ''
@@ -23,15 +23,15 @@ export function formatTxDate(value: string) {
 }
 
 /** 2026-10 → "October 2026" */
-export function formatMonthHeading(month: string) {
-  return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+export function formatMonthHeading(month: string, locale = 'en-US') {
+  return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
     asDate(`${month}-01`),
   )
 }
 
 /** 2026-10 → "Oct 2026" */
-export function formatMonthShort(month: string) {
-  return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
+export function formatMonthShort(month: string, locale = 'en-US') {
+  return new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
     asDate(`${month}-01`),
   )
 }

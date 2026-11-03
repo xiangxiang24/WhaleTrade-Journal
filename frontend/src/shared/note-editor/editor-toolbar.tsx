@@ -1,3 +1,4 @@
+import { useI18n } from "../i18n/use-i18n";
 import { useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
@@ -95,6 +96,7 @@ const BUTTON =
 
 // แถบเครื่องมือเหนือช่องจด: ย้อนกลับ/ทำซ้ำ · ตัวหนา เอียง ขีดเส้นใต้ · สีตัวอักษร (ส่วนที่ไม่มีในคำสั่ง /)
 export default function EditorToolbar({ editor }: EditorToolbarProps) {
+  const { t } = useI18n();
   const [colorOpen, setColorOpen] = useState(false);
   const colorRef = useRef<HTMLDivElement>(null);
 
@@ -144,14 +146,14 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
     <div>
       <div
         role="toolbar"
-        aria-label="Formatting"
+        aria-label={t("Formatting")}
         className="flex flex-wrap items-center gap-x-1 gap-y-1 border-b border-line px-3 py-2"
       >
         <button
           type="button"
           data-no-bounce
-          aria-label="Undo"
-          title="Undo"
+          aria-label={t("Undo")}
+          title={t("Undo")}
           disabled={!state.canUndo}
           onMouseDown={preventBlur}
           onClick={() => editor?.chain().focus().undo().run()}
@@ -162,8 +164,8 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
         <button
           type="button"
           data-no-bounce
-          aria-label="Redo"
-          title="Redo"
+          aria-label={t("Redo")}
+          title={t("Redo")}
           disabled={!state.canRedo}
           onMouseDown={preventBlur}
           onClick={() => editor?.chain().focus().redo().run()}
@@ -177,8 +179,8 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
         <button
           type="button"
           data-no-bounce
-          aria-label="Bold"
-          title="Bold (Ctrl/⌘ B)"
+          aria-label={t("Bold")}
+          title={`${t("Bold")} (Ctrl/⌘ ))`}
           aria-pressed={state.bold}
           onMouseDown={preventBlur}
           onClick={() => editor?.chain().focus().toggleBold().run()}
@@ -189,8 +191,8 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
         <button
           type="button"
           data-no-bounce
-          aria-label="Italic"
-          title="Italic (Ctrl/⌘ I)"
+          aria-label={t("Italic")}
+          title={`${t("Italic")} (Ctrl/⌘ ))`}
           aria-pressed={state.italic}
           onMouseDown={preventBlur}
           onClick={() => editor?.chain().focus().toggleItalic().run()}
@@ -201,8 +203,8 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
         <button
           type="button"
           data-no-bounce
-          aria-label="Underline"
-          title="Underline (Ctrl/⌘ U)"
+          aria-label={t("Underline")}
+          title={`${t("Underline")} (Ctrl/⌘ ))`}
           aria-pressed={state.underline}
           onMouseDown={preventBlur}
           onClick={() => editor?.chain().focus().toggleUnderline().run()}
@@ -217,8 +219,8 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
           <button
             type="button"
             data-no-bounce
-            aria-label="Text color"
-            title="Text color"
+            aria-label={t("Text color")}
+            title={t("Text color")}
             aria-haspopup="menu"
             aria-expanded={colorOpen}
             onMouseDown={preventBlur}
@@ -230,7 +232,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
           {colorOpen && (
             <div
               role="menu"
-              aria-label="Text color"
+              aria-label={t("Text color")}
               className="absolute top-full left-0 z-20 mt-2 flex gap-2 rounded-xl bg-surface p-2.5 shadow-lg"
             >
               {COLORS.map(({ label, value, swatch }) => (
@@ -240,8 +242,8 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
                   role="menuitemradio"
                   data-no-bounce
                   aria-checked={state.color === value}
-                  aria-label={label}
-                  title={label}
+                  aria-label={t(label)}
+                  title={t(label)}
                   onMouseDown={preventBlur}
                   onClick={() => {
                     if (value) editor?.chain().focus().setColor(value).run();
@@ -263,7 +265,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
           <kbd className="rounded-sm bg-blue-100 px-1.5 font-sans text-[12px] font-semibold text-navy-700">
             /
           </kbd>
-          Type / to design a complete journal
+          {t("Type / to design a complete journal")}
         </p>
       </div>
 
@@ -271,12 +273,12 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
       {state.inTable && (
         <div
           role="toolbar"
-          aria-label="Table"
+          aria-label={t("Table")}
           className="flex flex-wrap items-center gap-1.5 border-b border-line bg-blue-50 px-3 py-2"
         >
           <span className="mr-1 inline-flex items-center gap-1.5 text-[11px] leading-4 font-semibold tracking-[0.08em] text-text-muted uppercase">
             <Table2 size={14} strokeWidth={1.75} aria-hidden="true" />
-            Table
+            {t("Table")}
           </span>
           {TABLE_ACTIONS.map(({ label, icon: Icon, danger, run }) => (
             <button
@@ -293,7 +295,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
               }`}
             >
               <Icon size={14} strokeWidth={1.75} aria-hidden="true" />
-              {label}
+              {t(label)}
             </button>
           ))}
         </div>

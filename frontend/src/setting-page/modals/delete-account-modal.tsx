@@ -1,6 +1,7 @@
 import { useEffect, useId, useState, type FormEvent } from 'react'
 import { CircleAlert } from 'lucide-react'
 import ModalFrame from '../../shared/modal/modal-frame'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type DeleteAccountModalProps = {
   open: boolean
@@ -13,6 +14,7 @@ const EXIT_MS = 200
 const CONFIRM_WORD = 'DELETE'
 
 function Dialog({ onConfirm, onClose }: Omit<DeleteAccountModalProps, 'open'>) {
+  const { t } = useI18n()
   const [typed, setTyped] = useState('')
   const [error, setError] = useState<string>()
   const [working, setWorking] = useState(false)
@@ -38,7 +40,7 @@ function Dialog({ onConfirm, onClose }: Omit<DeleteAccountModalProps, 'open'>) {
       await onConfirm()
       setClosing(true)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not delete your account. Please try again.')
+      setError(t(caught instanceof Error ? caught.message : 'Could not delete your account. Please try again.'))
       setWorking(false)
     }
   }
@@ -54,16 +56,15 @@ function Dialog({ onConfirm, onClose }: Omit<DeleteAccountModalProps, 'open'>) {
       cardClassName="max-w-110 p-6 text-left"
     >
       <h2 id={titleId} className="m-0 text-[20px] leading-7 font-bold text-navy-900">
-        Delete your account?
+        {t('Delete your account?')}
       </h2>
       <p id={descId} className="m-0 mt-2 text-[14px] leading-6 text-navy-700">
-        Your journal notes, portfolios, transactions, reminders and saved plans will be permanently deleted. This action
-        cannot be undone.
+        {t('Your journal notes, portfolios, transactions, reminders and saved plans will be permanently deleted. This action cannot be undone.')}
       </p>
 
       <form noValidate onSubmit={handleSubmit} className="mt-4">
         <label htmlFor={inputId} className="block text-[12px] leading-4 font-semibold text-navy-900">
-          Type <span className="font-bold tracking-[0.08em]">{CONFIRM_WORD}</span> to confirm
+          {t('Type the word')} <span className="font-bold tracking-[0.08em]">{CONFIRM_WORD}</span> {t('to confirm')}
         </label>
         <input
           id={inputId}
@@ -88,14 +89,14 @@ function Dialog({ onConfirm, onClose }: Omit<DeleteAccountModalProps, 'open'>) {
             onClick={() => setClosing(true)}
             className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
           >
-            Cancel
+            {t('Cancel')}
           </button>
           <button
             type="submit"
             disabled={!ready || working}
             className="inline-flex h-11 items-center rounded-pill bg-red-500 px-6 text-[14px] leading-5 font-semibold text-surface transition-[filter] duration-150 hover:brightness-110 active:brightness-95 disabled:opacity-50"
           >
-            {working ? 'Deleting…' : 'Delete account'}
+            {working ? t('Deleting…') : t('Delete account')}
           </button>
         </div>
       </form>

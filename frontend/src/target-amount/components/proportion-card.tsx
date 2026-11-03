@@ -1,6 +1,7 @@
 import { Info } from 'lucide-react'
 import { formatBaht, formatPercent } from '../types/format'
 import type { CalcResult } from '../types/target-amount'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 const DISCLAIMER =
   'This projection is an illustrative model based on the stated recurring deposits and regular yield reinvestment. It is an educational estimate, not a forecast or guarantee of actual investment returns.'
@@ -9,36 +10,41 @@ type Row = { dot: string; label: string; value: string }
 
 // สัดส่วนเงินต้น/DCA/ปันผล (แถบ + คำอธิบายสี) + ตารางสรุปยอด + ข้อความเตือน
 export default function ProportionCard({ result }: { result: CalcResult }) {
+  const { t } = useI18n()
   const { output, input, assets } = result
   const { shares } = output
   const single = input.phases.length === 1
 
   const rows: Row[] = [
-    { dot: 'bg-blue-200', label: 'Initial principal', value: `${formatBaht(input.principal)} THB` },
+    { dot: 'bg-blue-200', label: t('Initial principal'), value: `${formatBaht(input.principal)} ${t('THB')}` },
     ...input.phases.map((phase, index) => ({
       dot: 'bg-blue-500',
-      label: `DCA — ${single ? '' : `Phase ${index + 1} `}(${phase.years} ${phase.years === 1 ? 'year' : 'years'} × ${formatBaht(phase.monthlyDca)} THB/month)`,
-      value: `${formatBaht(output.phaseTotals[index] ?? 0)} THB`,
+      label: t('DCA — {phase}({years} × {amount} THB/month)', {
+        phase: single ? '' : `${t('Phase {n}', { n: index + 1 })} `,
+        years: t(phase.years === 1 ? '{n} year' : '{n} years', { n: phase.years }),
+        amount: formatBaht(phase.monthlyDca),
+      }),
+      value: `${formatBaht(output.phaseTotals[index] ?? 0)} ${t('THB')}`,
     })),
-    { dot: 'bg-green-500', label: 'Expected dividends (reinvested)', value: `+${formatBaht(output.dividends)} THB` },
+    { dot: 'bg-green-500', label: t('Expected dividends (reinvested)'), value: `+${formatBaht(output.dividends)} ${t('THB')}` },
   ]
 
   const legend = [
-    { dot: 'bg-blue-200', label: 'Initial Principal', pct: shares.principal },
-    { dot: 'bg-blue-500', label: 'DCA Deposits', pct: shares.dca },
-    { dot: 'bg-green-500', label: 'Compounded Dividends', pct: shares.dividends },
+    { dot: 'bg-blue-200', label: t('Initial Principal'), pct: shares.principal },
+    { dot: 'bg-blue-500', label: t('DCA Deposits'), pct: shares.dca },
+    { dot: 'bg-green-500', label: t('Compounded Dividends'), pct: shares.dividends },
   ]
 
   return (
-    <section aria-label="Capital and dividend proportion" className="rounded-4xl bg-surface p-5 shadow-md min-[640px]:p-8">
+    <section aria-label={t('Capital and dividend proportion')} className="rounded-4xl bg-surface p-5 shadow-md min-[640px]:p-8">
       <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="min-w-0">
-          <h3 className="m-0 text-[20px] leading-7 font-bold text-navy-900">Capital &amp; Dividend Proportion</h3>
+          <h3 className="m-0 text-[20px] leading-7 font-bold text-navy-900">{t('Capital & Dividend Proportion')}</h3>
           <p className="m-0 text-[13px] leading-5 text-text-muted">
-            See how your own deposits compare to passive compound dividend distributions.
+            {t('See how your own deposits compare to passive compound dividend distributions.')}
           </p>
         </div>
-        <ul aria-label="Dividend yield per stock" className="m-0 flex list-none flex-wrap gap-2 p-0">
+        <ul aria-label={t('Dividend yield per stock')} className="m-0 flex list-none flex-wrap gap-2 p-0">
           {assets.map((asset) => (
             <li key={asset.assetId} className="rounded-pill bg-blue-50 px-3 py-1 text-[12px] leading-4 font-semibold text-navy-700 tabular-nums">
               {asset.ticker}: {asset.dividendPct}%
@@ -49,7 +55,7 @@ export default function ProportionCard({ result }: { result: CalcResult }) {
 
       <div
         role="img"
-        aria-label={`Initial principal ${formatPercent(shares.principal)}, DCA deposits ${formatPercent(shares.dca)}, compounded dividends ${formatPercent(shares.dividends)}`}
+        aria-label={t('Initial principal {a}, DCA deposits {b}, compounded dividends {c}', { a: formatPercent(shares.principal), b: formatPercent(shares.dca), c: formatPercent(shares.dividends) })}
         className="mt-5 flex h-3 overflow-hidden rounded-pill bg-blue-100"
       >
         <span className="bg-blue-200" style={{ width: `${shares.principal}%` }} />
@@ -78,16 +84,16 @@ export default function ProportionCard({ result }: { result: CalcResult }) {
           ))}
         </ul>
         <div className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-blue-200 pt-4">
-          <span className="text-[15px] leading-6 font-bold text-navy-900">Total Estimated Value</span>
+          <span className="text-[15px] leading-6 font-bold text-navy-900">{t('Total Estimated Value')}</span>
           <span className="text-[22px] leading-8 font-bold whitespace-nowrap text-navy-700 tabular-nums min-[640px]:text-[26px]">
-            {formatBaht(output.total)} THB
+            {formatBaht(output.total)} {t('THB')}
           </span>
         </div>
       </div>
 
       <p className="m-0 mt-5 flex items-start gap-3 rounded-2xl bg-parchment px-4 py-3 text-[12px] leading-5 text-navy-700">
         <Info size={16} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0" />
-        {DISCLAIMER}
+        {t(DISCLAIMER)}
       </p>
     </section>
   )

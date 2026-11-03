@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import { CircleAlert } from 'lucide-react'
 import ModalFrame from '../../shared/modal/modal-frame'
 import type { Portfolio } from '../../shared/types/portfolio'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type TrashPortfolioModalProps = {
   /** พอร์ตที่จะย้ายไปถังขยะ (ว่าง = ปิด) */
@@ -15,6 +16,7 @@ type TrashPortfolioModalProps = {
 const EXIT_MS = 200
 
 function Dialog({ portfolio, onConfirm, onClose }: Omit<TrashPortfolioModalProps, 'portfolio'> & { portfolio: Portfolio }) {
+  const { t } = useI18n()
   const [closing, setClosing] = useState(false)
   const [working, setWorking] = useState(false)
   const [error, setError] = useState<string>()
@@ -35,7 +37,7 @@ function Dialog({ portfolio, onConfirm, onClose }: Omit<TrashPortfolioModalProps
       await onConfirm(portfolio)
       setClosing(true)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not move this portfolio. Please try again.')
+      setError(t(caught instanceof Error ? caught.message : 'Could not move this portfolio. Please try again.'))
       setWorking(false)
     }
   }
@@ -51,11 +53,15 @@ function Dialog({ portfolio, onConfirm, onClose }: Omit<TrashPortfolioModalProps
       cardClassName="max-w-105 p-6 text-left"
     >
       <h2 id={titleId} className="m-0 text-[20px] leading-7 font-bold text-navy-900">
-        Move “{portfolio.name}” to Trash?
+        {t('Move “{name}” to Trash?', { name: portfolio.name })}
       </h2>
       <p id={descId} className="m-0 mt-2 text-[14px] leading-6 text-navy-700">
-        It will disappear from your portfolios and the target calculator. Your {portfolio.entries}{' '}
-        {portfolio.entries === 1 ? 'transaction is' : 'transactions are'} kept, and you can restore it from Trash anytime.
+        {t(
+          portfolio.entries === 1
+            ? 'It will disappear from your portfolios and the target calculator. Your {n} transaction is kept, and you can restore it from Trash anytime.'
+            : 'It will disappear from your portfolios and the target calculator. Your {n} transactions are kept, and you can restore it from Trash anytime.',
+          { n: portfolio.entries },
+        )}
       </p>
 
       {error && (
@@ -73,7 +79,7 @@ function Dialog({ portfolio, onConfirm, onClose }: Omit<TrashPortfolioModalProps
           onClick={() => setClosing(true)}
           className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
         >
-          Cancel
+          {t('Cancel')}
         </button>
         <button
           type="button"
@@ -81,7 +87,7 @@ function Dialog({ portfolio, onConfirm, onClose }: Omit<TrashPortfolioModalProps
           onClick={handleConfirm}
           className="inline-flex h-11 items-center rounded-pill bg-red-500 px-6 text-[14px] leading-5 font-semibold text-surface transition-[filter] duration-150 hover:brightness-110 active:brightness-95 disabled:opacity-50"
         >
-          {working ? 'Moving…' : 'Move to Trash'}
+          {working ? t('Moving…') : t('Move to Trash')}
         </button>
       </div>
     </ModalFrame>

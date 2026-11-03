@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { CircleAlert, Search } from 'lucide-react'
 import { searchAssets } from '../data/assets'
 import type { Asset } from '../types/transaction'
+import { useI18n } from '../i18n/use-i18n'
 
 type AssetPickerProps = {
   label: string
@@ -15,6 +16,7 @@ const displayOf = (asset: Asset | null) => (asset ? `${asset.ticker} · ${asset.
 // ช่องเลือกหุ้น/กองทุนจากรายการกลาง (Feature 6): พิมพ์ค้นหาแล้วเลือก ไม่พิมพ์ชื่อเอง
 // combobox + listbox ใช้ลูกศรขึ้น/ลง + Enter เลือก, Esc ปิดรายการ (ไม่ปิด modal ที่ครอบอยู่ตอนรายการเปิด)
 export default function AssetPicker({ label, value, onChange, error }: AssetPickerProps) {
+  const { t } = useI18n()
   const [text, setText] = useState(displayOf(value))
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
@@ -54,7 +56,7 @@ export default function AssetPicker({ label, value, onChange, error }: AssetPick
           aria-describedby={error ? errorId : undefined}
           autoComplete="off"
           value={text}
-          placeholder="Search SCB, TISCO, Apple…"
+          placeholder={t('Search SCB, TISCO, Apple…')}
           onFocus={(event) => {
             event.currentTarget.select()
             setOpen(true)
@@ -95,7 +97,7 @@ export default function AssetPicker({ label, value, onChange, error }: AssetPick
           aria-label={label}
           className="absolute inset-x-0 z-30 mt-1 max-h-60 list-none overflow-y-auto rounded-lg border border-line bg-surface p-1 shadow-lg"
         >
-          {results.length === 0 && <li className="px-3 py-3 text-[13px] leading-5 text-text-muted">No matching stock or fund</li>}
+          {results.length === 0 && <li className="px-3 py-3 text-[13px] leading-5 text-text-muted">{t('No matching stock or fund')}</li>}
           {results.map((asset, index) => (
             <li
               key={asset.id}
@@ -116,7 +118,7 @@ export default function AssetPicker({ label, value, onChange, error }: AssetPick
                 <span className="block truncate text-[14px] leading-5 font-semibold text-navy-900">{asset.name}</span>
                 <span className="block text-[12px] leading-4 text-text-muted">
                   {asset.market}: {asset.ticker}
-                  {asset.sector ? ` • ${asset.sector}` : ''}
+                  {asset.sector ? ` • ${t(asset.sector)}` : ''}
                 </span>
               </span>
               <span className="shrink-0 rounded-pill bg-blue-100 px-2 py-0.5 text-[11px] leading-4 font-semibold text-navy-700">

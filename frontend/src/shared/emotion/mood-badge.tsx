@@ -1,5 +1,6 @@
 import EmotionIcon from './emotion-icon'
 import { EMOTIONS, NO_EMOTION_LABEL, type Emotion } from './emotions'
+import { useI18n } from '../i18n/use-i18n'
 
 type MoodBadgeProps = {
   emotion: Emotion | null
@@ -24,7 +25,8 @@ const SIZE = {
 
 // ป้ายแสดงอารมณ์ที่เลือก: อีโมจิ + ชื่ออารมณ์ ตัวขาวบนพื้นสีเข้ม (ไม่ระบุ = พื้น blue-100 ตัวสีเข้ม)
 export default function MoodBadge({ emotion, size = 'sm' }: MoodBadgeProps) {
-  const label = EMOTIONS.find((item) => item.id === emotion)?.label ?? NO_EMOTION_LABEL
+  const { t } = useI18n()
+  const label = t(EMOTIONS.find((item) => item.id === emotion)?.label ?? NO_EMOTION_LABEL)
   const { box, icon } = SIZE[size]
   return (
     <span

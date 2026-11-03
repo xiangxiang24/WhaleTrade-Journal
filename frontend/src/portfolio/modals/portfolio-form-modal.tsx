@@ -5,6 +5,7 @@ import type { Portfolio, PortfolioFormValues, PortfolioIconKey } from '../../sha
 import { FieldError, TextField } from '../../onboarding/components/auth-field'
 import { PORTFOLIO_ICONS } from '../types/portfolio-icons'
 import { formatAmount } from '../types/format'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type PortfolioFormModalProps = {
   open: boolean
@@ -25,6 +26,7 @@ const GOAL_MAX = 999_999_999_999
 type Errors = { name?: string; tagline?: string; description?: string; goal?: string }
 
 function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 'open'>) {
+  const { t } = useI18n()
   const editing = Boolean(portfolio)
   const [name, setName] = useState(portfolio?.name ?? '')
   const [tagline, setTagline] = useState(portfolio?.tagline ?? '')
@@ -58,13 +60,13 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
   function validate(): { errors: Errors; goal: number | null } {
     const found: Errors = {}
     const trimmedName = name.trim()
-    if (!trimmedName) found.name = 'Please give your portfolio a name.'
-    else if (trimmedName.length > NAME_MAX) found.name = `Keep the name within ${NAME_MAX} characters.`
-    if (tagline.trim().length > TAGLINE_MAX) found.tagline = `Keep the description within ${TAGLINE_MAX} characters.`
-    if (description.trim().length > DESCRIPTION_MAX) found.description = `Keep the story within ${DESCRIPTION_MAX} characters.`
+    if (!trimmedName) found.name = t('Please give your portfolio a name.')
+    else if (trimmedName.length > NAME_MAX) found.name = t('Keep the name within {n} characters.', { n: NAME_MAX })
+    if (tagline.trim().length > TAGLINE_MAX) found.tagline = t('Keep the description within {n} characters.', { n: TAGLINE_MAX })
+    if (description.trim().length > DESCRIPTION_MAX) found.description = t('Keep the story within {n} characters.', { n: DESCRIPTION_MAX })
     const digits = goalText.replace(/\D/g, '')
     const goal = digits ? Number(digits) : null
-    if (goal !== null && (goal <= 0 || goal > GOAL_MAX)) found.goal = 'Enter a goal greater than 0.'
+    if (goal !== null && (goal <= 0 || goal > GOAL_MAX)) found.goal = t('Enter a goal greater than 0.')
     return { errors: found, goal }
   }
 
@@ -80,7 +82,7 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
       await onSubmit({ name: name.trim(), tagline: tagline.trim(), description: description.trim(), icon, annualGoal: result.goal })
       setClosing(true)
     } catch (caught) {
-      setSubmitError(caught instanceof Error ? caught.message : 'Could not save this portfolio. Please try again.')
+      setSubmitError(t(caught instanceof Error ? caught.message : 'Could not save this portfolio. Please try again.'))
       setSubmitting(false)
     }
   }
@@ -96,42 +98,42 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
       cardClassName="max-w-130 p-5 text-left min-[640px]:p-8"
     >
       <h2 id={titleId} className="m-0 text-[24px] leading-8 font-bold text-navy-900 min-[640px]:text-[28px] min-[640px]:leading-9">
-        {editing ? 'Edit Portfolio' : 'Create Portfolio'}
+        {editing ? t('Edit Portfolio') : t('Create Portfolio')}
       </h2>
       <p id={descId} className="m-0 mt-1 mb-5 text-[14px] leading-5 text-text-muted">
         {editing
-          ? 'Rename it or adjust the yearly goal. Your transactions stay untouched.'
-          : 'Give your new garden a name and a yearly dividend goal.'}
+          ? t('Rename it or adjust the yearly goal. Your transactions stay untouched.')
+          : t('Give your new garden a name and a yearly dividend goal.')}
       </p>
 
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
         <TextField
           id={nameId}
-          label="Portfolio name"
+          label={t('Portfolio name')}
           value={name}
           onChange={setName}
           error={errors.name}
-          placeholder="e.g. Dividend Sanctuary"
+          placeholder={t('e.g. Dividend Sanctuary')}
         />
         <TextField
           id={taglineId}
-          label="Short description (optional)"
+          label={t('Short description (optional)')}
           value={tagline}
           onChange={setTagline}
           error={errors.tagline}
-          placeholder="e.g. Anchor Portfolio"
+          placeholder={t('e.g. Anchor Portfolio')}
         />
 
         <div>
           <label htmlFor={descriptionId} className="block text-[12px] leading-4 font-semibold text-navy-900">
-            About this portfolio (optional)
+            {t('About this portfolio (optional)')}
           </label>
           <textarea
             id={descriptionId}
             rows={3}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="A few words about why this garden exists"
+            placeholder={t('A few words about why this garden exists')}
             aria-invalid={Boolean(errors.description)}
             aria-describedby={errors.description ? `${descriptionId}-error` : undefined}
             className={`mt-1.5 w-full resize-none rounded-md border-2 bg-surface px-4 py-3 text-[14px] leading-5 text-navy-900 outline-none transition-shadow duration-150 placeholder:text-text-muted focus:shadow-focus ${
@@ -143,7 +145,7 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
 
         <div>
           <label htmlFor={goalId} className="block text-[12px] leading-4 font-semibold text-navy-900">
-            Annual goal (optional)
+            {t('Annual goal (optional)')}
           </label>
           <div className="relative mt-1.5">
             <input
@@ -166,15 +168,15 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
               aria-hidden="true"
               className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-[13px] font-semibold text-text-muted"
             >
-              THB
+              {t('THB')}
             </span>
           </div>
           {errors.goal && <FieldError id={goalErrorId}>{errors.goal}</FieldError>}
         </div>
 
         <fieldset className="m-0 min-w-0 border-0 p-0">
-          <legend className="p-0 text-[12px] leading-4 font-semibold text-navy-900">Icon</legend>
-          <div role="radiogroup" aria-label="Portfolio icon" className="mt-1.5 flex flex-wrap gap-2">
+          <legend className="p-0 text-[12px] leading-4 font-semibold text-navy-900">{t('Icon')}</legend>
+          <div role="radiogroup" aria-label={t('Portfolio icon')} className="mt-1.5 flex flex-wrap gap-2">
             {PORTFOLIO_ICONS.map(({ key, label, icon: Icon }) => {
               const selected = icon === key
               return (
@@ -183,8 +185,8 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
                   type="button"
                   role="radio"
                   aria-checked={selected}
-                  aria-label={label}
-                  title={label}
+                  aria-label={t(label)}
+                  title={t(label)}
                   onClick={() => setIcon(key)}
                   className={`inline-flex size-12 items-center justify-center rounded-pill border-2 text-navy-700 transition-colors duration-150 ${
                     selected ? 'border-blue-500 bg-blue-100' : 'border-transparent bg-blue-50 hover:bg-blue-100'
@@ -211,14 +213,14 @@ function Dialog({ portfolio, onSubmit, onClose }: Omit<PortfolioFormModalProps, 
             onClick={() => setClosing(true)}
             className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
           >
-            Cancel
+            {t('Cancel')}
           </button>
           <button
             type="submit"
             disabled={submitting}
             className="inline-flex h-11 items-center rounded-pill bg-blue-500 px-6 text-[14px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900 disabled:bg-blue-200 disabled:shadow-none"
           >
-            {submitting ? 'Saving…' : editing ? 'Save Changes' : 'Create Portfolio'}
+            {submitting ? t('Saving…') : editing ? t('Save Changes') : t('Create Portfolio')}
           </button>
         </div>
       </form>

@@ -3,6 +3,7 @@ import { MAX_PHASES, stageName } from '../types/target-amount'
 import type { Calculator } from '../types/use-calculator'
 import NumberField from './number-field'
 import StepCard from './step-card'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 // ข้อความชี้แจงสมมติฐานคงที่ (target-amount-page.md)
 const ASSUMPTION =
@@ -30,6 +31,7 @@ function Switch({ on, onChange, label }: { on: boolean; onChange: (on: boolean) 
 
 // ขั้นตอนที่ 3: แบ่งเฟส (ไม่บังคับ) สวิตช์ + แถวเฟส + แถบสรุประยะเวลา + ข้อความสมมติฐาน
 export default function PhasesStep({ calc }: { calc: Calculator }) {
+  const { t } = useI18n()
   const { phasesOn, phases, errors } = calc
   const years = phases.map((phase) => Number(phase.yearsText.replace(/\D/g, '')) || 0)
   const totalYears = years.reduce((sum, value) => sum + value, 0)
@@ -37,9 +39,9 @@ export default function PhasesStep({ calc }: { calc: Calculator }) {
   return (
     <StepCard
       step={3}
-      title="Split into phases (optional)"
-      description="Adapt your monthly investment capacity as your career and income grow."
-      aside={<Switch on={phasesOn} onChange={calc.togglePhases} label="Split into phases" />}
+      title={t('Split into phases (optional)')}
+      description={t('Adapt your monthly investment capacity as your career and income grow.')}
+      aside={<Switch on={phasesOn} onChange={calc.togglePhases} label={t('Split into phases')} />}
     >
       {phasesOn && (
         <>
@@ -55,14 +57,14 @@ export default function PhasesStep({ calc }: { calc: Calculator }) {
                       P{index + 1}
                     </span>
                     <div className="min-w-0">
-                      <p className="m-0 text-[14px] leading-5 font-semibold text-navy-900">Phase {index + 1}</p>
-                      <p className="m-0 text-[12px] leading-4 text-text-muted">{stageName(index)}</p>
+                      <p className="m-0 text-[14px] leading-5 font-semibold text-navy-900">{t('Phase {n}', { n: index + 1 })}</p>
+                      <p className="m-0 text-[12px] leading-4 text-text-muted">{t(stageName(index))}</p>
                     </div>
                   </div>
                   <div className="grid min-w-0 flex-[3] grid-cols-1 gap-3 min-[1024px]:grid-cols-2">
                     <NumberField
                       compact
-                      label="Years"
+                      label={t('Years')}
                       value={phase.yearsText}
                       onChange={(text) => calc.updatePhase(phase.id, { yearsText: text })}
                       maxDigits={2}
@@ -71,8 +73,8 @@ export default function PhasesStep({ calc }: { calc: Calculator }) {
                     />
                     <NumberField
                       compact
-                      label="Monthly DCA"
-                      suffix="THB"
+                      label={t('Monthly DCA')}
+                      suffix={t('THB')}
                       value={phase.dcaText}
                       onChange={(text) => calc.updatePhase(phase.id, { dcaText: text })}
                       placeholder="5,000"
@@ -81,7 +83,7 @@ export default function PhasesStep({ calc }: { calc: Calculator }) {
                   {phases.length > 1 && (
                     <button
                       type="button"
-                      aria-label={`Remove phase ${index + 1}`}
+                      aria-label={t('Remove phase {n}', { n: index + 1 })}
                       onClick={() => calc.removePhase(phase.id)}
                       className="group/icon inline-flex size-9 shrink-0 items-center justify-center rounded-pill text-navy-700 hover:text-red-500 min-[640px]:mt-5"
                     >
@@ -112,17 +114,17 @@ export default function PhasesStep({ calc }: { calc: Calculator }) {
             className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-pill border-2 border-dashed border-blue-200 bg-surface text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50"
           >
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-            Add phase
+            {t('Add phase')}
           </button>
 
           <p className="m-0 mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-pill bg-blue-100 px-4 py-2 text-[12px] leading-5 font-semibold text-navy-700">
             <span className="inline-flex items-center gap-2">
               <Hourglass size={14} strokeWidth={1.75} aria-hidden="true" />
-              Calculated timeline
+              {t('Calculated timeline')}
             </span>
             <span className="tabular-nums">
-              Total duration: {totalYears} {totalYears === 1 ? 'year' : 'years'}
-              {phases.length > 1 && ` (${years.map((value) => `${value} ${value === 1 ? 'yr' : 'yrs'}`).join(' + ')})`}
+              {t('Total duration: {duration}', { duration: t(totalYears === 1 ? '{n} year' : '{n} years', { n: totalYears }) })}
+              {phases.length > 1 && ` (${years.map((value) => t(value === 1 ? '{n} yr' : '{n} yrs', { n: value })).join(' + ')})`}
             </span>
           </p>
         </>
@@ -130,7 +132,7 @@ export default function PhasesStep({ calc }: { calc: Calculator }) {
 
       <p className={`m-0 flex items-start gap-3 rounded-3xl bg-parchment px-4 py-3 text-[12px] leading-5 text-navy-700 ${phasesOn ? 'mt-3' : ''}`}>
         <Sprout size={16} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0" />
-        {ASSUMPTION}
+        {t(ASSUMPTION)}
       </p>
     </StepCard>
   )

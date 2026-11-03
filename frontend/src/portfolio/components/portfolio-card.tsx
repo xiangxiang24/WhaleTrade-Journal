@@ -5,6 +5,7 @@ import { formatUpdated, goalProgress } from '../types/format'
 import CardMenu from './card-menu'
 import Money from './money'
 import PortfolioIcon from './portfolio-icon'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type PortfolioCardProps = {
   portfolio: Portfolio
@@ -18,29 +19,30 @@ const OVERLINE = 'text-[11px] leading-4 font-semibold tracking-[0.08em] text-tex
 
 // ส่วน Annual Goal + แถบความคืบหน้า (ถึงเป้า = แถบเขียว + ป้าย "100% full", ยังไม่ตั้ง Goal = ข้อความชวนตั้ง)
 function GoalBox({ portfolio }: { portfolio: Portfolio }) {
+  const { t } = useI18n()
   const progress = goalProgress(portfolio.reached, portfolio.annualGoal)
   const full = progress === 100
 
   return (
     <div className="rounded-3xl bg-blue-50 px-4 py-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <span className={OVERLINE}>Annual goal</span>
+        <span className={OVERLINE}>{t('Annual goal')}</span>
         {portfolio.annualGoal ? (
           <Money value={portfolio.annualGoal} className="text-[22px] leading-7 font-semibold text-navy-900" />
         ) : (
-          <span className="text-[15px] leading-6 font-semibold text-navy-700">No goal yet</span>
+          <span className="text-[15px] leading-6 font-semibold text-navy-700">{t('No goal yet')}</span>
         )}
       </div>
 
       {progress === null ? (
         <p className="m-0 mt-3 text-[13px] leading-5 text-text-muted">
-          Set an annual goal from Edit details to watch your progress grow.
+          {t('Set an annual goal from Edit details to watch your progress grow.')}
         </p>
       ) : (
         <>
           <div
             role="progressbar"
-            aria-label={`${portfolio.name} goal progress`}
+            aria-label={t('{name} goal progress', { name: portfolio.name })}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={progress}
@@ -52,11 +54,11 @@ function GoalBox({ portfolio }: { portfolio: Portfolio }) {
             />
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[13px] leading-5">
-            <span className="tabular-nums text-navy-900">{`${portfolio.reached.toLocaleString('en-US')} reached`}</span>
+            <span className="tabular-nums text-navy-900">{t('{amount} reached', { amount: portfolio.reached.toLocaleString('en-US') })}</span>
             {full ? (
               <span className="inline-flex items-center gap-1 rounded-pill bg-green-50 px-2.5 py-0.5 text-[12px] leading-4 font-semibold text-navy-900">
                 <CircleCheck size={14} strokeWidth={1.75} aria-hidden="true" className="text-green-500" />
-                100% full
+                {t('100% full')}
               </span>
             ) : (
               <span className="font-semibold text-navy-700 tabular-nums">{progress}%</span>
@@ -70,6 +72,7 @@ function GoalBox({ portfolio }: { portfolio: Portfolio }) {
 
 // การ์ดพอร์ต: หัว (ไอคอน ชื่อ คำอธิบาย เมนู) / เป้าหมาย / สถิติ / ท้าย (อัปเดตล่าสุด + Open)
 export default function PortfolioCard({ portfolio, timeZone, onOpen, onEdit, onTrash }: PortfolioCardProps) {
+  const { t, locale } = useI18n()
   // ยก z-index ของการ์ดที่เมนูเปิดอยู่ เพื่อไม่ให้การ์ดข้างเคียงทับเมนู
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -102,15 +105,15 @@ export default function PortfolioCard({ portfolio, timeZone, onOpen, onEdit, onT
 
       <dl className="m-0 mt-5 flex flex-wrap gap-x-6 gap-y-3 px-1">
         <div className="min-w-0 flex-auto">
-          <dt className={OVERLINE}>Total recorded DCA</dt>
+          <dt className={OVERLINE}>{t('Total recorded DCA')}</dt>
           <dd className="m-0 mt-1">
             <Money value={portfolio.totalDca} className="text-[18px] leading-7 font-semibold text-navy-900" />
           </dd>
         </div>
         <div className="min-w-0 flex-auto">
-          <dt className={OVERLINE}>Transactions</dt>
+          <dt className={OVERLINE}>{t('Transactions')}</dt>
           <dd className="m-0 mt-1 text-[18px] leading-7 font-semibold whitespace-nowrap text-navy-900 tabular-nums">
-            {portfolio.entries} <span className="text-[0.7em] font-semibold text-text-muted">{portfolio.entries === 1 ? 'entry' : 'entries'}</span>
+            {portfolio.entries} <span className="text-[0.7em] font-semibold text-text-muted">{portfolio.entries === 1 ? t('entry') : t('entries')}</span>
           </dd>
         </div>
       </dl>
@@ -119,16 +122,16 @@ export default function PortfolioCard({ portfolio, timeZone, onOpen, onEdit, onT
         <p className="m-0 flex items-center gap-1.5 text-[12px] leading-4 text-text-muted">
           <CalendarDays size={14} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
           <span>
-            Last updated <time dateTime={portfolio.updatedAt}>{formatUpdated(portfolio.updatedAt, timeZone)}</time>
+            {t('Last updated')} <time dateTime={portfolio.updatedAt}>{formatUpdated(portfolio.updatedAt, timeZone, locale)}</time>
           </span>
         </p>
         <button
           type="button"
           onClick={() => onOpen(portfolio.id)}
-          aria-label={`Open ${portfolio.name}`}
+          aria-label={t('Open {name}', { name: portfolio.name })}
           className="inline-flex h-10 items-center gap-1 rounded-pill bg-blue-500 pr-3 pl-5 text-[15px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900"
         >
-          Open
+          {t('Open')}
           <ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" />
         </button>
       </footer>

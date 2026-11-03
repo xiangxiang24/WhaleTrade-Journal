@@ -3,6 +3,7 @@ import banner from '../../assets/Banner.png'
 import type { Portfolio } from '../../shared/types/portfolio'
 import type { PortfolioLoadStatus } from '../types/portfolio'
 import PortfolioCard from './portfolio-card'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type PortfolioGridProps = {
   status: PortfolioLoadStatus
@@ -48,9 +49,10 @@ export default function PortfolioGrid({
   onCreate,
   onRetry,
 }: PortfolioGridProps) {
+  const { t } = useI18n()
   if (status === 'loading') {
     return (
-      <div className={GRID} role="status" aria-label="Loading your portfolios">
+      <div className={GRID} role="status" aria-label={t('Loading your portfolios')}>
         {Array.from({ length: 3 }, (_, index) => (
           <div key={index} className="h-90 animate-pulse rounded-4xl bg-blue-100 motion-reduce:animate-none" />
         ))}
@@ -61,11 +63,11 @@ export default function PortfolioGrid({
   if (status === 'error') {
     return (
       <Message
-        title="Could not load your portfolios"
-        description="Something went wrong. Please try again."
+        title={t('Could not load your portfolios')}
+        description={t('Something went wrong. Please try again.')}
         action={
           <button type="button" onClick={onRetry} className={PRIMARY_BUTTON}>
-            Try again
+            {t('Try again')}
           </button>
         }
       />
@@ -75,12 +77,12 @@ export default function PortfolioGrid({
   if (previewEmpty || portfolios.length === 0) {
     return (
       <Message
-        title="Your garden is waiting for its first seed"
-        description="Create your first portfolio to set a yearly goal and record every DCA in one calm place."
+        title={t('Your garden is waiting for its first seed')}
+        description={t('Create your first portfolio to set a yearly goal and record every DCA in one calm place.')}
         action={
           <button type="button" onClick={onCreate} className={PRIMARY_BUTTON}>
             <Plus size={18} strokeWidth={1.75} aria-hidden="true" />
-            Create your first portfolio
+            {t('Create your first portfolio')}
           </button>
         }
       />

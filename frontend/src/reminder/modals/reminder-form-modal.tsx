@@ -3,6 +3,7 @@ import { CircleAlert, Trash2 } from 'lucide-react'
 import ModalFrame from '../../shared/modal/modal-frame'
 import type { Reminder, ReminderFormValues } from '../../shared/types/reminder'
 import { dayKey, timeKey } from '../types/datetime'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type ReminderFormModalProps = {
   open: boolean
@@ -40,6 +41,7 @@ function FieldError({ id, children }: { id: string; children: string }) {
 }
 
 function Dialog({ reminder, defaultDate, timeZone, onSubmit, onDelete, onClose }: Omit<ReminderFormModalProps, 'open'>) {
+  const { t } = useI18n()
   const editing = Boolean(reminder)
   const [title, setTitle] = useState(reminder?.title ?? '')
   const [description, setDescription] = useState(reminder?.description ?? '')
@@ -70,11 +72,11 @@ function Dialog({ reminder, defaultDate, timeZone, onSubmit, onDelete, onClose }
     event.preventDefault()
     if (submitting) return
     const found: Errors = {}
-    if (!title.trim()) found.title = 'Please give this reminder a title.'
-    else if (title.trim().length > TITLE_MAX) found.title = `Keep the title within ${TITLE_MAX} characters.`
-    if (description.trim().length > DESCRIPTION_MAX) found.description = `Keep the note within ${DESCRIPTION_MAX} characters.`
-    if (!date) found.date = 'Pick a date.'
-    if (!time) found.time = 'Pick a time.'
+    if (!title.trim()) found.title = t('Please give this reminder a title.')
+    else if (title.trim().length > TITLE_MAX) found.title = t('Keep the title within {n} characters.', { n: TITLE_MAX })
+    if (description.trim().length > DESCRIPTION_MAX) found.description = t('Keep the note within {n} characters.', { n: DESCRIPTION_MAX })
+    if (!date) found.date = t('Pick a date.')
+    if (!time) found.time = t('Pick a time.')
     setErrors(found)
     setSubmitError(undefined)
     if (Object.keys(found).length > 0) return
@@ -83,7 +85,7 @@ function Dialog({ reminder, defaultDate, timeZone, onSubmit, onDelete, onClose }
       await onSubmit({ title: title.trim(), description: description.trim(), date, time })
       setClosing(true)
     } catch (caught) {
-      setSubmitError(caught instanceof Error ? caught.message : 'Could not save this reminder. Please try again.')
+      setSubmitError(t(caught instanceof Error ? caught.message : 'Could not save this reminder. Please try again.'))
       setSubmitting(false)
     }
   }
@@ -99,22 +101,22 @@ function Dialog({ reminder, defaultDate, timeZone, onSubmit, onDelete, onClose }
       cardClassName="max-w-130 p-5 text-left min-[640px]:p-8"
     >
       <h2 id={titleId} className="m-0 text-[24px] leading-8 font-bold text-navy-900 min-[640px]:text-[28px] min-[640px]:leading-9">
-        {editing ? 'Edit Reminder' : 'New Reminder'}
+        {editing ? t('Edit Reminder') : t('New Reminder')}
       </h2>
       <p id={descId} className="m-0 mt-1 mb-5 text-[14px] leading-5 text-text-muted">
-        A short note with the day and time you want to be reminded.
+        {t('A short note with the day and time you want to be reminded.')}
       </p>
 
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label htmlFor={fieldTitle} className="block text-[12px] leading-4 font-semibold text-navy-900">
-            Title
+            {t('Title')}
           </label>
           <input
             id={fieldTitle}
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="e.g. SCB Ex-Dividend Date (XD)"
+            placeholder={t('e.g. SCB Ex-Dividend Date (XD)')}
             aria-invalid={Boolean(errors.title)}
             aria-describedby={errors.title ? `${fieldTitle}-error` : undefined}
             className={`${inputClass(Boolean(errors.title))} mt-1.5`}
@@ -124,14 +126,14 @@ function Dialog({ reminder, defaultDate, timeZone, onSubmit, onDelete, onClose }
 
         <div>
           <label htmlFor={fieldDescription} className="block text-[12px] leading-4 font-semibold text-navy-900">
-            Note (optional)
+            {t('Note (optional)')}
           </label>
           <textarea
             id={fieldDescription}
             rows={3}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="Six months in. Are my reasons for buying still true?"
+            placeholder={t('Six months in. Are my reasons for buying still true?')}
             aria-invalid={Boolean(errors.description)}
             aria-describedby={errors.description ? `${fieldDescription}-error` : undefined}
             className={`mt-1.5 w-full resize-none rounded-md border-2 bg-surface px-4 py-3 text-[14px] leading-5 text-navy-900 outline-none transition-shadow duration-150 placeholder:text-text-muted focus:shadow-focus ${
@@ -144,7 +146,7 @@ function Dialog({ reminder, defaultDate, timeZone, onSubmit, onDelete, onClose }
         <div className="grid gap-4 min-[640px]:grid-cols-2">
           <div>
             <label htmlFor={fieldDate} className="block text-[12px] leading-4 font-semibold text-navy-900">
-              Date
+              {t('Date')}
             </label>
             <input
               id={fieldDate}
@@ -159,7 +161,7 @@ function Dialog({ reminder, defaultDate, timeZone, onSubmit, onDelete, onClose }
           </div>
           <div>
             <label htmlFor={fieldTime} className="block text-[12px] leading-4 font-semibold text-navy-900">
-              Time
+              {t('Time')}
             </label>
             <input
               id={fieldTime}
@@ -190,7 +192,7 @@ function Dialog({ reminder, defaultDate, timeZone, onSubmit, onDelete, onClose }
               className="inline-flex h-11 items-center gap-2 rounded-pill border-2 border-red-500 bg-surface px-5 text-[14px] leading-5 font-semibold text-red-500 transition-colors duration-150 hover:bg-red-50 active:bg-red-500 active:text-surface disabled:opacity-50"
             >
               <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
-              Delete
+              {t('Delete')}
             </button>
           ) : (
             <span />
@@ -202,14 +204,14 @@ function Dialog({ reminder, defaultDate, timeZone, onSubmit, onDelete, onClose }
               onClick={() => setClosing(true)}
               className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
             >
-              Cancel
+              {t('Cancel')}
             </button>
             <button
               type="submit"
               disabled={submitting}
               className="inline-flex h-11 items-center rounded-pill bg-blue-500 px-6 text-[14px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900 disabled:bg-blue-200 disabled:shadow-none"
             >
-              {submitting ? 'Saving…' : editing ? 'Save Changes' : 'Set Reminder'}
+              {submitting ? t('Saving…') : editing ? t('Save Changes') : t('Set Reminder')}
             </button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import type { AssetRow } from '../types/target-amount'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type AssetYieldRowProps = {
   row: AssetRow
@@ -16,6 +17,7 @@ const sanitize = (text: string) => {
 
 // แถวหุ้น/กองทุน: ตัวย่อ + ชื่อ + ตลาด · หมวด / ช่องปันผล % ต่อปี + ปุ่มเอาออก
 export default function AssetYieldRow({ row, onYieldChange, onRemove }: AssetYieldRowProps) {
+  const { t } = useI18n()
   const { asset } = row
   return (
     <li className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-3xl bg-blue-50 px-4 py-3">
@@ -29,12 +31,12 @@ export default function AssetYieldRow({ row, onYieldChange, onRemove }: AssetYie
         <p className="m-0 text-[14px] leading-5 font-bold break-words text-navy-900">{asset.name}</p>
         <p className="m-0 text-[12px] leading-4 text-text-muted">
           {asset.ticker} · {asset.market}
-          {asset.sector ? ` · ${asset.sector}` : ''}
+          {asset.sector ? ` · ${t(asset.sector)}` : ''}
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
         <label className="flex items-center gap-1.5">
-          <span className="sr-only">Dividend yield per year for {asset.ticker}</span>
+          <span className="sr-only">{t('Dividend yield per year for {ticker}', { ticker: asset.ticker })}</span>
           <input
             inputMode="decimal"
             autoComplete="off"
@@ -49,7 +51,7 @@ export default function AssetYieldRow({ row, onYieldChange, onRemove }: AssetYie
         </label>
         <button
           type="button"
-          aria-label={`Remove ${asset.ticker}`}
+          aria-label={t('Remove {ticker}', { ticker: asset.ticker })}
           onClick={onRemove}
           className="group/icon inline-flex size-9 items-center justify-center rounded-pill text-navy-700 hover:text-red-500"
         >

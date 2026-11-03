@@ -1,5 +1,6 @@
 import { ChevronDown, Search } from 'lucide-react'
 import { formatMonthHeading } from '../types/format'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 export type SectorTab = { value: string; label: string; count: number }
 
@@ -28,20 +29,21 @@ export default function LogToolbar({
   month,
   onMonthChange,
 }: LogToolbarProps) {
+  const { t, locale } = useI18n()
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
       <div className="flex items-center gap-3">
         <h2 className="m-0 text-[24px] leading-8 font-bold text-navy-900 min-[640px]:text-[28px] min-[640px]:leading-9">
-          Transaction Logs
+          {t('Transaction Logs')}
         </h2>
         <span className="rounded-pill bg-blue-100 px-3 py-0.5 text-[12px] leading-5 font-semibold text-navy-700">
-          {holdingCount} {holdingCount === 1 ? 'share' : 'shares'}
+          {t(holdingCount === 1 ? '{n} share' : '{n} shares', { n: holdingCount })}
         </span>
       </div>
 
       <div className="flex min-w-0 flex-wrap items-center gap-3 max-[639px]:w-full">
         <label className="relative block min-w-0 flex-1 basis-56 min-[1280px]:w-72 min-[1280px]:flex-none">
-          <span className="sr-only">Search stock or fund</span>
+          <span className="sr-only">{t('Search stock or fund')}</span>
           <Search
             size={18}
             strokeWidth={1.75}
@@ -52,23 +54,23 @@ export default function LogToolbar({
             type="search"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Search stock or fund"
+            placeholder={t('Search stock or fund')}
             className="h-11 w-full rounded-pill border-2 border-blue-500 bg-surface pr-4 pl-11 text-[14px] text-navy-900 outline-none transition-shadow duration-150 placeholder:text-text-muted focus:shadow-focus"
           />
         </label>
 
         <label className="relative block">
-          <span className="sr-only">Filter by month</span>
+          <span className="sr-only">{t('Filter by month')}</span>
           {/* appearance-none: ปิดหน้าตา select ของระบบ (macOS วาดเป็นสี่เหลี่ยม) เพื่อให้เป็นทรงแคปซูลเหมือนช่องค้นหา */}
           <select
             value={month}
             onChange={(event) => onMonthChange(event.target.value)}
             className="h-11 appearance-none rounded-pill border-2 border-blue-500 bg-surface pr-10 pl-4 text-[14px] font-medium text-navy-700 outline-none transition-shadow duration-150 focus:shadow-focus"
           >
-            <option value="all">All months</option>
+            <option value="all">{t('All months')}</option>
             {months.map((value) => (
               <option key={value} value={value}>
-                {formatMonthHeading(value)}
+                {formatMonthHeading(value, locale)}
               </option>
             ))}
           </select>
@@ -83,7 +85,7 @@ export default function LogToolbar({
 
       <div
         role="tablist"
-        aria-label="Filter by sector"
+        aria-label={t('Filter by sector')}
         className="no-scrollbar flex max-w-full gap-1 overflow-x-auto rounded-pill bg-blue-50 p-1 max-[639px]:w-full"
       >
         {tabs.map((tab) => {

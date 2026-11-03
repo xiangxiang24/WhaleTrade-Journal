@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import EmotionIcon from '../emotion/emotion-icon'
 import { EMOTIONS, NO_EMOTION_LABEL, type Emotion } from '../emotion/emotions'
+import { useI18n } from '../i18n/use-i18n'
 
 type MoodOptionsProps = {
   value: Emotion | null
@@ -25,6 +26,7 @@ const EMOJI_SIZE = {
 // ปกติ: ช่องโปร่งใส / hover: พื้น blue-100 + อีโมจิขยาย 1.1 / กด: อีโมจิย่อ 0.9 / เลือกอยู่: พื้น blue-100 + ขอบ 2px blue-500
 // กดซ้ำที่ตัวที่เลือกอยู่ = ยกเลิก (ไม่ระบุ)
 export function MoodOptions({ value, onChange, size = 'md', labelledBy }: MoodOptionsProps) {
+  const { t } = useI18n()
   return (
     <div
       role="group"
@@ -39,7 +41,7 @@ export function MoodOptions({ value, onChange, size = 'md', labelledBy }: MoodOp
               type="button"
               data-no-bounce
               aria-pressed={selected}
-              aria-label={label}
+              aria-label={t(label)}
               onClick={() => onChange(selected ? null : id)}
               className={`group flex w-full items-center justify-center rounded-2xl border-2 transition-colors duration-150 ${SLOT_SIZE[size]} ${
                 selected
@@ -63,16 +65,17 @@ type MoodPickerProps = Pick<MoodOptionsProps, 'value' | 'onChange'>
 
 // ตัวเลือกอารมณ์พร้อมคำถามและชื่ออารมณ์ที่เลือก (ใช้ในฟอร์ม modal)
 export default function MoodPicker({ value, onChange }: MoodPickerProps) {
+  const { t } = useI18n()
   const labelId = useId()
-  const selectedLabel = EMOTIONS.find((item) => item.id === value)?.label ?? NO_EMOTION_LABEL
+  const selectedLabel = t(EMOTIONS.find((item) => item.id === value)?.label ?? NO_EMOTION_LABEL)
 
   return (
     <div>
       <p id={labelId} className="m-0 text-[16px] leading-6 font-semibold text-navy-900">
-        How do you feel about this decision?
+        {t('How do you feel about this decision?')}
       </p>
       <p className="m-0 mt-0.5 text-[13px] leading-5 text-text-muted">
-        You can change this anytime. No judgment here.
+        {t('You can change this anytime. No judgment here.')}
       </p>
       <div className="mt-3">
         <MoodOptions value={value} onChange={onChange} labelledBy={labelId} />

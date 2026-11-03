@@ -75,33 +75,44 @@ export function monthGrid(year: number, month: number): MonthCell[] {
   })
 }
 
-const dayFormatter = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', ...options })
+const dayFormatter = (options: Intl.DateTimeFormatOptions, locale = 'en-US') =>
+  new Intl.DateTimeFormat(locale, { timeZone: 'UTC', ...options })
 
 /** "September 2026" */
-export const formatMonthTitle = (year: number, month: number) =>
-  dayFormatter({ month: 'long', year: 'numeric' }).format(new Date(Date.UTC(year, month, 1)))
+export const formatMonthTitle = (year: number, month: number, locale = 'en-US') =>
+  dayFormatter({ month: 'long', year: 'numeric' }, locale).format(new Date(Date.UTC(year, month, 1)))
 
 /** "25 Sep 2026" */
-export function formatDay(key: string, withYear = true) {
-  const parts = dayFormatter({ day: 'numeric', month: 'short', year: 'numeric' }).formatToParts(keyToUtc(key))
+export function formatDay(key: string, withYear = true, locale = 'en-US') {
+  const parts = dayFormatter({ day: 'numeric', month: 'short', year: 'numeric' }, locale).formatToParts(keyToUtc(key))
   const pick = (type: string) => parts.find((part) => part.type === type)?.value ?? ''
   return `${pick('day')} ${pick('month')}${withYear ? ` ${pick('year')}` : ''}`
 }
 
 /** "Friday, 25 September 2026" ใช้เป็น aria-label ของวันในปฏิทิน */
-export const formatDayLong = (key: string) =>
-  dayFormatter({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(keyToUtc(key))
+export const formatDayLong = (key: string, locale = 'en-US') =>
+  dayFormatter({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }, locale).format(keyToUtc(key))
+
+/** ชื่อวันในสัปดาห์แบบย่อของวันนั้น เช่น "Mon" */
+export const formatWeekdayShort = (key: string, locale = 'en-US') =>
+  dayFormatter({ weekday: 'short' }, locale).format(keyToUtc(key))
 
 /** "Today, 25 Sep 2026 • 09:00" / "Tomorrow, …" / "Yesterday, …" / "Sat, 3 Oct 2026 • 09:00" */
-export function formatRemindAt(iso: string, todayKey: string, timeZone: string) {
+export function formatRemindAt(
+  iso: string,
+  todayKey: string,
+  timeZone: string,
+  t: (text: string) => string = (text) => text,
+  locale = 'en-US',
+) {
   const key = dayKey(iso, timeZone)
   const label =
     key === todayKey
-      ? 'Today'
+      ? t('Today')
       : key === addDays(todayKey, 1)
-        ? 'Tomorrow'
+        ? t('Tomorrow')
         : key === addDays(todayKey, -1)
-          ? 'Yesterday'
-          : dayFormatter({ weekday: 'short' }).format(keyToUtc(key))
-  return `${label}, ${formatDay(key)} • ${timeKey(iso, timeZone)}`
+          ? t('Yesterday')
+          : formatWeekdayShort(key, locale)
+  return `${label}, ${formatDay(key, true, locale)} • ${timeKey(iso, timeZone)}`
 }

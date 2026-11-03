@@ -71,6 +71,18 @@ export function useAccount(onChange: (account: Account) => void) {
     onChange(saved)
   }, [language, timezone, onChange])
 
+  // ภาษาใช้ทันทีที่เลือก (ไม่รอปุ่ม Save) เขตเวลาที่แก้ค้างอยู่ไม่ถูกบันทึกไปด้วย
+  const changeLanguage = useCallback(
+    async (next: Language) => {
+      if (!account) return
+      setLanguage(next)
+      const saved = await updatePreferences({ language: next, timezone: account.timezone })
+      setAccount(saved)
+      onChange(saved)
+    },
+    [account, onChange],
+  )
+
   const saveEmail = useCallback(
     async (email: string, password: string) => {
       const saved = await updateEmail(email, password)
@@ -97,6 +109,7 @@ export function useAccount(onChange: (account: Account) => void) {
     saveProfile,
     cancelProfile,
     savePreferences,
+    changeLanguage,
     saveEmail,
     changePassword,
     deleteAccount,

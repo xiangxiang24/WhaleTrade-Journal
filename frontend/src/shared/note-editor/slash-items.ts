@@ -122,11 +122,12 @@ export const SLASH_ITEMS: SlashItem[] = [
 ]
 
 /** กรองรายการตามคำที่พิมพ์ต่อจาก / (ตรงกับชื่อหรือคำค้น) */
-export function filterSlashItems(query: string): SlashItem[] {
+export function filterSlashItems(query: string, t: (text: string) => string = (text) => text): SlashItem[] {
   const keyword = query.trim().toLowerCase()
   if (!keyword) return SLASH_ITEMS
   return SLASH_ITEMS.filter(
     (item) =>
-      item.label.toLowerCase().includes(keyword) || item.keywords.some((word) => word.includes(keyword)),
+      item.label.toLowerCase().includes(keyword) ||
+      t(item.label).toLowerCase().includes(keyword) || item.keywords.some((word) => word.includes(keyword)),
   )
 }

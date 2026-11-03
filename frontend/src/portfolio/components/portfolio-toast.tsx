@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Undo2 } from 'lucide-react'
 import type { PortfolioToast } from '../types/portfolio'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type PortfolioToastProps = {
   toast: PortfolioToast | null
@@ -12,6 +13,7 @@ const VISIBLE_MS = 6000
 
 // ข้อความแจ้งผลท้ายหน้า (เช่น ย้ายพอร์ตไปถังขยะ + Undo) หายเองหลัง 6 วินาที
 export default function PortfolioToastView({ toast, onUndo, onDismiss }: PortfolioToastProps) {
+  const { t } = useI18n()
   const toastId = toast?.id
   useEffect(() => {
     if (toastId === undefined) return
@@ -36,7 +38,7 @@ export default function PortfolioToastView({ toast, onUndo, onDismiss }: Portfol
             className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-pill bg-surface px-3 text-[13px] leading-5 font-semibold text-navy-900 hover:bg-blue-100"
           >
             <Undo2 size={14} strokeWidth={1.75} aria-hidden="true" />
-            Undo
+            {t('Undo')}
           </button>
         )}
       </div>

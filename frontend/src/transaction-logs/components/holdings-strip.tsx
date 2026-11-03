@@ -2,12 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import type { Holding } from '../../shared/data/portfolio-math'
 import { formatDecimal } from '../types/format'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 const ARROW =
   'inline-flex size-10 shrink-0 items-center justify-center rounded-pill text-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:text-blue-200 disabled:hover:bg-transparent'
 
 // แถบ Holdings: การ์ด ticker + จำนวนหน่วย เรียงแนวนอน เลื่อนด้วยลูกศร (ปิดปุ่มเมื่อสุดทาง) หรือเลื่อนนิ้ว/ล้อเมาส์ได้
 export default function HoldingsStrip({ holdings }: { holdings: Holding[] }) {
+  const { t } = useI18n()
   const scroller = useRef<HTMLUListElement>(null)
   const [edges, setEdges] = useState({ start: true, end: true })
 
@@ -34,16 +36,16 @@ export default function HoldingsStrip({ holdings }: { holdings: Holding[] }) {
   }
 
   return (
-    <section aria-label="Holdings" className="rounded-4xl bg-surface p-5 shadow-md min-[640px]:p-6">
-      <h2 className="m-0 text-[14px] leading-5 font-semibold tracking-[0.08em] text-navy-900 uppercase">Holdings</h2>
+    <section aria-label={t('Holdings')} className="rounded-4xl bg-surface p-5 shadow-md min-[640px]:p-6">
+      <h2 className="m-0 text-[14px] leading-5 font-semibold tracking-[0.08em] text-navy-900 uppercase">{t('Holdings')}</h2>
 
       {holdings.length === 0 ? (
         <p className="m-0 mt-3 text-[14px] leading-6 text-text-muted">
-          No holdings yet. Stocks and funds you buy will appear here with the units you still hold.
+          {t('No holdings yet. Stocks and funds you buy will appear here with the units you still hold.')}
         </p>
       ) : (
         <div className="mt-3 flex items-center gap-1 min-[640px]:gap-2">
-          <button type="button" aria-label="Scroll holdings left" disabled={edges.start} onClick={() => scrollByPage(-1)} className={ARROW}>
+          <button type="button" aria-label={t('Scroll holdings left')} disabled={edges.start} onClick={() => scrollByPage(-1)} className={ARROW}>
             <ChevronsLeft size={22} strokeWidth={1.75} aria-hidden="true" />
           </button>
           <ul
@@ -60,11 +62,11 @@ export default function HoldingsStrip({ holdings }: { holdings: Holding[] }) {
                 <span className="mt-1 text-[20px] leading-7 font-semibold text-navy-900 tabular-nums">
                   {formatDecimal(units, 2)}
                 </span>
-                <span className="text-[12px] leading-4 text-text-muted">{asset.type === 'fund' ? 'units' : 'shares'}</span>
+                <span className="text-[12px] leading-4 text-text-muted">{asset.type === 'fund' ? t('units') : t('shares')}</span>
               </li>
             ))}
           </ul>
-          <button type="button" aria-label="Scroll holdings right" disabled={edges.end} onClick={() => scrollByPage(1)} className={ARROW}>
+          <button type="button" aria-label={t('Scroll holdings right')} disabled={edges.end} onClick={() => scrollByPage(1)} className={ARROW}>
             <ChevronsRight size={22} strokeWidth={1.75} aria-hidden="true" />
           </button>
         </div>

@@ -1,6 +1,7 @@
 import { Check, CheckCheck, Clock, SquarePen } from 'lucide-react'
 import type { Reminder } from '../../shared/types/reminder'
 import { dayKey, formatDay, formatRemindAt } from '../types/datetime'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type ReminderCardProps = {
   reminder: Reminder
@@ -31,14 +32,15 @@ function CheckCircle({ done, label, onClick }: { done: boolean; label: string; o
 
 // การ์ดการเตือน: ยังไม่เสร็จ = เวลา + ชื่อ + รายละเอียด + ปุ่ม Edit, เสร็จแล้ว = แถบจาง "Done 20 Sep • ..." (กดวงกลมเพื่อยกเลิก)
 export default function ReminderCard({ reminder, now, todayKey, timeZone, onToggle, onEdit }: ReminderCardProps) {
+  const { t, locale } = useI18n()
   if (reminder.done) {
     return (
       <div className="flex items-start gap-3 rounded-3xl bg-blue-50 px-4 py-4 min-[640px]:px-5">
-        <CheckCircle done label={`Mark “${reminder.title}” as not done`} onClick={() => onToggle(reminder)} />
+        <CheckCircle done label={t('Mark “{title}” as not done', { title: reminder.title })} onClick={() => onToggle(reminder)} />
         <div className="min-w-0 flex-1">
           <p className="m-0 text-[14px] leading-5 font-semibold text-text-muted line-through">{reminder.title}</p>
           <p className="m-0 text-[12px] leading-5 text-text-muted">
-            Done {formatDay(dayKey(reminder.doneAt ?? reminder.remindAt, timeZone), false)}
+            {t('Done {date}', { date: formatDay(dayKey(reminder.doneAt ?? reminder.remindAt, timeZone), false, locale) })}
             {reminder.description && (
               <span className="ml-1">
                 • <em>{reminder.description}</em>
@@ -55,14 +57,14 @@ export default function ReminderCard({ reminder, now, todayKey, timeZone, onTogg
   return (
     <article className="rounded-3xl bg-surface p-4 shadow-md min-[640px]:p-5">
       <div className="flex items-start gap-3">
-        <CheckCircle done={false} label={`Mark “${reminder.title}” as done`} onClick={() => onToggle(reminder)} />
+        <CheckCircle done={false} label={t('Mark “{title}” as done', { title: reminder.title })} onClick={() => onToggle(reminder)} />
         <div className="min-w-0 flex-1">
           <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] leading-5 text-navy-700">
             <Clock size={14} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
-            <time dateTime={reminder.remindAt}>{formatRemindAt(reminder.remindAt, todayKey, timeZone)}</time>
+            <time dateTime={reminder.remindAt}>{formatRemindAt(reminder.remindAt, todayKey, timeZone, t, locale)}</time>
             {due && (
               <span className="inline-flex h-5 items-center rounded-pill bg-red-50 px-2 text-[11px] leading-4 font-semibold text-navy-900">
-                Due
+                {t('Due')}
               </span>
             )}
           </p>
@@ -71,7 +73,7 @@ export default function ReminderCard({ reminder, now, todayKey, timeZone, onTogg
         <button
           type="button"
           onClick={() => onEdit(reminder)}
-          aria-label={`Edit ${reminder.title}`}
+          aria-label={t('Edit {title}', { title: reminder.title })}
           className="group/icon inline-flex h-8 shrink-0 items-center gap-1.5 rounded-pill px-2 text-[13px] leading-5 font-semibold text-navy-700 hover:text-blue-500"
         >
           <SquarePen
@@ -80,7 +82,7 @@ export default function ReminderCard({ reminder, now, todayKey, timeZone, onTogg
             aria-hidden="true"
             className="transition-[stroke-width] duration-150 group-hover/icon:stroke-[2.5]"
           />
-          Edit
+          {t('Edit')}
         </button>
       </div>
       {reminder.description && (

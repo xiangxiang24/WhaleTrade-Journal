@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type FormEvent } from 'react'
 import { CircleAlert } from 'lucide-react'
 import ModalFrame from '../../shared/modal/modal-frame'
 import { formatBaht } from '../types/format'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type GoalModalProps = {
   open: boolean
@@ -16,6 +17,7 @@ const EXIT_MS = 200
 const GOAL_MAX = 999_999_999_999
 
 function Dialog({ goal, onSubmit, onClose }: Omit<GoalModalProps, 'open'>) {
+  const { t } = useI18n()
   const [text, setText] = useState(goal ? formatBaht(goal) : '')
   const [error, setError] = useState<string>()
   const [submitError, setSubmitError] = useState<string>()
@@ -42,7 +44,7 @@ function Dialog({ goal, onSubmit, onClose }: Omit<GoalModalProps, 'open'>) {
       await onSubmit(value)
       setClosing(true)
     } catch (caught) {
-      setSubmitError(caught instanceof Error ? caught.message : 'Could not save the goal. Please try again.')
+      setSubmitError(t(caught instanceof Error ? caught.message : 'Could not save the goal. Please try again.'))
       setSubmitting(false)
     }
   }
@@ -53,7 +55,7 @@ function Dialog({ goal, onSubmit, onClose }: Omit<GoalModalProps, 'open'>) {
     const digits = text.replace(/\D/g, '')
     const value = digits ? Number(digits) : null
     if (value === null || value <= 0 || value > GOAL_MAX) {
-      setError('Enter a yearly goal greater than 0.')
+      setError(t('Enter a yearly goal greater than 0.'))
       return
     }
     setError(undefined)
@@ -71,15 +73,15 @@ function Dialog({ goal, onSubmit, onClose }: Omit<GoalModalProps, 'open'>) {
       cardClassName="max-w-110 p-5 text-left min-[640px]:p-8"
     >
       <h2 id={titleId} className="m-0 text-[24px] leading-8 font-bold text-navy-900">
-        {goal ? 'Edit annual goal' : 'Set annual goal'}
+        {goal ? t('Edit annual goal') : t('Set annual goal')}
       </h2>
       <p id={descId} className="m-0 mt-1 mb-5 text-[14px] leading-5 text-text-muted">
-        The yearly dividend income you are growing toward. Progress is counted from dividends you have recorded.
+        {t('The yearly dividend income you are growing toward. Progress is counted from dividends you have recorded.')}
       </p>
 
       <form noValidate onSubmit={handleSubmit}>
         <label htmlFor={inputId} className="block text-[12px] leading-4 font-semibold text-navy-900">
-          Annual dividend goal
+          {t('Annual dividend goal')}
         </label>
         <div className="relative mt-1.5">
           <input
@@ -99,7 +101,7 @@ function Dialog({ goal, onSubmit, onClose }: Omit<GoalModalProps, 'open'>) {
             }`}
           />
           <span aria-hidden="true" className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-[13px] font-semibold text-text-muted">
-            THB / year
+            {t('THB / year')}
           </span>
         </div>
         {error && (
@@ -124,7 +126,7 @@ function Dialog({ goal, onSubmit, onClose }: Omit<GoalModalProps, 'open'>) {
               onClick={() => void save(null)}
               className="inline-flex h-11 items-center rounded-pill border-2 border-red-500 bg-surface px-5 text-[14px] leading-5 font-semibold text-red-500 transition-colors duration-150 hover:bg-red-50 disabled:opacity-50"
             >
-              Remove goal
+              {t('Remove goal')}
             </button>
           ) : (
             <span />
@@ -136,14 +138,14 @@ function Dialog({ goal, onSubmit, onClose }: Omit<GoalModalProps, 'open'>) {
               onClick={() => setClosing(true)}
               className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
             >
-              Cancel
+              {t('Cancel')}
             </button>
             <button
               type="submit"
               disabled={submitting}
               className="inline-flex h-11 items-center rounded-pill bg-blue-500 px-6 text-[14px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900 disabled:bg-blue-200 disabled:shadow-none"
             >
-              {submitting ? 'Saving…' : 'Save goal'}
+              {submitting ? t('Saving…') : t('Save goal')}
             </button>
           </div>
         </div>

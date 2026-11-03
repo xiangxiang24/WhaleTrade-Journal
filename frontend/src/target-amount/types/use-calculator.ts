@@ -14,6 +14,7 @@ import {
   type PhaseRow,
   type SourceMode,
 } from './target-amount'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 export type PortfolioOption = { portfolio: Portfolio; holdings: Holding[] }
 export type SourceStatus = 'loading' | 'ready' | 'error'
@@ -37,6 +38,7 @@ const yieldText = (value: number | null) => (value === null ? '' : String(Number
 
 // state ทั้งหมดของฟอร์มเครื่องคำนวณ + ตัวเลขสรุปสดๆ + การคำนวณ (ผลจำลอง) และตรวจข้อมูลตอนกด Calculate
 export function useCalculator() {
+  const { t } = useI18n()
   const [mode, setMode] = useState<SourceMode>('portfolio')
   const [options, setOptions] = useState<PortfolioOption[]>([])
   const [sourceStatus, setSourceStatus] = useState<SourceStatus>('loading')
@@ -158,21 +160,21 @@ export function useCalculator() {
 
   function validate(): FormErrors {
     const found: FormErrors = {}
-    if (rows.length === 0) found.assets = 'Add at least one stock or fund to calculate.'
+    if (rows.length === 0) found.assets = t('Add at least one stock or fund to calculate.')
     else if (rows.some((row) => parseYield(row.yieldText) === null))
-      found.assets = 'Enter a dividend yield between 0 and 100% for every stock or fund.'
+      found.assets = t('Enter a dividend yield between 0 and 100% for every stock or fund.')
     if (principalText.trim() === '' && phaseDca.every((value) => value === 0) && totalDca === 0)
-      found.principal = 'Enter your initial principal or a monthly DCA.'
+      found.principal = t('Enter your initial principal or a monthly DCA.')
     if (!phasesOn) {
-      if (parseWhole(dcaText) === null) found.dca = 'Enter a monthly DCA (0 if none).'
+      if (parseWhole(dcaText) === null) found.dca = t('Enter a monthly DCA (0 if none).')
       const years = parseWhole(yearsText)
-      if (years === null || years < 1 || years > MAX_YEARS) found.duration = `Enter a duration from 1 to ${MAX_YEARS} years.`
+      if (years === null || years < 1 || years > MAX_YEARS) found.duration = t('Enter a duration from 1 to {max} years.', { max: MAX_YEARS })
     } else if (phases.some((phase) => !(parseWhole(phase.yearsText) ?? 0) || parseWhole(phase.dcaText) === null)) {
-      found.phases = 'Every phase needs at least 1 year and a monthly DCA (0 if none).'
+      found.phases = t('Every phase needs at least 1 year and a monthly DCA (0 if none).')
     } else if (totalYears > MAX_YEARS) {
-      found.phases = `Total duration can be at most ${MAX_YEARS} years.`
+      found.phases = t('Total duration can be at most {max} years.', { max: MAX_YEARS })
     }
-    if (!found.principal && principal === 0 && totalDca === 0) found.principal = 'Enter your initial principal or a monthly DCA.'
+    if (!found.principal && principal === 0 && totalDca === 0) found.principal = t('Enter your initial principal or a monthly DCA.')
     return found
   }
 

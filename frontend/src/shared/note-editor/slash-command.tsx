@@ -5,6 +5,7 @@ import SlashMenu, { type SlashMenuHandle } from './slash-menu'
 import { filterSlashItems, type SlashItem } from './slash-items'
 
 type SlashCommandOptions = {
+  translate: (text: string) => string
   /** เปิดกล่องแนบไฟล์/ภาพ/ลิงก์ (คำสั่ง Attachment) */
   openAttachment: () => void
   /** แจ้งเมื่อเมนูเปิด/ปิด (ให้ตัวแก้ไขกัน Esc ไปปิด modal ที่ครอบอยู่) */
@@ -63,17 +64,17 @@ export const SlashCommand = Extension.create<SlashCommandOptions>({
   name: 'slashCommand',
 
   addOptions() {
-    return { openAttachment: () => undefined, onMenuChange: () => undefined }
+    return { translate: (text: string) => text, openAttachment: () => undefined, onMenuChange: () => undefined }
   },
 
   addProseMirrorPlugins() {
-    const { openAttachment, onMenuChange } = this.options
+    const { translate, openAttachment, onMenuChange } = this.options
 
     return [
       Suggestion<SlashItem, SlashItem>({
         editor: this.editor,
         char: '/',
-        items: ({ query }) => filterSlashItems(query),
+        items: ({ query }) => filterSlashItems(query, translate),
         command: ({ editor, range, props }: { editor: Editor; range: Range; props: SlashItem }) => {
           props.run({ editor, range, openAttachment })
         },
@@ -83,7 +84,7 @@ export const SlashCommand = Extension.create<SlashCommandOptions>({
           return {
             onStart: (props: SuggestionProps<SlashItem, SlashItem>) => {
               renderer = new ReactRenderer(SlashMenu, {
-                props: { items: props.items, command: (item: SlashItem) => props.command(item) },
+                props: { t: translate, items: props.items, command: (item: SlashItem) => props.command(item) },
                 editor: props.editor,
               })
               document.body.appendChild(renderer.element)

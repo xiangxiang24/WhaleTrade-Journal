@@ -13,6 +13,7 @@ import TargetHeader from './components/target-header'
 import SavePlanModal from './modals/save-plan-modal'
 import type { ReminderToast } from '../reminder/types/reminder'
 import { useCalculator } from './types/use-calculator'
+import { useI18n } from '../shared/i18n/use-i18n'
 
 type TargetAmountProps = {
   user: SidebarUser
@@ -24,6 +25,7 @@ type TargetAmountProps = {
 
 // หน้า Target Calculator: ฟอร์ม 3 ขั้นตอน (ซ้าย) + Sanctuary Summary (ขวา/บนในจอแคบ) แล้วผลประมาณการด้านล่างหลังกด Calculate
 export default function TargetAmount({ user, reminderBadge, onNavigate, onLogout }: TargetAmountProps) {
+  const { t } = useI18n()
   const calc = useCalculator()
   const { leaving, leaveTo } = usePageLeave()
   const [saveOpen, setSaveOpen] = useState(false)
@@ -51,13 +53,13 @@ export default function TargetAmount({ user, reminderBadge, onNavigate, onLogout
       phases: result.input.phases,
       assets: result.assets.map(({ assetId, dividendPct }) => ({ assetId, dividendPct })),
     })
-    showToast(`“${name}” saved to Saved Plans`)
+    showToast(t('“{name}” saved to Saved Plans', { name }))
   }
 
   // ส่งออก PDF/รูปภาพต้องใช้โปรเซสหลักของ Electron จึงทำตอนต่อ backend (ตอนนี้แจ้งผู้ใช้)
-  const handleExport = (kind: 'PDF' | 'image') => showToast(`Export ${kind} will be available once the app is connected.`)
+  const handleExport = (kind: 'PDF' | 'image') => showToast(t('Export {kind} will be available once the app is connected.', { kind: t(kind) }))
 
-  const defaultName = `${calc.summary.totalYears}-year quiet sanctuary`
+  const defaultName = t('{n}-year quiet sanctuary', { n: calc.summary.totalYears })
 
   return (
     <AppLayout

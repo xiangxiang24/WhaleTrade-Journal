@@ -6,6 +6,7 @@ import type { Transaction } from '../../shared/types/transaction'
 import { formatBaht, formatDecimal, formatMonthHeading, formatTxDate } from '../types/format'
 import { TYPE_LABEL } from '../types/type-label'
 import TypeBadge from './type-badge'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type TransactionTableProps = {
   /** หลังกรองแล้ว เรียงใหม่ → เก่า */
@@ -24,6 +25,7 @@ const ICON = 'transition-[color,stroke-width,filter] duration-150 group-hover/ic
 // ตารางธุรกรรมแบ่งกลุ่มรายเดือน: คอลัมน์ STOCK / TYPE / PERCENT UNIT / DATE / AMOUNT / ACTION
 // กว้างกว่าพื้นที่ = เลื่อนแนวนอนในการ์ด โดยคอลัมน์แรก (หุ้น) ติดซ้าย (design rules 5.1)
 export default function TransactionTable({ transactions, yields, onEdit, onDelete }: TransactionTableProps) {
+  const { t, locale } = useI18n()
   const groups: { month: string; items: Transaction[] }[] = []
   for (const tx of transactions) {
     const month = tx.date.slice(0, 7)
@@ -37,12 +39,12 @@ export default function TransactionTable({ transactions, yields, onEdit, onDelet
       <table className="w-full min-w-[980px] border-collapse">
         <thead>
           <tr className="bg-blue-500">
-            <th scope="col" className={`${TH} sticky left-0 z-10 w-[32%] bg-blue-500 pl-6`}>Stock / Fund</th>
-            <th scope="col" className={TH}>Type</th>
-            <th scope="col" className={`${TH} text-right whitespace-nowrap`}>Percent unit</th>
-            <th scope="col" className={TH}>Date</th>
-            <th scope="col" className={`${TH} text-right`}>Amount</th>
-            <th scope="col" className={`${TH} pr-6 text-right`}>Action</th>
+            <th scope="col" className={`${TH} sticky left-0 z-10 w-[32%] bg-blue-500 pl-6`}>{t('Stock / Fund')}</th>
+            <th scope="col" className={TH}>{t('Type')}</th>
+            <th scope="col" className={`${TH} text-right whitespace-nowrap`}>{t('Percent unit')}</th>
+            <th scope="col" className={TH}>{t('Date')}</th>
+            <th scope="col" className={`${TH} text-right`}>{t('Amount')}</th>
+            <th scope="col" className={`${TH} pr-6 text-right`}>{t('Action')}</th>
           </tr>
         </thead>
         {groups.map((group) => (
@@ -51,9 +53,9 @@ export default function TransactionTable({ transactions, yields, onEdit, onDelet
               <tr>
                 <th scope="colgroup" colSpan={6} className="border-b border-line bg-blue-50 p-0 text-left">
                   <div className="sticky left-0 flex w-fit items-center gap-3 px-6 py-2 text-[13px] leading-5 font-semibold text-navy-700">
-                    {formatMonthHeading(group.month)}
+                    {formatMonthHeading(group.month, locale)}
                     <span className="font-medium text-text-muted">
-                      {group.items.length} {group.items.length === 1 ? 'entry' : 'entries'}
+                      {t(group.items.length === 1 ? '{n} entry' : '{n} entries', { n: group.items.length })}
                     </span>
                   </div>
                 </th>
@@ -65,9 +67,9 @@ export default function TransactionTable({ transactions, yields, onEdit, onDelet
                 const sign = tx.type === 'buy' ? '−' : '+'
                 const subtitle =
                   tx.type === 'dividend'
-                    ? `${formatBaht(amount / 12)} THB / mo`
+                    ? t('{amount} THB / mo', { amount: formatBaht(amount / 12) })
                     : `${formatDecimal(tx.units ?? 0, 6)} × ${formatDecimal(tx.price ?? 0, 4)}`
-                const label = `${TYPE_LABEL[tx.type]} ${asset?.ticker ?? ''} on ${formatTxDate(tx.date)}`
+                const label = t('{type} {ticker} on {date}', { type: t(TYPE_LABEL[tx.type]), ticker: asset?.ticker ?? '', date: formatTxDate(tx.date, locale) })
                 return (
                   <tr key={tx.id} className="border-b border-line last:border-b-0">
                     <td className="sticky left-0 z-[1] min-w-64 bg-surface py-3 pr-4 pl-6">
@@ -79,10 +81,10 @@ export default function TransactionTable({ transactions, yields, onEdit, onDelet
                           {asset?.ticker.slice(0, 5)}
                         </span>
                         <div className="min-w-0">
-                          <p className="m-0 text-[15px] leading-6 font-bold text-navy-900">{asset?.name ?? 'Unknown asset'}</p>
+                          <p className="m-0 text-[15px] leading-6 font-bold text-navy-900">{asset?.name ?? t('Unknown asset')}</p>
                           <p className="m-0 text-[12px] leading-4 text-text-muted">
                             {asset ? `${asset.market}: ${asset.ticker}` : '—'}
-                            {asset?.sector ? ` • ${asset.sector}` : ''}
+                            {asset?.sector ? ` • ${t(asset.sector)}` : ''}
                           </p>
                           {tx.tag && <p className="m-0 text-[12px] leading-4 text-text-muted">{tx.tag}</p>}
                         </div>
@@ -90,11 +92,11 @@ export default function TransactionTable({ transactions, yields, onEdit, onDelet
                     </td>
                     <td className="px-4 py-3"><TypeBadge type={tx.type} /></td>
                     <td className="px-4 py-3 text-right text-[16px] leading-6 font-semibold text-navy-700 tabular-nums">
-                      {yieldPct === undefined ? <span aria-label="No yield">—</span> : `${yieldPct.toFixed(1)}%`}
+                      {yieldPct === undefined ? <span aria-label={t('No yield')}>—</span> : `${yieldPct.toFixed(1)}%`}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <time dateTime={tx.date} className="block text-[14px] leading-5 font-medium text-navy-900">
-                        {formatTxDate(tx.date)}
+                        {formatTxDate(tx.date, locale)}
                       </time>
                       {tx.note && <span className="block text-[12px] leading-4 text-text-muted">{tx.note}</span>}
                     </td>
@@ -102,16 +104,16 @@ export default function TransactionTable({ transactions, yields, onEdit, onDelet
                       <p className="m-0 text-[16px] leading-6 font-bold whitespace-nowrap text-navy-900 tabular-nums">
                         {sign}
                         {formatBaht(amount)}
-                        <span className="ml-1 text-[0.75em] font-semibold text-text-muted">THB</span>
+                        <span className="ml-1 text-[0.75em] font-semibold text-text-muted">{t('THB')}</span>
                       </p>
                       <p className="m-0 text-[12px] leading-4 whitespace-nowrap text-text-muted tabular-nums">{subtitle}</p>
                     </td>
                     <td className="py-3 pr-6 pl-4">
                       <div className="flex justify-end gap-1">
-                        <button type="button" aria-label={`Edit ${label}`} onClick={() => onEdit(tx)} className={ICON_BUTTON}>
+                        <button type="button" aria-label={t('Edit {label}', { label })} onClick={() => onEdit(tx)} className={ICON_BUTTON}>
                           <Pencil size={16} strokeWidth={1.75} aria-hidden="true" className={`text-navy-700 group-hover/icon:text-blue-500 ${ICON}`} />
                         </button>
-                        <button type="button" aria-label={`Delete ${label}`} onClick={() => onDelete(tx)} className={ICON_BUTTON}>
+                        <button type="button" aria-label={t('Delete {label}', { label })} onClick={() => onDelete(tx)} className={ICON_BUTTON}>
                           <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" className={`text-red-500 group-hover/icon:brightness-75 ${ICON}`} />
                         </button>
                       </div>

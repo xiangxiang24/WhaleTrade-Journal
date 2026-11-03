@@ -4,6 +4,7 @@ import logo from '../../assets/Logo.png'
 import type { JournalNote } from '../../shared/types/journal-note'
 import type { JournalLoadStatus } from '../types/journal'
 import JournalCard from './journal-card'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type JournalListProps = {
   status: JournalLoadStatus
@@ -47,9 +48,10 @@ export default function JournalList({
   onClearFilters,
   onRetry,
 }: JournalListProps) {
+  const { t } = useI18n()
   if (status === 'loading') {
     return (
-      <div className={GRID} role="status" aria-label="Loading your journals">
+      <div className={GRID} role="status" aria-label={t('Loading your journals')}>
         {Array.from({ length: 6 }, (_, index) => (
           <div key={index} className="h-56 animate-pulse rounded-lg bg-blue-100 motion-reduce:animate-none" />
         ))}
@@ -59,9 +61,9 @@ export default function JournalList({
 
   if (status === 'error') {
     return (
-      <EmptyState title="Could not load your journals" description="Something went wrong. Please try again.">
+      <EmptyState title={t('Could not load your journals')} description={t('Something went wrong. Please try again.')}>
         <button type="button" onClick={onRetry} className={PRIMARY_BUTTON}>
-          Try again
+          {t('Try again')}
         </button>
       </EmptyState>
     )
@@ -69,10 +71,10 @@ export default function JournalList({
 
   if (totalCount === 0) {
     return (
-      <EmptyState title="No journal notes yet" description="Write your first note to keep your reasons next to your decisions.">
+      <EmptyState title={t('No journal notes yet')} description={t('Write your first note to keep your reasons next to your decisions.')}>
         <button type="button" onClick={onNewNote} className={PRIMARY_BUTTON}>
           <PenLine size={18} strokeWidth={1.75} aria-hidden="true" />
-          New Note
+          {t('New Note')}
         </button>
       </EmptyState>
     )
@@ -80,13 +82,13 @@ export default function JournalList({
 
   if (notes.length === 0) {
     return (
-      <EmptyState title="No notes match your search" description="Try a different word or clear the filters.">
+      <EmptyState title={t('No notes match your search')} description={t('Try a different word or clear the filters.')}>
         <button
           type="button"
           onClick={onClearFilters}
           className="inline-flex h-9 items-center rounded-pill px-4 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:bg-blue-50 active:bg-blue-100"
         >
-          Clear filters
+          {t('Clear filters')}
         </button>
       </EmptyState>
     )

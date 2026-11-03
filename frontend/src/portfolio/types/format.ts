@@ -6,8 +6,8 @@ export function formatAmount(value: number) {
 }
 
 /** วันที่อัปเดตล่าสุด เช่น "Oct 8, 2026" ตามเขตเวลาผู้ใช้ */
-export function formatUpdated(iso: string, timeZone: string) {
-  return new Intl.DateTimeFormat('en-US', {
+export function formatUpdated(iso: string, timeZone: string, locale = 'en-US') {
+  return new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { BookOpen, Check, Paperclip, Plus } from 'lucide-react'
 import type { Task } from '../../shared/types/reminder'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type TodoCardProps = {
   tasks: Task[]
@@ -13,6 +14,7 @@ const NOTE = 'Gentle To-Do List for reminding of sub-events'
 
 // การ์ด Gentle To-Dos: task checkbox (ค้างก่อน เสร็จแล้วขีดฆ่าอยู่ท้าย) + ช่องเพิ่ม task + กล่องหมายเหตุ
 export default function TodoCard({ tasks, onToggle, onAdd }: TodoCardProps) {
+  const { t } = useI18n()
   const [text, setText] = useState('')
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string>()
@@ -30,7 +32,7 @@ export default function TodoCard({ tasks, onToggle, onAdd }: TodoCardProps) {
       await onAdd(value)
       setText('')
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not add this task. Please try again.')
+      setError(t(caught instanceof Error ? caught.message : 'Could not add this task. Please try again.'))
     } finally {
       setAdding(false)
     }
@@ -38,7 +40,7 @@ export default function TodoCard({ tasks, onToggle, onAdd }: TodoCardProps) {
 
   return (
     <div>
-      <section aria-label="Gentle to-dos" className="relative rounded-4xl bg-parchment p-5 shadow-md min-[640px]:p-6">
+      <section aria-label={t('Gentle to-dos')} className="relative rounded-4xl bg-parchment p-5 shadow-md min-[640px]:p-6">
         {/* คลิปทองตกแต่งมุมบนขวา (กฎ: gold ใช้กับไอคอนคลิปเท่านั้น) */}
         <Paperclip
           size={30}
@@ -47,15 +49,15 @@ export default function TodoCard({ tasks, onToggle, onAdd }: TodoCardProps) {
           className="absolute -top-2 right-6 text-gold-400"
         />
         <header>
-          <h2 className="m-0 text-[22px] leading-7 font-bold text-navy-900">Gentle To-Dos</h2>
+          <h2 className="m-0 text-[22px] leading-7 font-bold text-navy-900">{t('Gentle To-Dos')}</h2>
           <p className="m-0 text-[13px] leading-5 text-text-muted">
-            Patience ledger • {pending.length} {pending.length === 1 ? 'action' : 'actions'} pending
+            {t(pending.length === 1 ? 'Patience ledger • {n} action pending' : 'Patience ledger • {n} actions pending', { n: pending.length })}
           </p>
         </header>
 
         {tasks.length === 0 ? (
           <p className="m-0 mt-4 rounded-3xl bg-surface px-5 py-4 text-[14px] leading-6 text-text-muted">
-            No tasks yet. Add one quiet thing you want to remember.
+            {t('No tasks yet. Add one quiet thing you want to remember.')}
           </p>
         ) : (
           <ul className="m-0 mt-4 flex list-none flex-col gap-2 p-0">
@@ -89,12 +91,12 @@ export default function TodoCard({ tasks, onToggle, onAdd }: TodoCardProps) {
 
         <form noValidate onSubmit={handleSubmit} className="mt-4 flex items-center gap-2">
           <label className="min-w-0 flex-1">
-            <span className="sr-only">Add a quiet task</span>
+            <span className="sr-only">{t('Add a quiet task')}</span>
             <input
               value={text}
               maxLength={TASK_MAX}
               onChange={(event) => setText(event.target.value)}
-              placeholder="Add a quiet task…"
+              placeholder={t('Add a quiet task…')}
               className="h-11 w-full rounded-pill border-2 border-blue-500 bg-surface px-4 text-[14px] text-navy-900 outline-none transition-shadow duration-150 placeholder:text-text-muted focus:shadow-focus"
             />
           </label>
@@ -104,7 +106,7 @@ export default function TodoCard({ tasks, onToggle, onAdd }: TodoCardProps) {
             className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-pill bg-blue-500 px-5 text-[14px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900 disabled:bg-blue-200 disabled:shadow-none"
           >
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-            {adding ? 'Adding…' : 'Add'}
+            {adding ? t('Adding…') : t('Add')}
           </button>
         </form>
         {error && (
@@ -116,7 +118,7 @@ export default function TodoCard({ tasks, onToggle, onAdd }: TodoCardProps) {
 
       <p className="m-0 mt-4 flex items-center gap-3 rounded-3xl bg-blue-50 px-5 py-4 text-[13px] leading-5 text-navy-700">
         <BookOpen size={18} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
-        {NOTE}
+        {t(NOTE)}
       </p>
     </div>
   )

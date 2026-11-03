@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { CircleAlert, Plus } from 'lucide-react'
 import AssetPicker from '../../shared/asset-picker/asset-picker'
 import type { Asset } from '../../shared/types/transaction'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type AddAssetControlProps = {
   /** เพิ่ม asset (ซ้ำ = false) */
@@ -12,6 +13,7 @@ type AddAssetControlProps = {
 
 // เพิ่มหุ้น/กองทุนเข้ารายการ: ช่องค้นหาจากรายการกลาง (Feature 6) + ปุ่ม Add
 export default function AddAssetControl({ onAdd, alwaysOpen }: AddAssetControlProps) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [pending, setPending] = useState<Asset | null>(null)
   const [version, setVersion] = useState(0)
@@ -25,18 +27,18 @@ export default function AddAssetControl({ onAdd, alwaysOpen }: AddAssetControlPr
         className="flex h-11 w-full items-center justify-center gap-2 rounded-pill border-2 border-dashed border-blue-200 bg-surface text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50"
       >
         <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-        Add Dividend and Ticker
+        {t('Add Dividend and Ticker')}
       </button>
     )
   }
 
   function handleAdd() {
     if (!pending) {
-      setError('Choose a stock or fund from the list first.')
+      setError(t('Choose a stock or fund from the list first.'))
       return
     }
     if (!onAdd(pending)) {
-      setError(`${pending.ticker} is already in the list.`)
+      setError(t('{ticker} is already in the list.', { ticker: pending.ticker }))
       return
     }
     setError(undefined)
@@ -52,7 +54,7 @@ export default function AddAssetControl({ onAdd, alwaysOpen }: AddAssetControlPr
         <div className="min-w-0 flex-1 basis-56">
           <AssetPicker
             key={version}
-            label="Type name or ticker"
+            label={t('Type name or ticker')}
             value={pending}
             onChange={(asset) => {
               setPending(asset)
@@ -67,7 +69,7 @@ export default function AddAssetControl({ onAdd, alwaysOpen }: AddAssetControlPr
             className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-pill bg-blue-500 px-5 text-[14px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900"
           >
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-            Add
+            {t('Add')}
           </button>
           {!alwaysOpen && (
             <button
@@ -79,7 +81,7 @@ export default function AddAssetControl({ onAdd, alwaysOpen }: AddAssetControlPr
               }}
               className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-5 text-[14px] leading-5 font-semibold text-navy-700 hover:border-blue-500 hover:bg-blue-50"
             >
-              Cancel
+              {t('Cancel')}
             </button>
           )}
         </div>

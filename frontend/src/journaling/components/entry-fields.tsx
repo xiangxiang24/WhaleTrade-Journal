@@ -3,6 +3,7 @@ import { CircleAlert } from 'lucide-react'
 import { contentToPlainText } from '../../shared/note-editor/content'
 import NoteEditor from '../../shared/note-editor/note-editor'
 import { countWords } from '../../shared/note-form/count-words'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type EntryFieldsProps = {
   title: string
@@ -24,6 +25,7 @@ export default function EntryFields({
   onTitleChange,
   onContentChange,
 }: EntryFieldsProps) {
+  const { t } = useI18n()
   const titleId = useId()
   const contentId = useId()
   const contentLabelId = useId()
@@ -33,7 +35,7 @@ export default function EntryFields({
     <>
       <div>
         <label htmlFor={titleId} className={`block ${LABEL}`}>
-          Title
+          {t('Title')}
         </label>
         <input
           id={titleId}
@@ -41,7 +43,7 @@ export default function EntryFields({
           value={title}
           maxLength={TITLE_MAX}
           onChange={(event) => onTitleChange(event.target.value)}
-          placeholder="Today Journal"
+          placeholder={t('Today Journal')}
           className="mt-1.5 h-12 w-full rounded-xl bg-blue-50 px-5 text-[17px] leading-6 font-bold text-navy-900 outline-none transition-shadow duration-150 placeholder:font-medium placeholder:text-text-muted focus:shadow-focus min-[640px]:text-[20px]"
         />
       </div>
@@ -49,10 +51,10 @@ export default function EntryFields({
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex items-center justify-between gap-3">
           <span id={contentLabelId} className={LABEL}>
-            Reflective thoughts
+            {t('Reflective thoughts')}
           </span>
           <span className="text-[12px] leading-4 text-text-muted tabular-nums" aria-live="polite">
-            {wordCount} {wordCount === 1 ? 'word' : 'words'}
+            {t(wordCount === 1 ? '{n} word' : '{n} words', { n: wordCount })}
           </span>
         </div>
         <div className="mt-1.5">

@@ -10,6 +10,7 @@ import DeletePlanModal from './modals/delete-plan-modal'
 import RenamePlanModal from './modals/rename-plan-modal'
 import type { PlanToast } from './types/saved-plan'
 import { useSavedPlans } from './types/use-saved-plans'
+import { useI18n } from '../shared/i18n/use-i18n'
 
 type SavedPlanProps = {
   user: SidebarUser
@@ -32,6 +33,7 @@ export default function SavedPlan({
   onLogout,
   onOpenPlan,
 }: SavedPlanProps) {
+  const { t } = useI18n()
   const { plans, names, status, reload, rename, remove } = useSavedPlans()
   const { leaving, leaveTo } = usePageLeave()
   const [renameTarget, setRenameTarget] = useState<CalcPlan | null>(null)
@@ -43,12 +45,12 @@ export default function SavedPlan({
 
   async function handleRename(plan: CalcPlan, name: string) {
     await rename(plan.id, name)
-    showToast(`Renamed to “${name}”`)
+    showToast(t('Renamed to “{name}”', { name }))
   }
 
   async function handleDelete(plan: CalcPlan) {
     await remove(plan.id)
-    showToast(`“${plan.name}” deleted`)
+    showToast(t('“{name}” deleted', { name: plan.name }))
   }
 
   const goNewPlan = () => leaveTo(() => onNavigate?.('target-amount'))
@@ -70,7 +72,7 @@ export default function SavedPlan({
           </div>
 
           <section
-            aria-label="Saved plans"
+            aria-label={t('Saved plans')}
             className="mt-6 animate-fade-up px-1 pb-2 [animation-delay:80ms] min-[640px]:mt-8 motion-reduce:animate-none"
           >
             <PlanGrid

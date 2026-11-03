@@ -3,16 +3,18 @@ import type { CalcPlan } from '../../shared/types/calc-plan'
 import { formatBaht } from '../../target-amount/types/format'
 import { stageName } from '../../target-amount/types/target-amount'
 import { formatYears } from '../types/saved-plan'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 // การ์ด "Plan inputs": ค่าที่บันทึกไว้ในแผน (หุ้น + ปันผล % ต่อปี และแต่ละเฟส) ไว้ดูประกอบผล
 export default function InputsCard({ plan }: { plan: CalcPlan }) {
+  const { t } = useI18n()
   return (
-    <section aria-label="Plan inputs" className="rounded-4xl bg-surface p-5 shadow-md min-[640px]:p-8">
-      <h3 className="m-0 text-[20px] leading-7 font-bold text-navy-900">Plan inputs</h3>
-      <p className="m-0 text-[13px] leading-5 text-text-muted">The numbers this estimate was calculated from.</p>
+    <section aria-label={t('Plan inputs')} className="rounded-4xl bg-surface p-5 shadow-md min-[640px]:p-8">
+      <h3 className="m-0 text-[20px] leading-7 font-bold text-navy-900">{t('Plan inputs')}</h3>
+      <p className="m-0 text-[13px] leading-5 text-text-muted">{t('The numbers this estimate was calculated from.')}</p>
 
       <h4 className="m-0 mt-5 text-[11px] leading-4 font-semibold tracking-[0.08em] text-text-muted uppercase">
-        Stocks &amp; dividend yield
+        {t('Stocks & dividend yield')}
       </h4>
       <ul className="m-0 mt-2 flex list-none flex-col gap-2 p-0">
         {plan.assets.map((asset) => {
@@ -26,9 +28,9 @@ export default function InputsCard({ plan }: { plan: CalcPlan }) {
                 {info?.ticker.slice(0, 5)}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[14px] leading-5 font-bold break-words text-navy-900">{info?.name ?? 'Unknown asset'}</span>
+                <span className="block text-[14px] leading-5 font-bold break-words text-navy-900">{info?.name ?? t('Unknown asset')}</span>
                 <span className="block text-[12px] leading-4 text-text-muted">
-                  {info ? `${info.ticker} · ${info.market}${info.sector ? ` · ${info.sector}` : ''}` : '—'}
+                  {info ? `${info.ticker} · ${info.market}${info.sector ? ` · ${t(info.sector)}` : ''}` : '—'}
                 </span>
               </span>
               <span className="shrink-0 text-[16px] leading-6 font-bold text-navy-900 tabular-nums">{asset.dividendPct}%</span>
@@ -38,7 +40,7 @@ export default function InputsCard({ plan }: { plan: CalcPlan }) {
       </ul>
 
       <h4 className="m-0 mt-5 text-[11px] leading-4 font-semibold tracking-[0.08em] text-text-muted uppercase">
-        {plan.phases.length > 1 ? 'Phases' : 'Contribution'}
+        {plan.phases.length > 1 ? t('Phases') : t('Contribution')}
       </h4>
       <ul className="m-0 mt-2 flex list-none flex-col gap-2 p-0">
         {plan.phases.map((phase, index) => (
@@ -51,12 +53,12 @@ export default function InputsCard({ plan }: { plan: CalcPlan }) {
             </span>
             <span className="min-w-0 flex-1 basis-32">
               <span className="block text-[14px] leading-5 font-semibold text-navy-900">
-                {plan.phases.length > 1 ? `Phase ${index + 1}` : 'Monthly DCA'}
+                {plan.phases.length > 1 ? t('Phase {n}', { n: index + 1 }) : t('Monthly DCA')}
               </span>
-              {plan.phases.length > 1 && <span className="block text-[12px] leading-4 text-text-muted">{stageName(index)}</span>}
+              {plan.phases.length > 1 && <span className="block text-[12px] leading-4 text-text-muted">{t(stageName(index))}</span>}
             </span>
             <span className="text-[14px] leading-5 font-semibold whitespace-nowrap text-navy-900 tabular-nums">
-              {formatYears(phase.years)} × {formatBaht(phase.monthlyDca)} THB/month
+              {formatYears(phase.years, t)} × {formatBaht(phase.monthlyDca)} THB/{t('month')}
             </span>
           </li>
         ))}

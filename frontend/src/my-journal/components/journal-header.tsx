@@ -1,4 +1,5 @@
 import { Coffee } from 'lucide-react'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 // ข้อความตกแต่งคงที่ของหน้าจอ (database.md หัวข้อ 4) ยังไม่ผ่านระบบแปลภาษา
 const BADGE = 'Safe Haven'
@@ -22,26 +23,27 @@ function WeatherIcon() {
 
 // ส่วนหัว: "Welcome back" + ป้ายสถานะ + คำเตือนใจ (ซ้าย) / กล่องข้อความฮีลใจ (ขวา)
 export default function JournalHeader() {
+  const { t } = useI18n()
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
       <div>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="m-0 text-[30px] leading-10 font-bold text-navy-900 min-[640px]:text-[36px] min-[640px]:leading-11 min-[1280px]:text-[48px] min-[1280px]:leading-14">
-            Welcome back
+            {t('Welcome back')}
           </h1>
           <WeatherIcon />
           <span className="rounded-pill bg-blue-100 px-3 py-1 text-[12px] leading-4 font-medium text-navy-700">
-            {BADGE}
+            {t(BADGE)}
           </span>
         </div>
         <p className="m-0 mt-2 max-w-170 text-[15px] leading-6 text-navy-700 min-[640px]:text-[18px] min-[640px]:leading-7 min-[1280px]:text-[22px] min-[1280px]:leading-8">
-          {SUBTITLE}
+          {t(SUBTITLE)}
         </p>
       </div>
 
       <p className="m-0 inline-flex max-w-full items-center gap-3 rounded-2xl bg-surface px-5 py-3 text-[13px] leading-5 text-navy-900 shadow-md min-[640px]:rounded-pill min-[640px]:px-6 min-[640px]:text-[14px]">
         <span aria-hidden="true" className="size-2 shrink-0 rounded-pill bg-navy-700" />
-        {QUICK_NOTE}
+        {t(QUICK_NOTE)}
         <Coffee size={16} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-navy-700" />
       </p>
     </div>

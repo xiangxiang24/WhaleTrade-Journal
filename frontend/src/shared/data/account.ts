@@ -5,13 +5,36 @@ import type { Account, Language } from '../types/account'
 const MOCK_PASSWORD = 'Whale1234'
 let currentPassword = MOCK_PASSWORD
 
+// ภาษาและเขตเวลาจำไว้ในเบราว์เซอร์ (รีเฟรชแล้วยังเป็นค่าเดิม) ของจริงเก็บที่ User.language / User.timezone ใน DB
+const PREFS_KEY = 'whale-journal:preferences'
+
+function loadPreferences(): Pick<Account, 'language' | 'timezone'> {
+  const fallback = { language: 'en' as Language, timezone: 'Asia/Bangkok' }
+  try {
+    const saved = JSON.parse(localStorage.getItem(PREFS_KEY) ?? 'null') as Partial<Account> | null
+    return {
+      language: saved?.language === 'th' || saved?.language === 'en' ? saved.language : fallback.language,
+      timezone: typeof saved?.timezone === 'string' ? saved.timezone : fallback.timezone,
+    }
+  } catch {
+    return fallback
+  }
+}
+
+function savePreferences(values: Pick<Account, 'language' | 'timezone'>) {
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(values))
+  } catch {
+    // เก็บไม่ได้ (โหมดส่วนตัว/โควตาเต็ม) ใช้ค่าในหน่วยความจำต่อไป
+  }
+}
+
 let account: Account = {
   fullName: 'Thomas Westwood',
   displayName: 'Thomas W.',
   email: 'demo@whaletrade.app',
   avatarUrl: null,
-  language: 'en',
-  timezone: 'Asia/Bangkok',
+  ...loadPreferences(),
 }
 
 const LATENCY_MS = 300
@@ -46,6 +69,7 @@ export async function updateEmail(email: string, password: string): Promise<Acco
 export async function updatePreferences(values: { language: Language; timezone: string }): Promise<Account> {
   await delay()
   account = { ...account, ...values }
+  savePreferences(account)
   return { ...account }
 }
 

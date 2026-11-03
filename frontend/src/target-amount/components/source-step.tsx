@@ -4,6 +4,7 @@ import type { Calculator } from '../types/use-calculator'
 import AddAssetControl from './add-asset-control'
 import AssetYieldRow from './asset-yield-row'
 import StepCard from './step-card'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 const TABS: { value: SourceMode; label: string; Icon: typeof WalletCards }[] = [
   { value: 'portfolio', label: 'Use a portfolio', Icon: WalletCards },
@@ -15,16 +16,17 @@ const PRIMARY_BUTTON =
 
 // ขั้นตอนที่ 1: เลือกแหล่งหุ้น/กองทุน 2 โหมด (ดึงจากพอร์ต / กรอกเอง) + ตารางปันผล % ต่อปีของแต่ละตัว
 export default function SourceStep({ calc }: { calc: Calculator }) {
+  const { t } = useI18n()
   const { mode, options, sourceStatus, portfolioId, rows, errors } = calc
   const selected = options.find((option) => option.portfolio.id === portfolioId)
 
   return (
     <StepCard
       step={1}
-      title="Where should we start?"
-      description="Select an existing dividend portfolio or choose individual stocks manually."
+      title={t('Where should we start?')}
+      description={t('Select an existing dividend portfolio or choose individual stocks manually.')}
     >
-      <div role="tablist" aria-label="Source of stocks" className="inline-flex max-w-full gap-1 rounded-pill bg-blue-50 p-1 max-[479px]:flex">
+      <div role="tablist" aria-label={t('Source of stocks')} className="inline-flex max-w-full gap-1 rounded-pill bg-blue-50 p-1 max-[479px]:flex">
         {TABS.map(({ value, label, Icon }) => {
           const active = mode === value
           return (
@@ -39,7 +41,7 @@ export default function SourceStep({ calc }: { calc: Calculator }) {
               }`}
             >
               <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
-              {label}
+              {t(label)}
             </button>
           )
         })}
@@ -48,25 +50,25 @@ export default function SourceStep({ calc }: { calc: Calculator }) {
       {mode === 'portfolio' && (
         <div className="mt-4">
           {sourceStatus === 'loading' && (
-            <div role="status" aria-label="Loading your portfolios" className="h-11 animate-pulse rounded-pill bg-blue-100 motion-reduce:animate-none" />
+            <div role="status" aria-label={t('Loading your portfolios')} className="h-11 animate-pulse rounded-pill bg-blue-100 motion-reduce:animate-none" />
           )}
           {sourceStatus === 'error' && (
             <div className="flex flex-wrap items-center gap-3 rounded-3xl bg-blue-50 px-4 py-3 text-[14px] leading-5 text-navy-700">
-              Could not load your portfolios.
+              {t('Could not load your portfolios.')}
               <button type="button" onClick={calc.reloadSource} className={PRIMARY_BUTTON}>
-                Try again
+                {t('Try again')}
               </button>
             </div>
           )}
           {sourceStatus === 'ready' && options.length === 0 && (
             <p className="m-0 rounded-3xl bg-blue-50 px-4 py-3 text-[14px] leading-6 text-navy-700">
-              You have no portfolios yet. Switch to <strong>Enter manually</strong> or create a portfolio first.
+              {t('You have no portfolios yet. Switch to Enter manually or create a portfolio first.')}
             </p>
           )}
           {sourceStatus === 'ready' && options.length > 0 && (
             <>
               <label htmlFor="calc-portfolio" className="block text-[12px] leading-4 font-semibold text-navy-900">
-                Choose a portfolio
+                {t('Choose a portfolio')}
               </label>
               <div className="relative mt-1.5">
                 <select
@@ -75,10 +77,10 @@ export default function SourceStep({ calc }: { calc: Calculator }) {
                   onChange={(event) => calc.selectPortfolio(Number(event.target.value))}
                   className="h-11 w-full appearance-none rounded-pill border-2 border-blue-500 bg-surface pr-11 pl-4 text-[14px] font-semibold text-navy-900 outline-none transition-shadow duration-150 focus:shadow-focus"
                 >
-                  {portfolioId === null && <option value="">Select a portfolio</option>}
+                  {portfolioId === null && <option value="">{t('Select a portfolio')}</option>}
                   {options.map(({ portfolio, holdings }) => (
                     <option key={portfolio.id} value={portfolio.id}>
-                      {portfolio.name} ({holdings.length} Active {holdings.length === 1 ? 'Asset' : 'Assets'})
+                      {portfolio.name} ({t(holdings.length === 1 ? '{n} Active Asset' : '{n} Active Assets', { n: holdings.length })})
                     </option>
                   ))}
                 </select>
@@ -91,7 +93,7 @@ export default function SourceStep({ calc }: { calc: Calculator }) {
               </div>
               {selected && selected.holdings.length === 0 && (
                 <p className="m-0 mt-2 text-[13px] leading-5 text-text-muted">
-                  This portfolio has no holdings yet. Record a Buy first, or add stocks below.
+                  {t('This portfolio has no holdings yet. Record a Buy first, or add stocks below.')}
                 </p>
               )}
             </>
@@ -102,8 +104,8 @@ export default function SourceStep({ calc }: { calc: Calculator }) {
       {rows.length > 0 && (
         <div className="mt-5">
           <div className="flex justify-between gap-3 px-4 pb-2 text-[11px] leading-4 font-semibold tracking-[0.08em] text-text-muted uppercase max-[479px]:hidden">
-            <span>Holding name &amp; market</span>
-            <span>Dividend yield % per year</span>
+            <span>{t('Holding name & market')}</span>
+            <span>{t('Dividend yield % per year')}</span>
           </div>
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
             {rows.map((row) => (
@@ -121,8 +123,8 @@ export default function SourceStep({ calc }: { calc: Calculator }) {
       {rows.length === 0 && (mode === 'manual' || (sourceStatus === 'ready' && options.length > 0)) && (
         <p className="m-0 mt-4 text-[13px] leading-5 text-text-muted">
           {mode === 'manual'
-            ? 'Search for a stock or fund below, then enter its expected yearly dividend.'
-            : 'Add the stocks you want to include, then enter their expected yearly dividend.'}
+            ? t('Search for a stock or fund below, then enter its expected yearly dividend.')
+            : t('Add the stocks you want to include, then enter their expected yearly dividend.')}
         </p>
       )}
 

@@ -16,6 +16,7 @@ import { addDays, dayKey, startOfWeek, zonedToUtc } from './types/datetime'
 import type { ReminderToast } from './types/reminder'
 import { useNow } from './types/use-now'
 import { useReminders } from './types/use-reminders'
+import { useI18n } from '../shared/i18n/use-i18n'
 
 type ReminderPageProps = {
   user: SidebarUser
@@ -38,6 +39,7 @@ export default function ReminderPage({
   onNavigate,
   onLogout,
 }: ReminderPageProps) {
+  const { t } = useI18n()
   const { reminders, tasks, status, reload, addReminder, editReminder, removeReminder, toggleReminder, addTask, toggleTask } =
     useReminders()
   const now = useNow()
@@ -117,14 +119,14 @@ export default function ReminderPage({
     if (editing) await editReminder(editing.id, payload)
     else await addReminder(payload)
     selectDay(values.date)
-    showToast(editing ? 'Reminder updated' : 'Reminder set')
+    showToast(editing ? t('Reminder updated') : t('Reminder set'))
   }
 
   async function handleToggle(reminder: Reminder) {
     try {
       await toggleReminder(reminder.id, !reminder.done)
     } catch {
-      showToast('Could not update this reminder. Please try again.')
+      showToast(t('Could not update this reminder. Please try again.'))
     }
   }
 
@@ -132,13 +134,13 @@ export default function ReminderPage({
     try {
       await toggleTask(task.id, !task.done)
     } catch {
-      showToast('Could not update this task. Please try again.')
+      showToast(t('Could not update this task. Please try again.'))
     }
   }
 
   async function handleDelete(reminder: Reminder) {
     await removeReminder(reminder.id)
-    showToast('Reminder deleted')
+    showToast(t('Reminder deleted'))
   }
 
   const openNew = () => setForm({ reminder: null })
@@ -160,7 +162,7 @@ export default function ReminderPage({
           </div>
 
           {status === 'loading' && (
-            <div role="status" aria-label="Loading your reminders" className="mt-6 flex flex-col gap-4">
+            <div role="status" aria-label={t('Loading your reminders')} className="mt-6 flex flex-col gap-4">
               <div className="h-20 animate-pulse rounded-3xl bg-blue-100 motion-reduce:animate-none" />
               <div className="grid gap-6 min-[1280px]:grid-cols-[7fr_5fr]">
                 <div className="h-96 animate-pulse rounded-4xl bg-blue-100 motion-reduce:animate-none" />
@@ -172,10 +174,10 @@ export default function ReminderPage({
           {status === 'error' && (
             <div className="mt-6 flex flex-col items-center rounded-4xl bg-surface px-6 py-12 text-center shadow-md">
               <img className="h-36 w-auto min-[640px]:h-44" src={banner} alt="" />
-              <p className="m-0 mt-4 text-[18px] leading-7 font-bold text-navy-900">Could not load your reminders</p>
-              <p className="m-0 mt-1 text-[14px] leading-6 text-text-muted">Something went wrong. Please try again.</p>
+              <p className="m-0 mt-4 text-[18px] leading-7 font-bold text-navy-900">{t('Could not load your reminders')}</p>
+              <p className="m-0 mt-1 text-[14px] leading-6 text-text-muted">{t('Something went wrong. Please try again.')}</p>
               <button type="button" onClick={reload} className={`${PRIMARY_BUTTON} mt-6`}>
-                Try again
+                {t('Try again')}
               </button>
             </div>
           )}

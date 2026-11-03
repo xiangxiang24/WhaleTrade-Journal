@@ -6,13 +6,14 @@ export type SlashMenuHandle = {
 }
 
 type SlashMenuProps = {
+  t: (text: string) => string
   items: SlashItem[]
   command: (item: SlashItem) => void
 }
 
 // เมนูคำสั่ง / ที่ลอยตามเคอร์เซอร์: ไอคอน + ชื่อ แถวที่เลือก/ชี้เป็นพื้นเทาอ่อน กลุ่มบล็อกกับกลุ่มแทรกคั่นด้วยเส้น
 // เลือกด้วยลูกศรขึ้น/ลง + Enter ได้ (Esc ปิดโดย Suggestion)
-const SlashMenu = forwardRef<SlashMenuHandle, SlashMenuProps>(function SlashMenu({ items, command }, ref) {
+const SlashMenu = forwardRef<SlashMenuHandle, SlashMenuProps>(function SlashMenu({ t, items, command }, ref) {
   const [selected, setSelected] = useState(0)
   const listRef = useRef<HTMLUListElement>(null)
 
@@ -49,7 +50,7 @@ const SlashMenu = forwardRef<SlashMenuHandle, SlashMenuProps>(function SlashMenu
   if (items.length === 0) {
     return (
       <div className="w-64 rounded-2xl bg-surface p-4 text-[14px] leading-5 text-text-muted shadow-lg">
-        No matching commands
+        {t('No matching commands')}
       </div>
     )
   }
@@ -58,7 +59,7 @@ const SlashMenu = forwardRef<SlashMenuHandle, SlashMenuProps>(function SlashMenu
     <ul
       ref={listRef}
       role="listbox"
-      aria-label="Commands"
+      aria-label={t('Commands')}
       className="no-scrollbar m-0 max-h-(--slash-max-h,34rem) w-64 list-none overflow-y-auto rounded-2xl bg-surface p-2 shadow-lg"
     >
       {items.map((item, index) => {
@@ -81,7 +82,7 @@ const SlashMenu = forwardRef<SlashMenuHandle, SlashMenuProps>(function SlashMenu
               }`}
             >
               <Icon size={20} strokeWidth={1.5} aria-hidden="true" className="shrink-0 text-navy-700" />
-              {item.label}
+              {t(item.label)}
             </button>
           </li>
         )

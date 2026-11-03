@@ -22,6 +22,7 @@ import TransactionFormModal from './modals/transaction-form-modal'
 import { csvFilename, buildTransactionsCsv, downloadCsv } from './types/export-csv'
 import type { DetailToast } from './types/transaction-logs'
 import { usePortfolioDetail } from './types/use-portfolio-detail'
+import { useI18n } from '../shared/i18n/use-i18n'
 
 type TransactionLogsProps = {
   /** พอร์ตที่เปิดดู (กด Open จากหน้า Portfolio) */
@@ -58,6 +59,7 @@ export default function TransactionLogs({
   onNavigate,
   onLogout,
 }: TransactionLogsProps) {
+  const { t } = useI18n()
   const { portfolio, transactions, status, reload, addTransaction, editTransaction, removeTransaction, editPortfolio } =
     usePortfolioDetail(portfolioId)
   const { leaving, leaveTo } = usePageLeave()
@@ -97,10 +99,10 @@ export default function TransactionLogs({
       if (sector) counts.set(sector, (counts.get(sector) ?? 0) + 1)
     }
     return [
-      { value: 'all', label: 'All', count: transactions.length },
-      ...[...counts].sort(([a], [b]) => a.localeCompare(b)).map(([value, count]) => ({ value, label: value, count })),
+      { value: 'all', label: t('All'), count: transactions.length },
+      ...[...counts].sort(([a], [b]) => a.localeCompare(b)).map(([value, count]) => ({ value, label: t(value), count })),
     ]
-  }, [transactions])
+  }, [transactions, t])
 
   const months = useMemo(() => [...new Set(transactions.map((tx) => tx.date.slice(0, 7)))].sort().reverse(), [transactions])
 
@@ -128,12 +130,12 @@ export default function TransactionLogs({
     const editing = txForm?.transaction
     if (editing) await editTransaction(editing.id, values)
     else await addTransaction(values)
-    showToast(editing ? 'Transaction updated' : 'Transaction added')
+    showToast(editing ? t('Transaction updated') : t('Transaction added'))
   }
 
   async function handleDelete(tx: Transaction) {
     await removeTransaction(tx.id)
-    showToast('Transaction deleted')
+    showToast(t('Transaction deleted'))
   }
 
   async function saveGoal(goal: number | null) {
@@ -145,13 +147,13 @@ export default function TransactionLogs({
       icon: portfolio.icon,
       annualGoal: goal,
     })
-    showToast(goal ? 'Annual goal updated' : 'Annual goal removed')
+    showToast(goal ? t('Annual goal updated') : t('Annual goal removed'))
   }
 
   function handleExport() {
     if (!portfolio || transactions.length === 0) return
     downloadCsv(csvFilename(portfolio.name), buildTransactionsCsv(transactions))
-    showToast(`Exported ${transactions.length} ${transactions.length === 1 ? 'transaction' : 'transactions'}`)
+    showToast(t(transactions.length === 1 ? 'Exported {n} transaction' : 'Exported {n} transactions', { n: transactions.length }))
   }
 
   const goBack = () => leaveTo(onBack)
@@ -170,7 +172,7 @@ export default function TransactionLogs({
       <>
         <div className={`pt-2 pb-6 ${leaving ? 'animate-page-out motion-reduce:animate-none' : ''}`}>
           {status === 'loading' && (
-            <div role="status" aria-label="Loading your portfolio" className="flex flex-col gap-4">
+            <div role="status" aria-label={t('Loading your portfolio')} className="flex flex-col gap-4">
               <div className="h-10 w-48 animate-pulse rounded-pill bg-blue-100 motion-reduce:animate-none" />
               <div className="h-16 w-full max-w-lg animate-pulse rounded-3xl bg-blue-100 motion-reduce:animate-none" />
               <div className="grid gap-4 min-[1360px]:grid-cols-[2fr_1fr_1fr]">
@@ -184,20 +186,20 @@ export default function TransactionLogs({
 
           {(status === 'error' || status === 'missing') && (
             <Message
-              title={status === 'missing' ? 'This portfolio is not here anymore' : 'Could not load this portfolio'}
+              title={status === 'missing' ? t('This portfolio is not here anymore') : t('Could not load this portfolio')}
               description={
                 status === 'missing'
-                  ? 'It may have been moved to Trash. Head back to your portfolios to pick another one.'
-                  : 'Something went wrong. Please try again.'
+                  ? t('It may have been moved to Trash. Head back to your portfolios to pick another one.')
+                  : t('Something went wrong. Please try again.')
               }
             >
               {status === 'missing' ? (
                 <button type="button" onClick={goBack} className={PRIMARY_BUTTON}>
-                  Back to Portfolios
+                  {t('Back to Portfolios')}
                 </button>
               ) : (
                 <button type="button" onClick={reload} className={PRIMARY_BUTTON}>
-                  Try again
+                  {t('Try again')}
                 </button>
               )}
             </Message>
@@ -230,7 +232,7 @@ export default function TransactionLogs({
               </div>
 
               <section
-                aria-label="Transaction logs"
+                aria-label={t('Transaction logs')}
                 className="mt-6 animate-fade-up px-1 [animation-delay:240ms] min-[1280px]:mt-8 motion-reduce:animate-none"
               >
                 <LogToolbar
@@ -247,22 +249,22 @@ export default function TransactionLogs({
                 <div className="mt-4">
                   {transactions.length === 0 ? (
                     <Message
-                      title="No transactions yet"
-                      description="Record your first buy, sell or dividend. Your goal progress and yield will grow from here."
+                      title={t('No transactions yet')}
+                      description={t('Record your first buy, sell or dividend. Your goal progress and yield will grow from here.')}
                     >
                       <button type="button" onClick={() => setTxForm({ transaction: null })} className={PRIMARY_BUTTON}>
                         <Plus size={18} strokeWidth={1.75} aria-hidden="true" />
-                        Add your first transaction
+                        {t('Add your first transaction')}
                       </button>
                     </Message>
                   ) : visible.length === 0 ? (
-                    <Message title="No transactions match" description="Try a different name or clear the filters.">
+                    <Message title={t('No transactions match')} description={t('Try a different name or clear the filters.')}>
                       <button
                         type="button"
                         onClick={clearFilters}
                         className="inline-flex h-10 items-center rounded-pill px-5 text-[14px] leading-5 font-semibold text-navy-700 hover:bg-blue-50 active:bg-blue-100"
                       >
-                        Clear filters
+                        {t('Clear filters')}
                       </button>
                     </Message>
                   ) : (
@@ -293,7 +295,7 @@ export default function TransactionLogs({
           portfolio={portfolio}
           onSubmit={async (values) => {
             await editPortfolio(values)
-            showToast('Portfolio details saved')
+            showToast(t('Portfolio details saved'))
           }}
           onClose={() => setEditOpen(false)}
         />

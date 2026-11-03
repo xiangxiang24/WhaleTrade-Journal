@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import { CircleAlert } from 'lucide-react'
 import ModalFrame from '../../shared/modal/modal-frame'
 import type { CalcPlan } from '../../shared/types/calc-plan'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type DeletePlanModalProps = {
   /** แผนที่จะลบ (ว่าง = ปิด) */
@@ -14,6 +15,7 @@ type DeletePlanModalProps = {
 const EXIT_MS = 200
 
 function Dialog({ plan, onConfirm, onClose }: Omit<DeletePlanModalProps, 'plan'> & { plan: CalcPlan }) {
+  const { t } = useI18n()
   const [closing, setClosing] = useState(false)
   const [working, setWorking] = useState(false)
   const [error, setError] = useState<string>()
@@ -34,7 +36,7 @@ function Dialog({ plan, onConfirm, onClose }: Omit<DeletePlanModalProps, 'plan'>
       await onConfirm(plan)
       setClosing(true)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not delete this plan. Please try again.')
+      setError(t(caught instanceof Error ? caught.message : 'Could not delete this plan. Please try again.'))
       setWorking(false)
     }
   }
@@ -50,10 +52,10 @@ function Dialog({ plan, onConfirm, onClose }: Omit<DeletePlanModalProps, 'plan'>
       cardClassName="max-w-105 p-6 text-left"
     >
       <h2 id={titleId} className="m-0 text-[20px] leading-7 font-bold text-navy-900">
-        Delete “{plan.name}”?
+        {t('Delete “{name}”?', { name: plan.name })}
       </h2>
       <p id={descId} className="m-0 mt-2 text-[14px] leading-6 text-navy-700">
-        This saved plan will be permanently deleted. You can always calculate and save a new one. This action cannot be undone.
+        {t('This saved plan will be permanently deleted. You can always calculate and save a new one. This action cannot be undone.')}
       </p>
 
       {error && (
@@ -71,7 +73,7 @@ function Dialog({ plan, onConfirm, onClose }: Omit<DeletePlanModalProps, 'plan'>
           onClick={() => setClosing(true)}
           className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
         >
-          Cancel
+          {t('Cancel')}
         </button>
         <button
           type="button"
@@ -79,7 +81,7 @@ function Dialog({ plan, onConfirm, onClose }: Omit<DeletePlanModalProps, 'plan'>
           onClick={handleConfirm}
           className="inline-flex h-11 items-center rounded-pill bg-red-500 px-6 text-[14px] leading-5 font-semibold text-surface transition-[filter] duration-150 hover:brightness-110 active:brightness-95 disabled:opacity-50"
         >
-          {working ? 'Deleting…' : 'Delete'}
+          {working ? t('Deleting…') : t('Delete')}
         </button>
       </div>
     </ModalFrame>

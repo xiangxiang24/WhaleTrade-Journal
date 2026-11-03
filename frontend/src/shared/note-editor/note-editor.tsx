@@ -14,6 +14,7 @@ import { FileAttachment } from './file-attachment'
 import { createMenuState } from './menu-state'
 import { SlashCommand } from './slash-command'
 import './note-editor.css'
+import { useI18n } from '../i18n/use-i18n'
 
 type NoteEditorProps = {
   /** เนื้อโน้ต (JSON ของตัวแก้ไข หรือข้อความธรรมดาของโน้ตเก่า) */
@@ -37,9 +38,11 @@ export default function NoteEditor({
   labelledBy,
   describedBy,
   invalid = false,
-  placeholder = 'Why did you invest? What would change your mind? What will you measure?',
+  placeholder,
   minHeightClass = 'min-h-64',
 }: NoteEditorProps) {
+  const { t } = useI18n()
+  const placeholderText = placeholder ?? t('Why did you invest? What would change your mind? What will you measure?')
   const [attachmentOpen, setAttachmentOpen] = useState(false)
 
   // เก็บ callback ล่าสุดไว้ใน ref เพื่อไม่ต้องสร้างตัวแก้ไขใหม่เมื่อ parent ส่งฟังก์ชันตัวใหม่
@@ -85,10 +88,10 @@ export default function NoteEditor({
         },
       }),
       FileAttachment,
-      Placeholder.configure({ placeholder }),
-      SlashCommand.configure({ openAttachment, onMenuChange }),
+      Placeholder.configure({ placeholder: placeholderText }),
+      SlashCommand.configure({ translate: t, openAttachment, onMenuChange }),
     ],
-    [placeholder, openAttachment, onMenuChange],
+    [placeholderText, t, openAttachment, onMenuChange],
   )
 
   const editor = useEditor({

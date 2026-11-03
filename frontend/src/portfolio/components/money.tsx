@@ -1,3 +1,4 @@
+import { useI18n } from '../../shared/i18n/use-i18n'
 import { formatAmount } from '../types/format'
 
 type MoneyProps = {
@@ -8,10 +9,11 @@ type MoneyProps = {
 
 // ตัวเลขเงิน + หน่วย THB (tabular-nums, ไม่ตัดบรรทัดระหว่างตัวเลขกับหน่วย)
 export default function Money({ value, className = '' }: MoneyProps) {
+  const { t } = useI18n()
   return (
     <span className={`whitespace-nowrap tabular-nums ${className}`}>
       {formatAmount(value)}
-      <span className="ml-1 text-[0.7em] font-semibold text-text-muted">THB</span>
+      <span className="ml-1 text-[0.7em] font-semibold text-text-muted">{t('THB')}</span>
     </span>
   )
 }

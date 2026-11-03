@@ -1,4 +1,5 @@
 import { PenLine, Search, Sprout } from 'lucide-react'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type JournalToolbarProps = {
   query: string
@@ -15,10 +16,11 @@ export default function JournalToolbar({
   dividendYield,
   onNewNote,
 }: JournalToolbarProps) {
+  const { t } = useI18n()
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <label className="relative block w-full min-[1280px]:w-70">
-        <span className="sr-only">Search Journal Book</span>
+        <span className="sr-only">{t('Search Journal Book')}</span>
         <Search
           size={18}
           strokeWidth={1.75}
@@ -29,7 +31,7 @@ export default function JournalToolbar({
           type="search"
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Search Journal Book"
+          placeholder={t('Search Journal Book')}
           className="h-11 w-full rounded-pill border border-blue-500 bg-surface pr-4 pl-11 text-[14px] text-navy-900 outline-none transition-shadow duration-150 placeholder:text-blue-500/70 focus:shadow-focus"
         />
       </label>
@@ -38,7 +40,7 @@ export default function JournalToolbar({
         {dividendYield && (
           <span className="inline-flex h-11 items-center gap-2 rounded-pill bg-blue-50 px-4 max-[639px]:w-full max-[639px]:justify-center text-[14px] leading-5 font-medium text-navy-900">
             <Sprout size={16} strokeWidth={1.75} aria-hidden="true" className="text-navy-700" />
-            Dividend Yield at Cost: {dividendYield}
+            {t('Dividend Yield at Cost: {value}', { value: dividendYield })}
           </span>
         )}
         <button
@@ -47,7 +49,7 @@ export default function JournalToolbar({
           className="inline-flex h-11 items-center gap-2 rounded-pill bg-blue-500 px-6 text-[18px] max-[639px]:w-full max-[639px]:justify-center leading-6 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900"
         >
           <PenLine size={20} strokeWidth={1.75} aria-hidden="true" />
-          New Note
+          {t('New Note')}
         </button>
       </div>
     </div>

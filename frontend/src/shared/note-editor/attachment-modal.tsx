@@ -9,6 +9,7 @@ import {
   type AttachmentKind,
 } from '../data/attachments'
 import ModalFrame from '../modal/modal-frame'
+import { useI18n } from '../i18n/use-i18n'
 
 export type AttachmentResult =
   | { kind: 'image'; url: string; name: string }
@@ -25,6 +26,7 @@ type AttachmentModalProps = {
 
 type Tab = 'image' | 'file' | 'link'
 
+// label เป็นข้อความอังกฤษ แปลตอนแสดง
 const TABS: { id: Tab; label: string; icon: typeof ImageIcon }[] = [
   { id: 'image', label: 'Image', icon: ImageIcon },
   { id: 'file', label: 'File', icon: FileIcon },
@@ -49,6 +51,7 @@ function normalizeUrl(raw: string): string | null {
 }
 
 function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
+  const { t } = useI18n()
   const [closing, setClosing] = useState(false)
   const [tab, setTab] = useState<Tab>('image')
   const [file, setFile] = useState<File | null>(null)
@@ -81,7 +84,7 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
     if (tab === 'link') {
       const normalized = normalizeUrl(url)
       if (!normalized) {
-        setError('Please enter a valid link, for example https://example.com')
+        setError(t('Please enter a valid link, for example https://example.com'))
         return
       }
       onInsert({ kind: 'link', url: normalized, label: label.trim() })
@@ -100,7 +103,13 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
       )
       setClosing(true)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not attach this file. Please try again.')
+      const message = caught instanceof Error ? caught.message : 'Could not attach this file. Please try again.'
+      const tooLarge = /^This (image|file) is too large\. The limit is (.+)\.$/.exec(message)
+      setError(
+        tooLarge
+          ? t('This {kind} is too large. The limit is {limit}.', { kind: t(tooLarge[1]), limit: tooLarge[2] })
+          : t(message),
+      )
       setBusy(false)
     }
   }
@@ -120,13 +129,13 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
         cardClassName="max-w-130 p-6 text-left"
       >
         <h2 id={titleId} className="m-0 text-[22px] leading-8 font-bold text-navy-900">
-          Add attachment
+          {t('Add attachment')}
         </h2>
         <p id={descId} className="m-0 mt-1 text-[14px] leading-5 text-text-muted">
-          Attach an image, a file or a link to your journal.
+          {t('Attach an image, a file or a link to your journal.')}
         </p>
 
-        <div role="tablist" aria-label="Attachment type" className="mt-4 flex gap-1 rounded-pill bg-blue-50 p-1">
+        <div role="tablist" aria-label={t('Attachment type')} className="mt-4 flex gap-1 rounded-pill bg-blue-50 p-1">
           {TABS.map(({ id, label: tabLabel, icon: Icon }) => (
             <button
               key={id}
@@ -140,7 +149,7 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
               }`}
             >
               <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
-              {tabLabel}
+              {t(tabLabel)}
             </button>
           ))}
         </div>
@@ -149,7 +158,7 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
           {tab === 'link' ? (
             <div className="flex flex-col gap-4">
               <label className="block text-[12px] leading-4 font-semibold text-navy-900">
-                Link
+                {t('Link')}
                 <input
                   data-autofocus
                   type="url"
@@ -160,12 +169,12 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
                 />
               </label>
               <label className="block text-[12px] leading-4 font-semibold text-navy-900">
-                Text to show (optional)
+                {t('Text to show (optional)')}
                 <input
                   type="text"
                   value={label}
                   onChange={(event) => setLabel(event.target.value)}
-                  placeholder="Annual report"
+                  placeholder={t('Annual report')}
                   className={INPUT}
                 />
               </label>
@@ -190,10 +199,10 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
                 className="flex w-full flex-col items-center gap-1 rounded-xl border-2 border-dashed border-blue-200 bg-blue-50 px-4 py-8 text-center transition-colors duration-150 hover:bg-blue-100"
               >
                 <span className="text-[15px] leading-6 font-semibold text-navy-900">
-                  {file ? file.name : tab === 'image' ? 'Choose an image' : 'Choose a file'}
+                  {file ? file.name : tab === 'image' ? t('Choose an image') : t('Choose a file')}
                 </span>
                 <span className="text-[12px] leading-4 text-text-muted">
-                  {file ? formatBytes(file.size) : `Up to ${formatBytes(limit)}`}
+                  {file ? formatBytes(file.size) : t('Up to {size}', { size: formatBytes(limit) })}
                 </span>
               </button>
             </div>
@@ -214,7 +223,7 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
             onClick={() => setClosing(true)}
             className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
           >
-            Cancel
+            {t('Cancel')}
           </button>
           <button
             type="button"
@@ -222,7 +231,7 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
             onClick={handleInsert}
             className="inline-flex h-11 items-center rounded-pill bg-blue-500 px-6 text-[14px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900 disabled:bg-blue-200 disabled:shadow-none"
           >
-            {busy ? 'Attaching…' : 'Insert'}
+            {busy ? t('Attaching…') : t('Insert')}
           </button>
         </div>
       </ModalFrame>

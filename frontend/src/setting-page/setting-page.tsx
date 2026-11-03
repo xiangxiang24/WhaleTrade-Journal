@@ -14,6 +14,7 @@ import ChangePasswordModal from './modals/change-password-modal'
 import DeleteAccountModal from './modals/delete-account-modal'
 import type { SettingToast } from './types/setting'
 import { useAccount } from './types/use-account'
+import { useI18n } from '../shared/i18n/use-i18n'
 
 type SettingPageProps = {
   user: SidebarUser
@@ -36,6 +37,7 @@ export default function SettingPage({
   onAccountChange,
   onAccountDeleted,
 }: SettingPageProps) {
+  const { t } = useI18n()
   const state = useAccount(useCallback((account: Account) => onAccountChange?.(account), [onAccountChange]))
   const { leaving, leaveTo } = usePageLeave()
   const [emailOpen, setEmailOpen] = useState(false)
@@ -63,7 +65,7 @@ export default function SettingPage({
           </div>
 
           {state.status === 'loading' && (
-            <div role="status" aria-label="Loading your settings" className="mt-6 flex flex-col gap-5">
+            <div role="status" aria-label={t('Loading your settings')} className="mt-6 flex flex-col gap-5">
               {[0, 1, 2].map((index) => (
                 <div key={index} className="h-60 animate-pulse rounded-4xl bg-blue-100 motion-reduce:animate-none" />
               ))}
@@ -73,14 +75,14 @@ export default function SettingPage({
           {state.status === 'error' && (
             <div className="mt-6 flex flex-col items-center rounded-4xl bg-surface px-6 py-12 text-center shadow-md">
               <img className="h-36 w-auto min-[640px]:h-44" src={banner} alt="" />
-              <p className="m-0 mt-4 text-[18px] leading-7 font-bold text-navy-900">Could not load your settings</p>
-              <p className="m-0 mt-1 text-[14px] leading-6 text-text-muted">Something went wrong. Please try again.</p>
+              <p className="m-0 mt-4 text-[18px] leading-7 font-bold text-navy-900">{t('Could not load your settings')}</p>
+              <p className="m-0 mt-1 text-[14px] leading-6 text-text-muted">{t('Something went wrong. Please try again.')}</p>
               <button
                 type="button"
                 onClick={state.reload}
                 className="mt-6 inline-flex h-11 items-center rounded-pill bg-blue-500 px-6 text-[16px] leading-6 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900"
               >
-                Try again
+                {t('Try again')}
               </button>
             </div>
           )}
@@ -91,9 +93,9 @@ export default function SettingPage({
                 state={state}
                 onEditEmail={() => setEmailOpen(true)}
                 onLogout={() => onLogout?.()}
-                onSaved={() => showToast('Profile saved')}
+                onSaved={() => showToast(t('Profile saved'))}
               />
-              <LanguageSection state={state} onSaved={() => showToast('Preferences saved')} />
+              <LanguageSection state={state} onSaved={() => showToast(t('Preferences saved'))} />
               <SecuritySection onChangePassword={() => setPasswordOpen(true)} onDelete={() => setDeleteOpen(true)} />
             </div>
           )}
@@ -105,7 +107,7 @@ export default function SettingPage({
           currentEmail={state.account?.email ?? ''}
           onSubmit={async (email, password) => {
             await state.saveEmail(email, password)
-            showToast('Email updated')
+            showToast(t('Email updated'))
           }}
           onClose={() => setEmailOpen(false)}
         />
@@ -113,7 +115,7 @@ export default function SettingPage({
           open={passwordOpen}
           onSubmit={async (current, next) => {
             await state.changePassword(current, next)
-            showToast('Password updated')
+            showToast(t('Password updated'))
           }}
           onClose={() => setPasswordOpen(false)}
         />

@@ -3,6 +3,7 @@ import banner from '../../assets/Banner.png'
 import type { CalcPlan } from '../../shared/types/calc-plan'
 import type { SavedPlanLoadStatus } from '../types/saved-plan'
 import PlanCard from './plan-card'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type PlanGridProps = {
   status: SavedPlanLoadStatus
@@ -35,9 +36,10 @@ function Message({ title, description, action }: { title: string; description: s
 
 // กริดการ์ดแผน + สถานะ กำลังโหลด / ผิดพลาด / ยังไม่มีแผน (Empty state)
 export default function PlanGrid({ status, plans, names, timeZone, onOpen, onRename, onDelete, onNewPlan, onRetry }: PlanGridProps) {
+  const { t } = useI18n()
   if (status === 'loading') {
     return (
-      <div className={GRID} role="status" aria-label="Loading your saved plans">
+      <div className={GRID} role="status" aria-label={t('Loading your saved plans')}>
         {Array.from({ length: 3 }, (_, index) => (
           <div key={index} className="h-60 animate-pulse rounded-4xl bg-blue-100 motion-reduce:animate-none" />
         ))}
@@ -48,11 +50,11 @@ export default function PlanGrid({ status, plans, names, timeZone, onOpen, onRen
   if (status === 'error') {
     return (
       <Message
-        title="Could not load your saved plans"
-        description="Something went wrong. Please try again."
+        title={t('Could not load your saved plans')}
+        description={t('Something went wrong. Please try again.')}
         action={
           <button type="button" onClick={onRetry} className={PRIMARY_BUTTON}>
-            Try again
+            {t('Try again')}
           </button>
         }
       />
@@ -62,12 +64,12 @@ export default function PlanGrid({ status, plans, names, timeZone, onOpen, onRen
   if (plans.length === 0) {
     return (
       <Message
-        title="No saved plans yet"
-        description="Calculate a target in the Target Calculator, then press Save plan to keep it here."
+        title={t('No saved plans yet')}
+        description={t('Calculate a target in the Target Calculator, then press Save plan to keep it here.')}
         action={
           <button type="button" onClick={onNewPlan} className={PRIMARY_BUTTON}>
             <Calculator size={18} strokeWidth={1.75} aria-hidden="true" />
-            Open Target Calculator
+            {t('Open Target Calculator')}
           </button>
         }
       />

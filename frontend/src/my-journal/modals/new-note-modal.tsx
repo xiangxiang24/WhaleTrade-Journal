@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import ModalFrame from '../../shared/modal/modal-frame'
 import NoteForm from '../../shared/note-form/note-form'
 import type { NoteFormValues } from '../../shared/types/note-form'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type NewNoteModalProps = {
   open: boolean
@@ -14,6 +15,7 @@ type NewNoteModalProps = {
 const EXIT_MS = 200
 
 function Dialog({ onSubmit, onClose }: Omit<NewNoteModalProps, 'open'>) {
+  const { t } = useI18n()
   const [closing, setClosing] = useState(false)
   const titleId = useId()
   const descId = useId()
@@ -34,10 +36,10 @@ function Dialog({ onSubmit, onClose }: Omit<NewNoteModalProps, 'open'>) {
       cardClassName="max-w-190 p-5 text-left min-[640px]:p-8"
     >
       <h2 id={titleId} className="m-0 text-[24px] leading-8 font-bold text-navy-900 min-[640px]:text-[28px] min-[640px]:leading-9">
-        New Journal Book
+        {t('New Journal Book')}
       </h2>
       <p id={descId} className="m-0 mt-1 mb-5 text-[14px] leading-5 text-text-muted">
-        Your thoughts are safe, private, and encrypted.
+        {t('Your thoughts are safe, private, and encrypted.')}
       </p>
       <NoteForm
         submitLabel="Save Note"

@@ -43,9 +43,9 @@ export function utcOffset(timeZone: string) {
 }
 
 /** "Thailand (UTC+07:00 Bangkok)" */
-export function regionLabel(region: (typeof REGIONS)[number]) {
+export function regionLabel(region: (typeof REGIONS)[number], t: (text: string) => string = (text) => text) {
   const city = region.timezone.split('/').pop()?.replace(/_/g, ' ')
-  return `${region.country} (${utcOffset(region.timezone)} ${city})`
+  return `${t(region.country)} (${utcOffset(region.timezone)} ${city})`
 }
 
 /** ตัวอักษรย่อใน avatar จากชื่อที่แสดง เช่น "Thomas W." → "TW" */

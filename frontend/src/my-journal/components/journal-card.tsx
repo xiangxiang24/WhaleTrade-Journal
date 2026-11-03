@@ -4,6 +4,7 @@ import { contentToPlainText } from '../../shared/note-editor/content'
 import MoodBadge from '../../shared/emotion/mood-badge'
 import { formatNoteDate } from '../types/format-note-date'
 import type { JournalNote } from '../../shared/types/journal-note'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type JournalCardProps = {
   note: JournalNote
@@ -26,8 +27,9 @@ const DEFAULT_TITLE = 'Today Journal'
 // การ์ดโน้ต 1 ใบ: ทั้งใบเป็นลิงก์เดียว มีกระดาษซ้อนด้านหลังและคลิปทอง
 // Hover: พื้นเปลี่ยนเป็นฟ้าอย่างนุ่ม การ์ดลอยขึ้นเล็กน้อย กระดาษด้านหลังเลื่อนออกและเอียง คลิปแกว่ง
 export default function JournalCard({ note, timeZone, onOpen }: JournalCardProps) {
+  const { t, locale } = useI18n()
   const key = note.emotion ?? 'none'
-  const title = note.title?.trim() || DEFAULT_TITLE
+  const title = note.title?.trim() || t(DEFAULT_TITLE)
 
   return (
     <div className="group relative">
@@ -65,7 +67,7 @@ export default function JournalCard({ note, timeZone, onOpen }: JournalCardProps
             dateTime={note.createdAt}
             className="text-[12px] leading-4 text-surface/85 transition-colors duration-300 group-hover:text-surface"
           >
-            {formatNoteDate(note.createdAt, timeZone)}
+            {formatNoteDate(note.createdAt, timeZone, locale)}
           </time>
         </div>
       </a>

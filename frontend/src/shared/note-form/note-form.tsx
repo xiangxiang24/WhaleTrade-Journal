@@ -5,6 +5,7 @@ import { contentToPlainText, isContentEmpty } from '../note-editor/content'
 import NoteEditor from '../note-editor/note-editor'
 import { countWords } from './count-words'
 import MoodPicker from './mood-picker'
+import { useI18n } from '../i18n/use-i18n'
 
 type NoteFormProps = {
   /** ค่าเริ่มต้น (โน้ตใหม่ = ว่าง, แก้โน้ตเดิม = ค่าที่มีอยู่) */
@@ -30,6 +31,7 @@ export default function NoteForm({
   onDelete,
   submitLabel = 'Save Changes',
 }: NoteFormProps) {
+  const { t } = useI18n()
   const [emotion, setEmotion] = useState(initialValues.emotion)
   const [title, setTitle] = useState(initialValues.title)
   const [content, setContent] = useState(initialValues.content)
@@ -46,7 +48,7 @@ export default function NoteForm({
     event.preventDefault()
     if (submitting) return
     if (isContentEmpty(content)) {
-      setContentError('Please write a few thoughts before saving.')
+      setContentError(t('Please write a few thoughts before saving.'))
       return
     }
     setContentError(undefined)
@@ -55,7 +57,7 @@ export default function NoteForm({
     try {
       await onSubmit({ title: title.trim(), content, emotion })
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : 'Could not save your note. Please try again.')
+      setFormError(t(error instanceof Error ? error.message : 'Could not save your note. Please try again.'))
       setSubmitting(false)
     }
   }
@@ -66,7 +68,7 @@ export default function NoteForm({
 
       <div>
         <label htmlFor={titleId} className={`block ${LABEL}`}>
-          Title
+          {t('Title')}
         </label>
         <input
           id={titleId}
@@ -75,7 +77,7 @@ export default function NoteForm({
           value={title}
           maxLength={TITLE_MAX}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder="Today Journal"
+          placeholder={t('Today Journal')}
           className="mt-1.5 h-12 w-full rounded-pill border-2 border-blue-500 bg-surface px-5 text-[17px] leading-6 font-semibold text-navy-900 outline-none transition-shadow duration-150 placeholder:font-medium placeholder:text-text-muted focus:shadow-focus short:h-11"
         />
       </div>
@@ -83,10 +85,10 @@ export default function NoteForm({
       <div>
         <div className="flex items-center justify-between gap-3">
           <span id={contentLabelId} className={LABEL}>
-            Reflective thoughts
+            {t('Reflective thoughts')}
           </span>
           <span className="text-[12px] leading-4 text-text-muted tabular-nums" aria-live="polite">
-            {wordCount} {wordCount === 1 ? 'word' : 'words'}
+            {t(wordCount === 1 ? '{n} word' : '{n} words', { n: wordCount })}
           </span>
         </div>
         <div className="mt-1.5">
@@ -128,7 +130,7 @@ export default function NoteForm({
             className="inline-flex h-11 items-center gap-2 rounded-pill border-2 border-red-500 bg-surface px-5 text-[14px] leading-5 font-semibold text-red-500 transition-colors duration-150 hover:bg-red-50 active:bg-red-50"
           >
             <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
-            Delete note
+            {t('Delete note')}
           </button>
         ) : (
           <span />
@@ -139,14 +141,14 @@ export default function NoteForm({
             onClick={onCancel}
             className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100"
           >
-            Cancel
+            {t('Cancel')}
           </button>
           <button
             type="submit"
             disabled={submitting}
             className="inline-flex h-11 items-center rounded-pill bg-blue-500 px-6 text-[14px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900 disabled:bg-blue-200 disabled:shadow-none"
           >
-            {submitLabel}
+            {t(submitLabel)}
           </button>
         </div>
       </div>

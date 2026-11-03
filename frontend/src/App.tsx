@@ -16,6 +16,7 @@ import SavedPlan from './saved-plan/saved-plan'
 import PlanDetail from './saved-plan/plan-detail'
 import SettingPage from './setting-page/setting-page'
 import { getAccount } from './shared/data/account'
+import I18nProvider from './shared/i18n/i18n-provider'
 import type { Account } from './shared/types/account'
 import { countDueReminders } from './shared/data/reminders'
 import type { SidebarKey } from './shared/types/sidebar'
@@ -45,13 +46,16 @@ function screenForMenu(key: SidebarKey): Screen | null {
   return null
 }
 
-function App() {
+type ScreensProps = {
+  account: Account
+  setAccount: (account: Account) => void
+}
+
+function Screens({ account, setAccount }: ScreensProps) {
   const [screen, setScreen] = useState<Screen>('opening')
   const [openNoteId, setOpenNoteId] = useState<number | null>(null)
   const [openPortfolioId, setOpenPortfolioId] = useState<number | null>(null)
   const [openPlanId, setOpenPlanId] = useState<number | null>(null)
-  // บัญชีที่ล็อกอินอยู่ (ชื่อ รูป เขตเวลา) หน้า Setting แก้แล้วทุกหน้าเห็นทันที
-  const [account, setAccount] = useState<Account>(() => getAccount())
   const sidebarUser = { displayName: account.displayName, avatarUrl: account.avatarUrl ?? undefined }
   const timeZone = account.timezone
 
@@ -204,6 +208,7 @@ function App() {
         noteId={openNoteId}
         user={sidebarUser}
         reminderBadge={countDueReminders()}
+        onNavigate={(key) => setScreen(screenForMenu(key) ?? 'journaling')}
         onLogout={() => setScreen('inconnected')}
         onBack={() => setScreen('journals')}
         onDeleted={() => setScreen('journals')}
@@ -220,6 +225,16 @@ function App() {
       onStart={() => setScreen('journals')}
       onSwitch={() => setScreen('inconnected')}
     />
+  )
+}
+
+// บัญชีที่ล็อกอินอยู่ (ชื่อ รูป เขตเวลา ภาษา) หน้า Setting แก้แล้วทุกหน้าเห็นทันที
+function App() {
+  const [account, setAccount] = useState<Account>(() => getAccount())
+  return (
+    <I18nProvider language={account.language}>
+      <Screens account={account} setAccount={setAccount} />
+    </I18nProvider>
   )
 }
 

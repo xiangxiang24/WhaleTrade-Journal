@@ -1,6 +1,6 @@
 // รูปแบบวันที่บนการ์ดโน้ต "21 Sep 2026 | 21:31" แปลงตามเขตเวลาของผู้ใช้ (เวลาในฐานข้อมูลเก็บเป็น UTC)
-export function formatNoteDate(iso: string, timeZone: string): string {
-  const parts = new Intl.DateTimeFormat('en-US', {
+export function formatNoteDate(iso: string, timeZone: string, locale = 'en-US'): string {
+  const parts = new Intl.DateTimeFormat(locale, {
     timeZone,
     day: '2-digit',
     month: 'short',

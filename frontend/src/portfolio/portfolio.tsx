@@ -11,6 +11,7 @@ import PortfolioFormModal from './modals/portfolio-form-modal'
 import TrashPortfolioModal from './modals/trash-portfolio-modal'
 import type { PortfolioToast } from './types/portfolio'
 import { usePortfolios } from './types/use-portfolios'
+import { useI18n } from '../shared/i18n/use-i18n'
 
 type PortfolioPageProps = {
   user: SidebarUser
@@ -33,6 +34,7 @@ export default function PortfolioPage({
   onLogout,
   onOpenPortfolio,
 }: PortfolioPageProps) {
+  const { t } = useI18n()
   const { portfolios, status, reload, create, update, trash, restore } = usePortfolios()
   const [previewEmpty, setPreviewEmpty] = useState(false)
   // form = null ปิด, { portfolio: null } = สร้างใหม่, { portfolio } = แก้พอร์ตเดิม
@@ -50,17 +52,17 @@ export default function PortfolioPage({
     const editing = form?.portfolio
     if (editing) {
       await update(editing.id, values)
-      showToast({ message: `Saved changes to “${values.name}”` })
+      showToast({ message: t('Saved changes to “{name}”', { name: values.name }) })
     } else {
       await create(values)
       setPreviewEmpty(false)
-      showToast({ message: `“${values.name}” is ready to grow` })
+      showToast({ message: t('“{name}” is ready to grow', { name: values.name }) })
     }
   }
 
   async function handleTrash(portfolio: Portfolio) {
     await trash(portfolio.id)
-    showToast({ message: `“${portfolio.name}” moved to Trash`, undoId: portfolio.id })
+    showToast({ message: t('“{name}” moved to Trash', { name: portfolio.name }), undoId: portfolio.id })
   }
 
   async function handleUndo(id: number) {
@@ -68,7 +70,7 @@ export default function PortfolioPage({
     try {
       await restore(id)
     } catch {
-      showToast({ message: 'Could not restore this portfolio. Try the Trash page.' })
+      showToast({ message: t('Could not restore this portfolio. Try the Trash page.') })
     }
   }
 
@@ -97,7 +99,7 @@ export default function PortfolioPage({
 
           {/* pb-6 / px-1: เผื่อที่ให้เงาและการ์ดที่ลอยขึ้นตอน hover ไม่โดนพื้นที่เลื่อนตัด */}
           <section
-            aria-label="Portfolios"
+            aria-label={t('Portfolios')}
             className="mt-6 animate-fade-up px-1 pb-2 [animation-delay:80ms] min-[640px]:mt-8 motion-reduce:animate-none"
           >
             <PortfolioGrid

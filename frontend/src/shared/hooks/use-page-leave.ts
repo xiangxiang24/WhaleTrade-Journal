@@ -13,7 +13,12 @@ export function usePageLeave() {
     leavingRef.current = true
     setLeaving(true)
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    setTimeout(go, reduceMotion ? 0 : LEAVE_MS)
+    setTimeout(() => {
+      go()
+      // ถ้าปลายทางไม่เปลี่ยนหน้า (เช่น เมนูที่ยังไม่มีหน้า) หน้าเดิมต้องกลับมาแสดง ไม่ค้างเป็นหน้าขาว
+      leavingRef.current = false
+      setLeaving(false)
+    }, reduceMotion ? 0 : LEAVE_MS)
   }, [])
 
   return { leaving, leaveTo }

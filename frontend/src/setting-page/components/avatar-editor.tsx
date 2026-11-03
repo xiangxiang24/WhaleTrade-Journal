@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { Camera, CircleAlert, Upload } from 'lucide-react'
 import { AVATAR_MAX_BYTES, initialsOf } from '../types/setting'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type AvatarEditorProps = {
   /** ชื่อที่แสดง (ใช้ทำตัวอักษรย่อเมื่อไม่มีรูป) */
@@ -13,17 +14,18 @@ type AvatarEditorProps = {
 
 // รูปโปรไฟล์ใหญ่ + ปุ่ม Upload new avatar / Remove: ไม่มีรูป = ตัวอักษรย่อ (เช่น TW) รูปที่เลือกเป็นร่างจนกว่าจะกด Save Changes
 export default function AvatarEditor({ displayName, avatarUrl, onChange, title }: AvatarEditorProps) {
+  const { t } = useI18n()
   const input = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string>()
 
   function handleFile(file: File | undefined) {
     if (!file) return
-    if (!file.type.startsWith('image/')) return setError('Please choose an image file.')
-    if (file.size > AVATAR_MAX_BYTES) return setError('Please choose an image under 2 MB.')
+    if (!file.type.startsWith('image/')) return setError(t('Please choose an image file.'))
+    if (file.size > AVATAR_MAX_BYTES) return setError(t('Please choose an image under 2 MB.'))
     setError(undefined)
     const reader = new FileReader()
     reader.onload = () => onChange(String(reader.result))
-    reader.onerror = () => setError('Could not read this image. Please try another one.')
+    reader.onerror = () => setError(t('Could not read this image. Please try another one.'))
     reader.readAsDataURL(file)
   }
 
@@ -32,14 +34,14 @@ export default function AvatarEditor({ displayName, avatarUrl, onChange, title }
       <div className="relative shrink-0">
         <span
           role="img"
-          aria-label={avatarUrl ? 'Your profile photo' : `Initials ${initialsOf(displayName)}`}
+          aria-label={avatarUrl ? t('Your profile photo') : t('Initials {initials}', { initials: initialsOf(displayName) })}
           className="flex size-[72px] items-center justify-center overflow-hidden rounded-pill bg-blue-500 text-[26px] leading-8 font-bold text-surface min-[640px]:size-20"
         >
           {avatarUrl ? <img src={avatarUrl} alt="" className="size-full object-cover" /> : initialsOf(displayName)}
         </span>
         <button
           type="button"
-          aria-label="Upload new avatar"
+          aria-label={t('Upload new avatar')}
           onClick={() => input.current?.click()}
           className="absolute -right-1 -bottom-1 inline-flex size-8 items-center justify-center rounded-pill bg-surface text-navy-700 shadow-md hover:text-blue-500"
         >
@@ -56,7 +58,7 @@ export default function AvatarEditor({ displayName, avatarUrl, onChange, title }
             className="group/icon inline-flex h-8 items-center gap-1.5 rounded-pill pr-2 text-[13px] leading-5 font-semibold text-navy-700 hover:text-blue-500"
           >
             <Upload size={16} strokeWidth={1.75} aria-hidden="true" className="transition-[stroke-width] duration-150 group-hover/icon:stroke-[2.5]" />
-            Upload new avatar
+            {t('Upload new avatar')}
           </button>
           <button
             type="button"
@@ -67,7 +69,7 @@ export default function AvatarEditor({ displayName, avatarUrl, onChange, title }
             disabled={!avatarUrl}
             className="inline-flex h-8 items-center rounded-pill pr-2 text-[13px] leading-5 font-semibold text-text-muted hover:text-red-500 disabled:opacity-50 disabled:hover:text-text-muted"
           >
-            Remove
+            {t('Remove')}
           </button>
         </div>
         {error && (

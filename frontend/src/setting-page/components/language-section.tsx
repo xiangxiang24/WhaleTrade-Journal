@@ -4,6 +4,7 @@ import type { Language } from '../../shared/types/account'
 import type { AccountState } from '../types/use-account'
 import { REGIONS, flagOf, regionLabel } from '../types/setting'
 import SectionCard from './section-card'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 const LANGUAGES: { value: Language; label: string }[] = [
   { value: 'th', label: 'ไทย' },
@@ -12,6 +13,7 @@ const LANGUAGES: { value: Language; label: string }[] = [
 
 // Section 2 Language & Display: สวิตช์ภาษา ไทย / English + เลือกประเทศ/เขตเวลา + Save preferences
 export default function LanguageSection({ state, onSaved }: { state: AccountState; onSaved: () => void }) {
+  const { t } = useI18n()
   const { language, timezone, prefsDirty } = state
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string>()
@@ -26,20 +28,20 @@ export default function LanguageSection({ state, onSaved }: { state: AccountStat
       await state.savePreferences()
       onSaved()
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not save your preferences. Please try again.')
+      setError(t(caught instanceof Error ? caught.message : 'Could not save your preferences. Please try again.'))
     } finally {
       setSaving(false)
     }
   }
 
   return (
-    <SectionCard id="language-title" title="Language & Display" description="Choose how the app speaks and shows things to you.">
+    <SectionCard id="language-title" title={t('Language & Display')} description={t('Choose how the app speaks and shows things to you.')}>
       <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-3xl bg-parchment px-4 py-4 min-[640px]:px-6">
         <div className="min-w-0">
-          <p className="m-0 text-[18px] leading-6 font-bold text-navy-900">Interface Language</p>
-          <p className="m-0 text-[13px] leading-5 text-text-muted">Language used for mindfulness prompts &amp; reports.</p>
+          <p className="m-0 text-[18px] leading-6 font-bold text-navy-900">{t('Interface Language')}</p>
+          <p className="m-0 text-[13px] leading-5 text-text-muted">{t('Language used for mindfulness prompts & reports.')}</p>
         </div>
-        <div role="radiogroup" aria-label="Interface language" className="inline-flex gap-1 rounded-pill bg-surface p-1 max-[479px]:w-full">
+        <div role="radiogroup" aria-label={t('Interface language')} className="inline-flex gap-1 rounded-pill bg-surface p-1 max-[479px]:w-full">
           {LANGUAGES.map((item) => {
             const selected = item.value === language
             return (
@@ -49,7 +51,7 @@ export default function LanguageSection({ state, onSaved }: { state: AccountStat
                 role="radio"
                 aria-checked={selected}
                 lang={item.value}
-                onClick={() => state.setLanguage(item.value)}
+                onClick={() => void state.changeLanguage(item.value)}
                 data-no-bounce
                 className={`inline-flex h-9 min-w-20 items-center justify-center rounded-pill px-4 text-[14px] leading-5 font-semibold transition-colors duration-150 max-[479px]:flex-1 ${
                   selected ? 'bg-blue-500 text-surface' : 'text-navy-700 hover:bg-blue-50'
@@ -64,7 +66,7 @@ export default function LanguageSection({ state, onSaved }: { state: AccountStat
 
       <div className="mt-5">
         <label htmlFor="setting-timezone" className="block text-[18px] leading-6 font-bold text-navy-900">
-          Time Zone &amp; Region
+          {t('Time Zone & Region')}
         </label>
         <div className="relative mt-2">
           <select
@@ -76,13 +78,13 @@ export default function LanguageSection({ state, onSaved }: { state: AccountStat
             {!known && <option value={timezone}>{timezone}</option>}
             {REGIONS.map((region) => (
               <option key={region.timezone} value={region.timezone}>
-                {flagOf(region.code)} {regionLabel(region)}
+                {flagOf(region.code)} {regionLabel(region, t)}
               </option>
             ))}
           </select>
           <ChevronDown size={18} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-blue-500" />
         </div>
-        <p className="m-0 mt-2 text-[13px] leading-5 text-text-muted">Used for scheduling gentle ex-dividend reflection reminders.</p>
+        <p className="m-0 mt-2 text-[13px] leading-5 text-text-muted">{t('Used for scheduling gentle ex-dividend reflection reminders.')}</p>
       </div>
 
       {error && (
@@ -99,7 +101,7 @@ export default function LanguageSection({ state, onSaved }: { state: AccountStat
           disabled={!prefsDirty || saving}
           className="inline-flex h-11 items-center justify-center rounded-pill bg-blue-500 px-7 text-[15px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900 disabled:bg-blue-200 disabled:shadow-none max-[479px]:w-full"
         >
-          {saving ? 'Saving…' : 'Save preferences'}
+          {saving ? t('Saving…') : t('Save preferences')}
         </button>
       </div>
     </SectionCard>

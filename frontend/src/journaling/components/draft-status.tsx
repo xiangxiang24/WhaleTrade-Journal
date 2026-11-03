@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Cloud, CloudCheck, CloudUpload } from 'lucide-react'
 import { formatRelativeTime } from '../types/format-relative-time'
 import type { DraftState } from '../types/journaling'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type DraftStatusProps = {
   state: DraftState
@@ -11,6 +12,7 @@ type DraftStatusProps = {
 
 // ป้ายสถานะการบันทึกอัตโนมัติ: "Draft Autosaved • Just now" (เวลาอัปเดตเองทุก 30 วินาที)
 export default function DraftStatus({ state, savedAt }: DraftStatusProps) {
+  const { t } = useI18n()
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
@@ -19,13 +21,13 @@ export default function DraftStatus({ state, savedAt }: DraftStatusProps) {
   }, [])
 
   let Icon = CloudCheck
-  let text = 'No unsaved changes'
+  let text = t('No unsaved changes')
   if (state === 'saving') {
     Icon = CloudUpload
-    text = 'Saving draft…'
+    text = t('Saving draft…')
   } else if (state === 'saved' && savedAt !== null) {
     Icon = Cloud
-    text = `Draft Autosaved • ${formatRelativeTime(savedAt, now)}`
+    text = t('Draft Autosaved • {time}', { time: formatRelativeTime(savedAt, now, t) })
   }
 
   return (

@@ -1,6 +1,7 @@
 import EmotionIcon from '../../shared/emotion/emotion-icon'
 import { EMOTIONS } from '../../shared/emotion/emotions'
 import type { MoodFilterValue } from '../types/journal'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type MoodFilterProps = {
   value: MoodFilterValue
@@ -14,13 +15,14 @@ const CHIP =
 
 // แถวชิปกรองตามอารมณ์: All + 5 อารมณ์ พร้อมจำนวนในวงเล็บ (ชิปที่เลือกอยู่ = พื้น blue-500 ตัวขาว)
 export default function MoodFilter({ value, counts, onChange }: MoodFilterProps) {
+  const { t } = useI18n()
   const options: { id: MoodFilterValue; label: string }[] = [
-    { id: 'all', label: 'All' },
-    ...EMOTIONS,
+    { id: 'all', label: t('All') },
+    ...EMOTIONS.map(({ id, label }) => ({ id, label: t(label) })),
   ]
 
   return (
-    <div role="group" aria-label="Filter by mood" className="flex flex-wrap gap-2 min-[640px]:gap-3">
+    <div role="group" aria-label={t('Filter by mood')} className="flex flex-wrap gap-2 min-[640px]:gap-3">
       {options.map(({ id, label }) => {
         const selected = value === id
         return (

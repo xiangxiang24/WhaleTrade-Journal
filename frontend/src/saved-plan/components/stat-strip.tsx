@@ -1,6 +1,7 @@
 import type { CalcResult } from '../../target-amount/types/target-amount'
 import { formatBaht } from '../../target-amount/types/format'
 import { formatYears } from '../types/saved-plan'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 const LABEL = 'm-0 text-[11px] leading-4 font-semibold tracking-[0.08em] text-text-muted uppercase'
 const VALUE = 'm-0 mt-1 text-[22px] leading-8 font-bold whitespace-nowrap text-navy-900 tabular-nums'
@@ -8,12 +9,13 @@ const UNIT = 'text-[0.6em] font-semibold text-text-muted'
 
 // แถบสรุป 4 ช่อง: เงินต้น / DCA รวม / ระยะเวลา / ปันผลเฉลี่ย (2 คอลัมน์บนจอเล็ก, 4 คอลัมน์ตั้งแต่ 1024)
 export default function StatStrip({ result }: { result: CalcResult }) {
+  const { t } = useI18n()
   const { output, input } = result
   const items = [
-    { label: 'Initial principal', value: formatBaht(input.principal), unit: 'THB' },
-    { label: 'Total DCA', value: formatBaht(output.totalDca), unit: 'THB' },
-    { label: 'Duration', value: formatYears(output.years) },
-    { label: 'Avg dividend yield', value: `${result.avgYieldPct.toFixed(2)}%` },
+    { label: t('Initial principal'), value: formatBaht(input.principal), unit: t('THB') },
+    { label: t('Total DCA'), value: formatBaht(output.totalDca), unit: t('THB') },
+    { label: t('Duration'), value: formatYears(output.years, t) },
+    { label: t('Avg dividend yield'), value: `${result.avgYieldPct.toFixed(2)}%` },
   ]
   return (
     <dl className="m-0 grid grid-cols-2 gap-3 min-[1024px]:grid-cols-4 min-[1280px]:gap-4">

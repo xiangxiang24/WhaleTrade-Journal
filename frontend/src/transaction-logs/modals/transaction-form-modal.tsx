@@ -5,6 +5,7 @@ import { ASSET_BY_ID } from '../../shared/data/assets'
 import ModalFrame from '../../shared/modal/modal-frame'
 import type { Asset, Transaction, TransactionFormValues, TransactionType } from '../../shared/types/transaction'
 import { formatBaht, formatDecimal, todayLocal } from '../types/format'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type TransactionFormModalProps = {
   open: boolean
@@ -58,6 +59,7 @@ function Field({ id, label, error, hint, children }: { id: string; label: string
 }
 
 function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalProps, 'open'>) {
+  const { t } = useI18n()
   const editing = Boolean(transaction)
   const [type, setType] = useState<TransactionType>(transaction?.type ?? 'buy')
   const [date, setDate] = useState(transaction?.date ?? todayLocal())
@@ -102,19 +104,19 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
 
   function validate(): Errors {
     const found: Errors = {}
-    if (!date) found.date = 'Pick the date of this transaction.'
-    if (!asset) found.asset = 'Choose a stock or fund from the list.'
+    if (!date) found.date = t('Pick the date of this transaction.')
+    if (!asset) found.asset = t('Choose a stock or fund from the list.')
     if (dividend) {
       const value = parseNumber(amount)
-      if (value === null || Number.isNaN(value) || value <= 0) found.amount = 'Enter the dividend amount (greater than 0).'
-      if (unitsValue !== null && (Number.isNaN(unitsValue) || unitsValue < 0)) found.units = 'Enter a valid number of units.'
+      if (value === null || Number.isNaN(value) || value <= 0) found.amount = t('Enter the dividend amount (greater than 0).')
+      if (unitsValue !== null && (Number.isNaN(unitsValue) || unitsValue < 0)) found.units = t('Enter a valid number of units.')
     } else {
-      if (priceValue === null || Number.isNaN(priceValue) || priceValue <= 0) found.price = 'Enter a price greater than 0.'
-      if (unitsValue === null || Number.isNaN(unitsValue) || unitsValue <= 0) found.units = 'Enter units greater than 0.'
-      if (feeValue !== null && (Number.isNaN(feeValue) || feeValue < 0)) found.fee = 'Enter a fee of 0 or more.'
+      if (priceValue === null || Number.isNaN(priceValue) || priceValue <= 0) found.price = t('Enter a price greater than 0.')
+      if (unitsValue === null || Number.isNaN(unitsValue) || unitsValue <= 0) found.units = t('Enter units greater than 0.')
+      if (feeValue !== null && (Number.isNaN(feeValue) || feeValue < 0)) found.fee = t('Enter a fee of 0 or more.')
     }
-    if (tag.trim().length > 24) found.tag = 'Keep the tag within 24 characters.'
-    if (note.trim().length > 60) found.note = 'Keep the note within 60 characters.'
+    if (tag.trim().length > 24) found.tag = t('Keep the tag within 24 characters.')
+    if (note.trim().length > 60) found.note = t('Keep the note within 60 characters.')
     return found
   }
 
@@ -140,7 +142,7 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
       })
       setClosing(true)
     } catch (caught) {
-      setSubmitError(caught instanceof Error ? caught.message : 'Could not save this transaction. Please try again.')
+      setSubmitError(t(caught instanceof Error ? caught.message : 'Could not save this transaction. Please try again.'))
       setSubmitting(false)
     }
   }
@@ -158,16 +160,16 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
       cardClassName="max-w-140 p-5 text-left min-[640px]:p-8"
     >
       <h2 id={titleId} className="m-0 text-[24px] leading-8 font-bold text-navy-900 min-[640px]:text-[28px] min-[640px]:leading-9">
-        {editing ? 'Edit Transaction' : 'Add Transaction'}
+        {editing ? t('Edit Transaction') : t('Add Transaction')}
       </h2>
       <p id={descId} className="m-0 mt-1 mb-5 text-[14px] leading-5 text-text-muted">
-        Record a buy, a sell or a dividend. Fields marked optional can stay empty.
+        {t('Record a buy, a sell or a dividend. Fields marked optional can stay empty.')}
       </p>
 
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <span id={`${ids.date}-type`} className="block text-[12px] leading-4 font-semibold text-navy-900">
-            Type
+            {t('Type')}
           </span>
           <div role="radiogroup" aria-labelledby={`${ids.date}-type`} className="mt-1.5 grid grid-cols-3 gap-1 rounded-pill bg-blue-50 p-1">
             {TYPES.map((item) => {
@@ -183,7 +185,7 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
                     selected ? 'bg-blue-500 text-surface' : 'text-navy-700 hover:bg-blue-100'
                   }`}
                 >
-                  {item.label}
+                  {t(item.label)}
                 </button>
               )
             })}
@@ -191,7 +193,7 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
         </div>
 
         <div className="grid gap-4 min-[640px]:grid-cols-2">
-          <Field id={ids.date} label="Date" error={errors.date}>
+          <Field id={ids.date} label={t('Date')} error={errors.date}>
             <input
               id={ids.date}
               type="date"
@@ -202,12 +204,12 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
               className={inputClass(Boolean(errors.date))}
             />
           </Field>
-          <AssetPicker label="Stock / Fund" value={asset} onChange={setAsset} error={errors.asset} />
+          <AssetPicker label={t('Stock / Fund')} value={asset} onChange={setAsset} error={errors.asset} />
         </div>
 
         {dividend ? (
           <div className="grid gap-4 min-[640px]:grid-cols-2">
-            <Field id={ids.amount} label="Dividend amount (THB)" error={errors.amount}>
+            <Field id={ids.amount} label={t('Dividend amount (THB)')} error={errors.amount}>
               <input
                 id={ids.amount}
                 inputMode="decimal"
@@ -220,7 +222,7 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
                 className={`${inputClass(Boolean(errors.amount))} text-right tabular-nums`}
               />
             </Field>
-            <Field id={ids.units} label="Units held (optional)" error={errors.units} hint="Just for your records">
+            <Field id={ids.units} label={t('Units held (optional)')} error={errors.units} hint={t('Just for your records')}>
               <input
                 id={ids.units}
                 inputMode="decimal"
@@ -237,7 +239,7 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
         ) : (
           <>
             <div className="grid gap-4 min-[640px]:grid-cols-2">
-              <Field id={ids.price} label="Price per unit (THB)" error={errors.price}>
+              <Field id={ids.price} label={t('Price per unit (THB)')} error={errors.price}>
                 <input
                   id={ids.price}
                   inputMode="decimal"
@@ -250,7 +252,7 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
                   className={`${inputClass(Boolean(errors.price))} text-right tabular-nums`}
                 />
               </Field>
-              <Field id={ids.units} label="Units" error={errors.units}>
+              <Field id={ids.units} label={t('Units')} error={errors.units}>
                 <input
                   id={ids.units}
                   inputMode="decimal"
@@ -265,7 +267,7 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
               </Field>
             </div>
             <div className="grid items-start gap-4 min-[640px]:grid-cols-2">
-              <Field id={ids.fee} label="Fee (optional, THB)" error={errors.fee}>
+              <Field id={ids.fee} label={t('Fee (optional, THB)')} error={errors.fee}>
                 <input
                   id={ids.fee}
                   inputMode="decimal"
@@ -280,10 +282,10 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
               </Field>
               <div className="rounded-xl bg-blue-50 px-4 py-2.5 min-[640px]:mt-[22px]">
                 <p className="m-0 text-[11px] leading-4 font-semibold tracking-[0.08em] text-text-muted uppercase">
-                  {type === 'buy' ? 'Total cost' : 'Net proceeds'}
+                  {type === 'buy' ? t('Total cost') : t('Net proceeds')}
                 </p>
                 <p aria-live="polite" className="m-0 text-[16px] leading-6 font-bold text-navy-900 tabular-nums">
-                  {total === null ? '—' : `${formatBaht(total)} THB`}
+                  {total === null ? '—' : `${formatBaht(total)} ${t('THB')}`}
                   {total !== null && priceValue ? (
                     <span className="ml-2 text-[12px] font-medium text-text-muted">
                       {formatDecimal(unitsValue ?? 0, 6)} × {formatDecimal(priceValue, 4)}
@@ -296,13 +298,13 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
         )}
 
         <div className="grid gap-4 min-[640px]:grid-cols-2">
-          <Field id={ids.tag} label="Tag (optional)" error={errors.tag}>
+          <Field id={ids.tag} label={t('Tag (optional)')} error={errors.tag}>
             <input
               id={ids.tag}
               list={ids.tags}
               value={tag}
               onChange={(event) => setTag(event.target.value)}
-              placeholder="Core, Pillar…"
+              placeholder={t('Core, Pillar…')}
               aria-invalid={Boolean(errors.tag)}
               aria-describedby={describedBy(ids.tag, errors.tag)}
               className={inputClass(Boolean(errors.tag))}
@@ -313,12 +315,12 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
               ))}
             </datalist>
           </Field>
-          <Field id={ids.note} label="Note (optional)" error={errors.note}>
+          <Field id={ids.note} label={t('Note (optional)')} error={errors.note}>
             <input
               id={ids.note}
               value={note}
               onChange={(event) => setNote(event.target.value)}
-              placeholder="Semiannual pay"
+              placeholder={t('Semiannual pay')}
               aria-invalid={Boolean(errors.note)}
               aria-describedby={describedBy(ids.note, errors.note)}
               className={inputClass(Boolean(errors.note))}
@@ -340,14 +342,14 @@ function Dialog({ transaction, onSubmit, onClose }: Omit<TransactionFormModalPro
             onClick={() => setClosing(true)}
             className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
           >
-            Cancel
+            {t('Cancel')}
           </button>
           <button
             type="submit"
             disabled={submitting}
             className="inline-flex h-11 items-center rounded-pill bg-blue-500 px-6 text-[14px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900 disabled:bg-blue-200 disabled:shadow-none"
           >
-            {submitting ? 'Saving…' : editing ? 'Save Changes' : 'Add Transaction'}
+            {submitting ? t('Saving…') : editing ? t('Save Changes') : t('Add Transaction')}
           </button>
         </div>
       </form>

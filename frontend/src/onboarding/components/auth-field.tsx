@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { CircleAlert, Eye, EyeOff } from 'lucide-react'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 // ช่องกรอกทรงแคปซูล (design rules หัวข้อ 7.2) ขอบสีฟ้าตาม Figma, error = ขอบแดง
 const inputClass = (invalid: boolean) =>
@@ -70,6 +71,7 @@ export function PasswordField({
   autoComplete,
   labelAction,
 }: Omit<FieldProps, 'placeholder'> & { labelAction?: ReactNode }) {
+  const { t } = useI18n()
   const [visible, setVisible] = useState(false)
   const errorId = `${id}-error`
   return (
@@ -95,7 +97,7 @@ export function PasswordField({
         <button
           type="button"
           onClick={() => setVisible((current) => !current)}
-          aria-label={visible ? 'Hide password' : 'Show password'}
+          aria-label={t(visible ? 'Hide password' : 'Show password')}
           className="absolute top-1/2 right-2 flex size-8 -translate-y-1/2 items-center justify-center rounded-pill text-navy-700 hover:bg-blue-50"
         >
           {visible ? (

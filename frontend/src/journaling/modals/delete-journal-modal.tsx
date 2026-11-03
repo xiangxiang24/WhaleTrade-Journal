@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { CircleAlert } from 'lucide-react'
 import ModalFrame from '../../shared/modal/modal-frame'
+import { useI18n } from '../../shared/i18n/use-i18n'
 
 type DeleteJournalModalProps = {
   open: boolean
@@ -13,6 +14,7 @@ type DeleteJournalModalProps = {
 const EXIT_MS = 200
 
 function Dialog({ onConfirm, onClose }: Omit<DeleteJournalModalProps, 'open'>) {
+  const { t } = useI18n()
   const [closing, setClosing] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string>()
@@ -34,7 +36,7 @@ function Dialog({ onConfirm, onClose }: Omit<DeleteJournalModalProps, 'open'>) {
       await onConfirm()
       setClosing(true)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not delete this journal. Please try again.')
+      setError(t(caught instanceof Error ? caught.message : 'Could not delete this journal. Please try again.'))
       setDeleting(false)
     }
   }
@@ -50,10 +52,10 @@ function Dialog({ onConfirm, onClose }: Omit<DeleteJournalModalProps, 'open'>) {
       cardClassName="max-w-105 p-6 text-left"
     >
       <h2 id={titleId} className="m-0 text-[20px] leading-7 font-bold text-navy-900">
-        Delete this journal?
+        {t('Delete this journal?')}
       </h2>
       <p id={descId} className="m-0 mt-2 text-[14px] leading-6 text-navy-700">
-        This journal and its draft will be permanently deleted. This action cannot be undone.
+        {t('This journal and its draft will be permanently deleted. This action cannot be undone.')}
       </p>
 
       {error && (
@@ -71,7 +73,7 @@ function Dialog({ onConfirm, onClose }: Omit<DeleteJournalModalProps, 'open'>) {
           onClick={() => setClosing(true)}
           className="inline-flex h-11 items-center rounded-pill border-2 border-blue-200 bg-surface px-6 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:border-blue-500 hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50"
         >
-          Cancel
+          {t('Cancel')}
         </button>
         <button
           type="button"
@@ -79,7 +81,7 @@ function Dialog({ onConfirm, onClose }: Omit<DeleteJournalModalProps, 'open'>) {
           onClick={handleDelete}
           className="inline-flex h-11 items-center rounded-pill bg-red-500 px-6 text-[14px] leading-5 font-semibold text-surface transition-[filter] duration-150 hover:brightness-110 active:brightness-95 disabled:opacity-50"
         >
-          {deleting ? 'Deleting…' : 'Delete'}
+          {deleting ? t('Deleting…') : t('Delete')}
         </button>
       </div>
     </ModalFrame>

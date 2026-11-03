@@ -11,6 +11,7 @@ import JournalingHeader from './components/journaling-header'
 import MoodSection from './components/mood-section'
 import DeleteJournalModal from './modals/delete-journal-modal'
 import { useJournalEditor } from './types/use-journal-editor'
+import { useI18n } from '../shared/i18n/use-i18n'
 
 type JournalingProps = {
   /** โน้ตที่เปิดอยู่ */
@@ -36,6 +37,7 @@ export default function Journaling({
   onBack,
   onDeleted,
 }: JournalingProps) {
+  const { t } = useI18n()
   const editor = useJournalEditor(noteId)
   const [contentError, setContentError] = useState<string>()
   const [saveError, setSaveError] = useState<string>()
@@ -48,7 +50,7 @@ export default function Journaling({
     event.preventDefault()
     if (saving || !editor.dirty) return
     if (isContentEmpty(editor.values.content)) {
-      setContentError('Please write a few thoughts before saving.')
+      setContentError(t('Please write a few thoughts before saving.'))
       return
     }
     setContentError(undefined)
@@ -57,7 +59,7 @@ export default function Journaling({
     try {
       await editor.save()
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : 'Could not save your changes. Please try again.')
+      setSaveError(t(error instanceof Error ? error.message : 'Could not save your changes. Please try again.'))
     } finally {
       setSaving(false)
     }
@@ -72,7 +74,7 @@ export default function Journaling({
   function renderBody() {
     if (editor.status === 'loading') {
       return (
-        <div role="status" aria-label="Loading your journal" className="mt-6 h-96 animate-pulse rounded-3xl bg-blue-100 motion-reduce:animate-none" />
+        <div role="status" aria-label={t('Loading your journal')} className="mt-6 h-96 animate-pulse rounded-3xl bg-blue-100 motion-reduce:animate-none" />
       )
     }
 
@@ -82,10 +84,10 @@ export default function Journaling({
         <div className="mt-6 flex flex-col items-center rounded-3xl bg-surface px-6 py-16 text-center shadow-sm">
           <img className="h-32 w-auto" src={logo} alt="" />
           <p className="m-0 mt-4 text-[17px] leading-6 font-semibold text-navy-900">
-            {notFound ? 'This journal no longer exists' : 'Could not load this journal'}
+            {notFound ? t('This journal no longer exists') : t('Could not load this journal')}
           </p>
           <p className="m-0 mt-1 text-[14px] leading-5 text-text-muted">
-            {notFound ? 'It may have been deleted.' : 'Something went wrong. Please try again.'}
+            {notFound ? t('It may have been deleted.') : t('Something went wrong. Please try again.')}
           </p>
           <div className="mt-5">
             {notFound ? (
@@ -96,7 +98,7 @@ export default function Journaling({
                 onClick={editor.reload}
                 className="inline-flex h-11 items-center rounded-pill bg-blue-500 px-6 text-[16px] font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900"
               >
-                Try again
+                {t('Try again')}
               </button>
             )}
           </div>
