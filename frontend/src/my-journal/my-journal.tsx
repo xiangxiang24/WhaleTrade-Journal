@@ -47,6 +47,7 @@ export default function MyJournal({
   const counts = useMemo(() => {
     const result = { all: notes.length } as Record<MoodFilterValue, number>
     for (const { id } of EMOTIONS) result[id] = notes.filter((note) => note.emotion === id).length
+    result.none = notes.filter((note) => note.emotion === null).length
     return result
   }, [notes])
 
@@ -54,7 +55,7 @@ export default function MyJournal({
   const visibleNotes = useMemo(() => {
     const keyword = query.trim().toLowerCase()
     return notes
-      .filter((note) => mood === 'all' || note.emotion === mood)
+      .filter((note) => mood === 'all' || (mood === 'none' ? note.emotion === null : note.emotion === mood))
       .filter(
         (note) =>
           !keyword ||
