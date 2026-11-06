@@ -6,3 +6,4 @@ generated
 *.db
 /generated/prisma
 .DS_Store
+.dev-secrets.json

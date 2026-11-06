@@ -16,5 +16,6 @@
     "rewriteRelativeImportExtensions": true,
     "sourceMap": true
   },
-  "include": ["server", "electron", "generated"]
+  "include": ["server", "electron", "generated"],
+  "exclude": ["server/test"]
 }

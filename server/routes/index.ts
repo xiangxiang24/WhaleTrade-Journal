@@ -1,5 +1,5 @@
 import type { Express } from 'express';
-import type { Db } from '../db/client.js';
+import type { AppContext } from '../context.js';
 import { onboardingRoutes } from './onboarding.js';
 import { myJournalRoutes } from './my-journal.js';
 import { journalingRoutes } from './journaling.js';
@@ -13,16 +13,16 @@ import { trashRoutes } from './trash.js';
 import { assetsRoutes } from './assets.js';
 
 // รวม router ของทุกฟีเจอร์เข้ากับแอป (แต่ละ router ประกาศ path เต็มขึ้นต้นด้วย /api เอง)
-export function registerRoutes(app: Express, db: Db) {
-  app.use(onboardingRoutes(db));
-  app.use(myJournalRoutes(db));
-  app.use(journalingRoutes(db));
-  app.use(portfolioRoutes(db));
-  app.use(transactionLogsRoutes(db));
-  app.use(reminderRoutes(db));
-  app.use(targetAmountRoutes(db));
-  app.use(savedPlanRoutes(db));
-  app.use(settingPageRoutes(db));
-  app.use(trashRoutes(db));
-  app.use(assetsRoutes(db));
+export function registerRoutes(app: Express, ctx: AppContext) {
+  app.use(onboardingRoutes(ctx));
+  app.use(myJournalRoutes(ctx));
+  app.use(journalingRoutes(ctx));
+  app.use(portfolioRoutes(ctx));
+  app.use(transactionLogsRoutes(ctx));
+  app.use(reminderRoutes(ctx));
+  app.use(targetAmountRoutes(ctx));
+  app.use(savedPlanRoutes(ctx));
+  app.use(settingPageRoutes(ctx));
+  app.use(trashRoutes(ctx));
+  app.use(assetsRoutes(ctx));
 }

@@ -11,7 +11,8 @@
     "build:server": "prisma generate --config prisma7.config.ts && tsc -p tsconfig.server.json",
     "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
     "start:app": "npm run build:server && electron .",
-    "dist": "npm --prefix frontend run build && npm run build:server && electron-builder"
+    "dist": "npm --prefix frontend run build && npm run build:server && electron-builder",
+    "test:server": "tsx --test server/test/*.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,8 +20,10 @@
   "type": "module",
   "devDependencies": {
     "@electron/rebuild": "^4.2.1",
+    "@types/bcrypt": "^6.0.0",
     "@types/better-sqlite3": "^9.6.0",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.5",
     "concurrently": "^10.0.6",
     "cross-env": "^10.1.0",

@@ -199,6 +199,24 @@ whaletrade-journal/
 
 ---
 
+## 10.1 API: Auth (`server/*/onboarding.ts`, ทำแล้ว)
+
+| Endpoint | หน้าที่ |
+|---|---|
+| `POST /api/auth/register` | สมัคร (`fullName, displayName, email, password`) → `201 { token, account, recoveryCode }` รหัสกู้คืนเห็นครั้งเดียวตอนนี้ |
+| `POST /api/auth/login` | `{ email, password }` → `{ token, account }` ผิด = `401 Incorrect email or password.` (ไม่บอกว่าอีเมลมีหรือไม่) |
+| `POST /api/auth/recover` | `{ email, recoveryCode, newPassword }` → `204` เพิ่ม `tokenVersion` ทำให้ token เก่าใช้ไม่ได้ |
+| `GET /api/auth/me` | บัญชีของ token นี้ (ต้องมี `Authorization: Bearer <token>`) |
+
+- JWT HS256 อายุ 30 วัน payload `{ sub: userId, tv: tokenVersion }` ทุก route ที่ต้องล็อกอินใช้ `requireAuth` (`middleware/auth.ts`) ซึ่งเทียบ `tv` กับฐานข้อมูลทุกครั้ง
+- bcrypt cost 12, รหัสผ่านยาว 8–72 ไบต์; รหัสกู้คืน 8 ตัวอักษร เข้ารหัส AES-256-GCM เทียบด้วย `timingSafeEqual` (ไม่สนตัวเล็กใหญ่ ช่องว่าง และขีดคั่น)
+- `login` / `recover` จำกัด 10 ครั้ง / 15 นาที ต่ออีเมล (`429`)
+- ข้อความ error เป็นภาษาอังกฤษใน `{ "error": "..." }` ให้ frontend แปลด้วย `t()`
+- ค่าลับ (`jwtSecret`, `recoveryKey`): ตอนพัฒนาอยู่ใน `.dev-secrets.json` (gitignore) แอปจริงต้องเก็บใน Keychain ผ่าน Electron `safeStorage` (ยังไม่ทำ จะต่อตอนเปิด server จาก `electron/main.ts`)
+- ทดสอบ: `npm run test:server` (ใช้ฐานข้อมูลชั่วคราว + migration จริง)
+
+---
+
 ## 11. ลำดับการสร้าง
 
 1. Backend + ฐานข้อมูล + ระบบบัญชี (สมัคร / ล็อกอิน)
