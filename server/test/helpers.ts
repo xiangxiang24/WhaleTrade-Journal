@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createDb } from '../db/client.js';
 import { createApp } from '../index.js';
+import { importAssets } from '../services/assets/assets.js';
 
 /** เปิด server ทดสอบบนฐานข้อมูลชั่วคราว (ใช้ migration จริงทั้งชุด) คืน fetch ที่ชี้ไป server และฟังก์ชันปิด */
 export async function startTestServer() {
@@ -15,9 +16,17 @@ export async function startTestServer() {
 
   const db = createDb(dbPath);
   const secrets = { jwtSecret: crypto.randomBytes(32).toString('base64'), recoveryKey: crypto.randomBytes(32) };
-  const server = createApp({ db, secrets }).listen(0, '127.0.0.1');
+  await importAssets(db, path.resolve('seed/assets.json'));
+  const dataDir = path.join(dir, 'data');
+  const server = createApp({ db, secrets, dataDir }).listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));
   const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+  /** สมัครผู้ใช้ใหม่แล้วคืน token (ใช้เตรียมข้อมูลในแต่ละเทสต์) */
+  async function signUp(email: string) {
+    const { json } = await api('POST', '/api/auth/register', { fullName: 'Test User', displayName: 'Tester', email, password: 'Whale1234' });
+    return { token: json!.token as string, recoveryCode: json!.recoveryCode as string };
+  }
 
   async function api(method: string, route: string, body?: unknown, token?: string) {
     const response = await fetch(`${base}${route}`, {
@@ -34,6 +43,9 @@ export async function startTestServer() {
 
   return {
     api,
+    signUp,
+    base,
+    dataDir,
     db,
     secrets,
     async close() {

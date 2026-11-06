@@ -175,13 +175,16 @@ whaletrade-journal/
 │   └── shared/
 │       ├── apis/             # client.ts (request + token), assets.ts
 │       └── data/             # ข้อมูลจำลองระหว่างรอต่อ backend (จุดเดียวที่สลับเป็น API)
-├── server/                   # Backend (Express + TypeScript) แยกตามฟีเจอร์ชื่อเดียวกับหน้า frontend
-│   ├── routes/<ฟีเจอร์>.ts      # ประกาศ endpoint (+ index.ts รวมทุก router)
-│   ├── controllers/<ฟีเจอร์>.ts # รับ request ตรวจข้อมูล ตอบ response
-│   ├── services/<ฟีเจอร์>.ts    # กฎของระบบ + query ฐานข้อมูล (ทุก query กรอง userId)
-│   ├── middleware/           # auth (ตรวจ token)
+├── server/                   # Backend (Express + TypeScript) แยกโฟลเดอร์ตามฟีเจอร์ ชื่อเดียวกับหน้า frontend
+│   ├── routes/<ฟีเจอร์>/<ฟีเจอร์>.ts      # ประกาศ endpoint (+ routes/index.ts รวมทุก router)
+│   ├── controllers/<ฟีเจอร์>/<ฟีเจอร์>.ts # รับ request ตรวจข้อมูล ตอบ response (+ controllers/shared/parse.ts)
+│   ├── services/<ฟีเจอร์>/<ฟีเจอร์>.ts    # กฎของระบบ + query ฐานข้อมูล (ทุก query กรอง userId)
+│   ├── services/shared/      # ของที่ใช้ข้ามฟีเจอร์: auth, money, csv, storage, signed-url, notes, note-content,
+│   │                         #   transactions, portfolio-math, calculate-plan, recovery-code
+│   ├── middleware/           # auth (ตรวจ token), rate-limit, http-error
 │   ├── db/client.ts          # สร้าง Prisma client (SQLite)
-│   ├── index.ts              # startServer(db, port)
+│   ├── test/                 # เทสต์ API (npm run test:server)
+│   ├── index.ts              # createApp / startServer(ctx, port)
 │   └── dev.ts                # ตัวเริ่ม server ตอนพัฒนา (ใช้กับ tsx)
 ├── electron/                 # ตัวหุ้มแอป (TypeScript): main.ts, preload.ts, (scheduler.ts ภายหลัง)
 ├── prisma/                   # schema.prisma + migrations
@@ -214,6 +217,29 @@ whaletrade-journal/
 - ข้อความ error เป็นภาษาอังกฤษใน `{ "error": "..." }` ให้ frontend แปลด้วย `t()`
 - ค่าลับ (`jwtSecret`, `recoveryKey`): ตอนพัฒนาอยู่ใน `.dev-secrets.json` (gitignore) แอปจริงต้องเก็บใน Keychain ผ่าน Electron `safeStorage` (ยังไม่ทำ จะต่อตอนเปิด server จาก `electron/main.ts`)
 - ทดสอบ: `npm run test:server` (ใช้ฐานข้อมูลชั่วคราว + migration จริง)
+
+---
+
+## 10.2 API อื่นๆ (ทำแล้ว ทุก endpoint ต้องมี `Authorization: Bearer <token>` และกรองด้วย userId เสมอ ยกเว้นลิงก์ไฟล์ที่เซ็นลายเซ็น)
+
+ข้อมูลที่ส่งเป็นรูปเดียวกับ type ฝั่ง frontend (เงินเป็นบาท ราคา/หน่วยเป็นทศนิยม เวลาเป็น ISO UTC) ฝั่ง server แปลงเป็นสตางค์/×10,000/×1,000,000 ตอนเก็บ error เป็น `{ "error": "ข้อความอังกฤษ" }`
+
+| ฟีเจอร์ | Endpoint |
+|---|---|
+| assets | `GET /api/assets?q=&limit=` · `?ids=1,2` |
+| my-journal | `GET /api/notes` · `GET /api/notes/export.csv` |
+| journaling | `POST /api/notes` · `GET/PUT/DELETE /api/notes/:id` (DELETE = ย้ายไปถังขยะ) · `GET/PUT/DELETE /api/notes/:id/draft` · `POST /api/notes/:id/attachments?kind=&name=` (ไบต์ดิบ) · `GET /api/attachments/:id/file?sig=` |
+| portfolio | `GET/POST /api/portfolios` · `GET/PUT/DELETE /api/portfolios/:id` (DELETE = ถังขยะ) · `POST /api/portfolios/:id/restore` |
+| transaction-logs | `GET/POST /api/portfolios/:id/transactions` · `GET .../transactions/export.csv` · `PUT/DELETE /api/transactions/:id` |
+| trash | `GET/DELETE /api/trash/notes` · `POST /api/trash/notes/:id/restore` · `DELETE /api/trash/notes/:id` · `GET/DELETE /api/trash/portfolios` · `POST .../:id/restore` · `DELETE .../:id` |
+| target-amount | `POST /api/calculator/calculate` (ไม่แตะฐานข้อมูล) |
+| saved-plan | `GET/POST /api/plans` · `GET/PATCH/DELETE /api/plans/:id` · `GET /api/plans/portfolio-names` |
+| reminder | `GET/POST /api/reminders` · `GET /api/reminders/due-count` · `PUT/DELETE /api/reminders/:id` · `PATCH /api/reminders/:id/done` · `GET/POST /api/tasks` · `PATCH/DELETE /api/tasks/:id` |
+| setting-page | `GET/DELETE /api/account` · `PATCH /api/account/profile` · `PATCH /api/account/preferences` · `PATCH /api/account/email` · `POST /api/account/password` · `POST /api/account/recovery-code` · `GET /api/avatar/:userId/:file?sig=` |
+
+- รูปโปรไฟล์และไฟล์แนบเก็บเป็นไฟล์ใต้ `dataDir` (ตอนพัฒนา `./dev-data` แอปจริง `userData`) ไม่เก็บในไฟล์ .db และเปิดผ่าน URL ที่เซ็น HMAC (เปิดจาก `<img>` ได้โดยไม่ต้องส่ง header) ส่งกลับด้วย `nosniff` + CSP sandbox และไม่แสดง SVG ในหน้า
+- ลบโน้ตถาวรลบไฟล์แนบด้วย ลบพอร์ตถาวรลบ transaction ทั้งหมดและตั้ง `CalcPlan.portfolioId` เป็นว่าง ลบบัญชีลบทุกอย่างรวมไฟล์
+- ที่ยังไม่ทำ: ตัวตั้งเวลาเตือน + macOS notification (อยู่ฝั่ง Electron), การต่อ frontend จริง (ตอนนี้หน้าต่างๆ ยังใช้ `shared/data/*` ที่เป็นข้อมูลจำลอง ฟังก์ชันเรียก API ที่ชื่อเดียวกันรออยู่ใน `<หน้า>/apis/`), ออกจากระบบทุกอุปกรณ์
 
 ---
 

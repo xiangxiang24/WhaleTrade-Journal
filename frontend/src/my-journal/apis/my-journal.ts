@@ -1,3 +1,8 @@
-// ฟังก์ชันเรียก backend (fetch) ของหน้า: หน้ารวมบันทึก
-// เพิ่ม endpoint ของหน้านี้ที่นี่ผ่าน request() ใน shared/apis/client.ts แล้วให้ shared/data/* หรือ hook ของหน้าเรียกใช้แทนข้อมูลจำลอง
-export {}
+import { downloadFile, request } from '../../shared/apis/client'
+import type { JournalNote } from '../../shared/types/journal-note'
+
+// GET /api/notes  (ใหม่ → เก่า เฉพาะโน้ตที่ไม่อยู่ในถังขยะ)
+export const fetchJournalNotes = () => request<JournalNote[]>('/api/notes')
+
+// GET /api/notes/export.csv  (โน้ตทั้งหมด ไม่รวมถังขยะ)
+export const exportJournalsCsv = () => downloadFile('/api/notes/export.csv', 'journals.csv')

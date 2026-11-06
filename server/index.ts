@@ -7,7 +7,9 @@ import { registerRoutes } from './routes/index.js';
 export function createApp(ctx: AppContext) {
   const app = express();
   app.disable('x-powered-by');
-  app.use(express.json({ limit: '1mb' }));
+  // เนื้อไฟล์แนบเป็นไบต์ดิบ จึงข้ามตัวอ่าน JSON (route นั้นมีตัวอ่านของตัวเอง)
+  const json = express.json({ limit: '2mb' });
+  app.use((req, res, next) => (req.path.endsWith('/attachments') ? next() : json(req, res, next)));
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
   registerRoutes(app, ctx);
   app.use(errorHandler);

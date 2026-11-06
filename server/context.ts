@@ -12,4 +12,6 @@ export type Secrets = {
 export type AppContext = {
   db: Db
   secrets: Secrets
+  /** โฟลเดอร์เก็บไฟล์ของผู้ใช้ (ไฟล์แนบ รูปโปรไฟล์) ตอนพัฒนา = ./dev-data แอปจริง = userData ไม่เก็บในไฟล์ .db */
+  dataDir: string
 }

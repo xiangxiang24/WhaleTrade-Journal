@@ -1,3 +1,6 @@
-// ฟังก์ชันเรียก backend (fetch) ของหน้า: เครื่องคำนวณเงินเป้าหมาย
-// เพิ่ม endpoint ของหน้านี้ที่นี่ผ่าน request() ใน shared/apis/client.ts แล้วให้ shared/data/* หรือ hook ของหน้าเรียกใช้แทนข้อมูลจำลอง
-export {}
+import { request } from '../../shared/apis/client'
+import type { CalcInput, CalcOutput } from '../../shared/types/calc-plan'
+
+// POST /api/calculator/calculate  (คำนวณอย่างเดียว ไม่เขียนอะไรลงฐานข้อมูล)
+export const calculatePlan = (input: CalcInput) =>
+  request<CalcOutput>('/api/calculator/calculate', { method: 'POST', body: input })

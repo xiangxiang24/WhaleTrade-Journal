@@ -1,0 +1,93 @@
+[
+  {
+    "ticker": "SCB",
+    "name": "SCB X Public Co.",
+    "type": "stock",
+    "market": "SET",
+    "sector": "Banking"
+  },
+  {
+    "ticker": "PTTEP",
+    "name": "PTT Exploration & Prod.",
+    "type": "stock",
+    "market": "SET",
+    "sector": "Energy"
+  },
+  {
+    "ticker": "TTB",
+    "name": "TMBThanachart Bank",
+    "type": "stock",
+    "market": "SET",
+    "sector": "Banking"
+  },
+  {
+    "ticker": "KBANK",
+    "name": "Kasikornbank",
+    "type": "stock",
+    "market": "SET",
+    "sector": "Banking"
+  },
+  {
+    "ticker": "TISCO",
+    "name": "TISCO Financial Group",
+    "type": "stock",
+    "market": "SET",
+    "sector": "Banking"
+  },
+  {
+    "ticker": "ADVANC",
+    "name": "Advanced Info Service",
+    "type": "stock",
+    "market": "SET",
+    "sector": "Communication"
+  },
+  {
+    "ticker": "CPALL",
+    "name": "CP All",
+    "type": "stock",
+    "market": "SET",
+    "sector": "Commerce"
+  },
+  {
+    "ticker": "SCC",
+    "name": "Siam Cement",
+    "type": "stock",
+    "market": "SET",
+    "sector": "Materials"
+  },
+  {
+    "ticker": "AOT",
+    "name": "Airports of Thailand",
+    "type": "stock",
+    "market": "SET",
+    "sector": "Transport"
+  },
+  {
+    "ticker": "KO",
+    "name": "Coca-Cola Co.",
+    "type": "stock",
+    "market": "US",
+    "sector": "Consumer"
+  },
+  {
+    "ticker": "O",
+    "name": "Realty Income Corp.",
+    "type": "stock",
+    "market": "US",
+    "sector": "Real Estate"
+  },
+  {
+    "ticker": "AAPL",
+    "name": "Apple Inc.",
+    "type": "stock",
+    "market": "US",
+    "sector": "Technology"
+  },
+  {
+    "ticker": "SET50-D",
+    "name": "SET50 Dividend Index Fund",
+    "type": "fund",
+    "market": "TH-FUND",
+    "sector": null
+  }
+]
