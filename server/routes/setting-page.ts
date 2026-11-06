@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import type { createDb } from '../db/client.js';
+import type { Db } from '../db/client.js';
+import { settingPageController } from '../controllers/setting-page.js';
 
-type Db = ReturnType<typeof createDb>;
-
+// endpoints ของฟีเจอร์: บัญชี ภาษา เขตเวลา ความปลอดภัย
 export function settingPageRoutes(db: Db) {
   const router = Router();
-
-  // endpoints ของหน้า setting-page เพิ่มที่นี่
+  const controller = settingPageController(db);
+  void controller; // ใช้เมื่อเพิ่ม endpoint เช่น router.get('/api/...', controller.xxx)
 
   return router;
 }

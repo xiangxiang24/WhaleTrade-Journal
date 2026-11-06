@@ -29,7 +29,7 @@
 5. **เวลาที่เป็นช่วงเวลาจริง** (`remindAt`, `createdAt` ฯลฯ) เก็บเป็น UTC แล้วแปลงตามเขตเวลาผู้ใช้ตอนแสดงผล
 6. **ทุก query ต้องกรองด้วย `userId` ของผู้ที่ล็อกอิน**
    - ตาราง `Transaction` ไม่มี `userId` ตรงๆ ให้ตรวจผ่าน `portfolio.userId` เสมอ (join) ห้ามดึง transaction ด้วย id อย่างเดียว
-7. **Soft delete เฉพาะพอร์ต** (`Portfolio.deletedAt` มีค่า = อยู่ในถังขยะ) พอร์ตในถังขยะต้องไม่ถูกนับในรายการพอร์ต, เครื่องคำนวณ และ CSV ส่วน transaction ไม่ลบเมื่อพอร์ตถูก soft delete
+7. **Soft delete โน้ตและพอร์ต** (`Note.deletedAt` / `Portfolio.deletedAt` มีค่า = อยู่ในถังขยะ โน้ตในถังขยะไม่แสดงในไทม์ไลน์ ไม่นับในชิปอารมณ์ ค้นหาไม่เจอ และไม่อยู่ใน CSV) พอร์ตในถังขยะต้องไม่ถูกนับในรายการพอร์ต, เครื่องคำนวณ และ CSV ส่วน transaction ไม่ลบเมื่อพอร์ตถูก soft delete
 8. **ตัวเลขสรุปของพอร์ตไม่เก็บเป็นตัวเลขแยก** (ความคืบหน้า Goal, Run-Rate, Total Recorded DCA, Yield on Cost, Holdings, จำนวน entries) คำนวณจาก transaction ทุกครั้งที่ขอ จึงไม่มีทางไม่ตรงกับรายการจริง (ดูข้อ 4)
 9. **ฝั่ง Journal กับฝั่ง Port ไม่เกี่ยวข้องกันเลย** `Note` / `NoteDraft` อ้างอิงแค่ `User` ไม่มี foreign key ไป Portfolio, Transaction หรือ Asset และหน้า Journal ไม่แสดงตัวเลขที่คำนวณจากพอร์ต (ปันผล, Yield ฯลฯ)
 10. **รหัสผ่านเก็บเป็น hash (bcrypt) เท่านั้น ส่วนรหัสกู้คืนเก็บแบบเข้ารหัสที่ถอดกลับได้** (เพื่อให้ผู้ใช้ดูและ copy ซ้ำได้ตลอด)
@@ -84,9 +84,10 @@
 | contentText | String | ค่าเริ่มต้น `""` **ข้อความล้วนที่ดึงจาก `content`** (ไม่มีรูปแบบ) ให้ backend อัปเดตทุกครั้งที่บันทึก ใช้กับค้นหา ตัวอย่างบนการ์ด นับคำ และ export CSV เพื่อไม่ต้องแกะ JSON ทุกครั้ง |
 | emotion | String? | `overjoyed` / `happy` / `neutral` / `worried` / `sad` ว่าง (null) = ไม่ระบุ (แสดงเป็นอีโมจิสีเทา + สถานะ "ไม่ระบุ") ดูตารางอารมณ์ด้านล่าง |
 | emotionChangedAt | DateTime? | เวลาที่เปลี่ยนอารมณ์ล่าสุด (เก็บเบื้องหลัง ไม่แสดง) |
+| deletedAt | DateTime? | มีค่า = อยู่ในถังขยะ (ว่าง = โน้ตปกติ) |
 | createdAt / updatedAt | DateTime | `createdAt` คือวันเวลาที่แสดงบนการ์ด ("21 Sep 2026 \| 21:31") และใช้เรียงไทม์ไลน์ |
-- index `(userId, createdAt)` สำหรับไทม์ไลน์ และ `(userId, emotion)` สำหรับกรองอารมณ์
-- ลบโน้ต = ลบจริง (ไม่มีถังขยะของโน้ต) ต้องถามยืนยันก่อน
+- index `(userId, createdAt)` สำหรับไทม์ไลน์, `(userId, emotion)` สำหรับกรองอารมณ์ และ `(userId, deletedAt)` สำหรับถังขยะ
+- ลบโน้ตจากหน้าเขียน/แก้ = Soft delete (ตั้ง `deletedAt` และลบ NoteDraft ของโน้ตนั้น) ต้องถามยืนยันก่อน; กู้คืน = ล้าง `deletedAt` (กลับตำแหน่งเดิมตาม `createdAt`); ลบถาวรทำได้เฉพาะจากหน้า Trash ที่ผู้ใช้กดเอง (ลบแถว + ไฟล์แนบ)
 - โน้ตเป็นการเขียนอิสระ ไม่มีประเภท ไม่มีช่องเสริม และไม่ผูกกับหุ้น/กองทุนหรือพอร์ตใดเลย (มีแค่ผู้เขียน อารมณ์ หัวข้อ เนื้อหา)
 - ไม่เก็บ: จำนวนคำ ("352 words"), ข้อความตัวอย่างย่อบนการ์ด, จำนวนในชิปกรองอารมณ์ (คำนวณตอนแสดง จาก `contentText`)
 - **ตัวแก้ไข** ใช้ฟอนต์เดียวกับแอป ไม่มีการเลือกฟอนต์ เปลี่ยนได้เพียงความหนา (ตัวหนา) เอียง ขีดเส้นใต้ และสีตัวอักษร (ค่าสีเก็บเป็น CSS variable ของ token เช่น `var(--color-red-500)`) พิมพ์ `/` เรียกคำสั่งสร้างบล็อก: Text, Heading 1–3, Bulleted List, Numbered List, Check Item, Quote, Horizontal Line, Table, Attachment (ภาพ / ไฟล์ / ลิงก์)
@@ -348,7 +349,7 @@ Asset 1 ──< Transaction, PlanAsset   (Restrict: ลบ Asset ที่ถู
 | My Journals (การ์ด, ชิปอารมณ์, ค้นหา) | Note | — (export CSV อ่าน Note) |
 | Write / Edit Note | Note, NoteDraft, NoteAttachment | Note (สร้าง/แก้/ลบ รวม `content` JSON และ `contentText`), NoteDraft (บันทึกอัตโนมัติ/ลบเมื่อ Save/Cancel), NoteAttachment (แนบภาพ/ไฟล์) |
 | Portfolio List (การ์ดพอร์ต) | Portfolio (deletedAt ว่าง), Transaction (Run-Rate, DCA, จำนวน entries) | Portfolio (สร้าง/แก้ชื่อ tagline icon, ลบ = ตั้ง deletedAt) |
-| Trash | Portfolio (deletedAt มีค่า) | Portfolio (restore ล้าง deletedAt / ลบถาวร) |
+| Trash | Note และ Portfolio (deletedAt มีค่า), Transaction (จำนวน), CalcPlan (จำนวนแผนที่อ้างอิงพอร์ต) | Note / Portfolio (restore ล้าง deletedAt / ลบถาวร / ล้างถังขยะรายแท็บ; ลบพอร์ตถาวร = ลบ Transaction ทั้งหมดและตั้ง `CalcPlan.portfolioId` เป็นว่าง) |
 | Portfolio Detail: การ์ด Annual Dividend Goal | Portfolio, Transaction (dividend) | Portfolio (`annualDividendGoal`) |
 | Portfolio Detail: การ์ด Total Recorded DCA | Transaction (buy) | — |
 | Portfolio Detail: การ์ด Avg. Yield on Cost | Transaction, Asset | — |
@@ -357,7 +358,7 @@ Asset 1 ──< Transaction, PlanAsset   (Restrict: ลบ Asset ที่ถู
 | Target Amount: ส่วน 1 เลือกที่มา (Use a portfolio / Enter manually) | Portfolio (deletedAt ว่าง), Transaction (Holdings และ Yield ของแต่ละ asset), Asset (ค้นหา ticker) | — |
 | Target Amount: ส่วน 2–3 ตัวเลขและ phases | — (ค่าที่กรอกอยู่ในหน้าจอ) | — |
 | Target Amount: Sanctuary Summary + Your Estimate | — (คำนวณจากค่าในฟอร์ม) | CalcPlan, PlanPhase, PlanAsset เฉพาะเมื่อกด Save plan |
-| Saved Plans (หน้า "Personal Vault") | CalcPlan, PlanPhase (ผลรวม years), Portfolio (ชื่อแหล่งที่มา) | CalcPlan (ลบ, เปลี่ยนชื่อ), Open = โหลดแผนกลับเข้าฟอร์ม |
+| Saved Plans (หน้า "Personal Vault") | CalcPlan, PlanPhase (ผลรวม years), Portfolio (ชื่อแหล่งที่มา) | CalcPlan (ลบ, เปลี่ยนชื่อ), Open = เปิดหน้าสรุปผลของแผน (คำนวณใหม่จากข้อมูลที่บันทึก) |
 | Reminders: ปฏิทิน + Scheduled In Day | Reminder | Reminder (สร้าง/แก้/ลบ, ติ๊กเสร็จ) |
 | Reminders: Gentle To-Dos | Task | Task (เพิ่ม, ติ๊ก, ลบ) |
 | Reminders: ป้าย due this week | Reminder | — |

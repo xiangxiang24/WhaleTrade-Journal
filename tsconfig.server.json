@@ -1,0 +1,20 @@
+{
+  // compile server + electron เป็น .js ไปที่ dist/ (แอปจริงรันจาก dist/ ไม่พึ่ง tsx)
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "rootDir": ".",
+    "outDir": "dist",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "rewriteRelativeImportExtensions": true,
+    "sourceMap": true
+  },
+  "include": ["server", "electron", "generated"]
+}

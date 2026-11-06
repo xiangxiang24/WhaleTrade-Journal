@@ -2,9 +2,16 @@
   "name": "whaletrade-journal",
   "version": "1.0.0",
   "description": "",
-  "main": "electron/main.js",
+  "main": "dist/electron/main.js",
   "scripts": {
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "dev": "concurrently -k -n api,web \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "tsx watch server/dev.ts",
+    "dev:web": "npm --prefix frontend run dev",
+    "build:server": "prisma generate --config prisma7.config.ts && tsc -p tsconfig.server.json",
+    "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
+    "start:app": "npm run build:server && electron .",
+    "dist": "npm --prefix frontend run build && npm run build:server && electron-builder"
   },
   "keywords": [],
   "author": "",
@@ -36,9 +43,26 @@
   "build": {
     "appId": "com.yourname.tradingjournal",
     "productName": "Trading Journal",
-    "files": ["electron/**", "server/**", "client/dist/**", "generated/**", "package.json"],
-    "extraResources": [{ "from": "prisma/migrations", "to": "migrations" }, { "from": "seed", "to": "seed" }],
-    "asarUnpack": ["node_modules/better-sqlite3/**"],
-    "mac": { "target": "dir" }
+    "files": [
+      "dist/**",
+      "frontend/dist/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "prisma/migrations",
+        "to": "migrations"
+      },
+      {
+        "from": "seed",
+        "to": "seed"
+      }
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**"
+    ],
+    "mac": {
+      "target": "dir"
+    }
   }
 }

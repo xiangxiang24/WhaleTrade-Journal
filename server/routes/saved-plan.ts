@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import type { createDb } from '../db/client.js';
+import type { Db } from '../db/client.js';
+import { savedPlanController } from '../controllers/saved-plan.js';
 
-type Db = ReturnType<typeof createDb>;
-
+// endpoints ของฟีเจอร์: แผนที่บันทึกไว้
 export function savedPlanRoutes(db: Db) {
   const router = Router();
-
-  // endpoints ของหน้า saved-plan เพิ่มที่นี่
+  const controller = savedPlanController(db);
+  void controller; // ใช้เมื่อเพิ่ม endpoint เช่น router.get('/api/...', controller.xxx)
 
   return router;
 }

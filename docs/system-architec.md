@@ -163,27 +163,39 @@ Database
 
 ---
 
-## 10. โครงสร้างโฟลเดอร์ (เสนอ)
+## 10. โครงสร้างโฟลเดอร์ (ที่ใช้จริง)
 
 ```
 whaletrade-journal/
-├── frontend/                 # Frontend (React)
-│   └── src/
-│       ├── pages/          # Journals, Portfolio, TargetAmount, Reminders, Trash, Settings, Login
-│       ├── components/     # JournalCard, Sidebar, EmotionPicker, StockSelect, ...
-│       ├── i18n/           # th.json, en.json
-│       └── api/            # ฟังก์ชันเรียก backend
-├── server/                 # Backend (Express)
-│   ├── routes/             # auth, notes, portfolios, transactions, assets, plans, reminders
-│   ├── services/           # calculator.js, csv.js, goal.js
-│   ├── middleware/         # auth (ตรวจ token)
-│   └── prisma/             # schema.prisma, migrations
-├── electron/               # ตัวหุ้มแอป
-│   ├── main.js             # เปิดหน้าต่าง, background
-│   ├── preload.js          # ช่อง IPC ที่อนุญาต
-│   └── scheduler.js        # ตัวตั้งเวลาเตือน + notification
+├── frontend/src/             # Frontend (React) แยกโฟลเดอร์ตามหน้า
+│   ├── <หน้า>/               # onboarding, my-journal, journaling, portfolio, transaction-logs,
+│   │   ├── components/       # reminder, target-amount, saved-plan, setting-page, trash
+│   │   ├── modals/ types/
+│   │   └── apis/<หน้า>.ts    # ฟังก์ชันเรียก backend (fetch) ของหน้านั้น
+│   └── shared/
+│       ├── apis/             # client.ts (request + token), assets.ts
+│       └── data/             # ข้อมูลจำลองระหว่างรอต่อ backend (จุดเดียวที่สลับเป็น API)
+├── server/                   # Backend (Express + TypeScript) แยกตามฟีเจอร์ชื่อเดียวกับหน้า frontend
+│   ├── routes/<ฟีเจอร์>.ts      # ประกาศ endpoint (+ index.ts รวมทุก router)
+│   ├── controllers/<ฟีเจอร์>.ts # รับ request ตรวจข้อมูล ตอบ response
+│   ├── services/<ฟีเจอร์>.ts    # กฎของระบบ + query ฐานข้อมูล (ทุก query กรอง userId)
+│   ├── middleware/           # auth (ตรวจ token)
+│   ├── db/client.ts          # สร้าง Prisma client (SQLite)
+│   ├── index.ts              # startServer(db, port)
+│   └── dev.ts                # ตัวเริ่ม server ตอนพัฒนา (ใช้กับ tsx)
+├── electron/                 # ตัวหุ้มแอป (TypeScript): main.ts, preload.ts, (scheduler.ts ภายหลัง)
+├── prisma/                   # schema.prisma + migrations
+├── seed/ scripts/            # รายชื่อหุ้น/กองทุน และสคริปต์นำเข้า
+├── tsconfig.server.json      # compile server + electron + generated → dist/
 └── package.json
 ```
+
+ฟีเจอร์ฝั่ง server: onboarding, my-journal, journaling, portfolio, transaction-logs, reminder, target-amount, saved-plan, setting-page, trash และ assets (รายชื่อหุ้น/กองทุนใช้ร่วมกัน)
+
+**Build / รัน**
+- ตอนพัฒนา: `npm run dev` (server ด้วย tsx watch + Vite) ใช้ `tsx` เฉพาะตอนพัฒนาเท่านั้น
+- แอปจริง: `npm run build:server` (`prisma generate` + `tsc`) ได้ไฟล์ `.js` ใน `dist/` แล้วรันด้วย Node/Electron ตรงๆ ไม่พึ่ง tsx
+- สร้างแอป: `npm run dist` (build frontend + build server + electron-builder) preload เป็น ESM จึงตั้ง `sandbox: false` (ยังคง `contextIsolation: true`)
 
 ---
 

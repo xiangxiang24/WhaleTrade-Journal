@@ -5,3 +5,5 @@ export function createDb(dbPath: string) {
   const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
   return new PrismaClient({ adapter });
 }
+
+export type Db = ReturnType<typeof createDb>;

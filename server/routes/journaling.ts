@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import type { createDb } from '../db/client.js';
+import type { Db } from '../db/client.js';
+import { journalingController } from '../controllers/journaling.js';
 
-type Db = ReturnType<typeof createDb>;
-
+// endpoints ของฟีเจอร์: เขียน / ดู / แก้โน้ต, ฉบับร่าง, ไฟล์แนบ
 export function journalingRoutes(db: Db) {
   const router = Router();
-
-  // endpoints ของหน้า journaling เพิ่มที่นี่
+  const controller = journalingController(db);
+  void controller; // ใช้เมื่อเพิ่ม endpoint เช่น router.get('/api/...', controller.xxx)
 
   return router;
 }

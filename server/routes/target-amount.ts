@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import type { createDb } from '../db/client.js';
+import type { Db } from '../db/client.js';
+import { targetAmountController } from '../controllers/target-amount.js';
 
-type Db = ReturnType<typeof createDb>;
-
+// endpoints ของฟีเจอร์: เครื่องคำนวณเงินเป้าหมาย
 export function targetAmountRoutes(db: Db) {
   const router = Router();
-
-  // endpoints ของหน้า target-amount เพิ่มที่นี่
+  const controller = targetAmountController(db);
+  void controller; // ใช้เมื่อเพิ่ม endpoint เช่น router.get('/api/...', controller.xxx)
 
   return router;
 }

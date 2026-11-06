@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import type { createDb } from '../db/client.js';
+import type { Db } from '../db/client.js';
+import { reminderController } from '../controllers/reminder.js';
 
-type Db = ReturnType<typeof createDb>;
-
+// endpoints ของฟีเจอร์: การเตือน ปฏิทิน และ task
 export function reminderRoutes(db: Db) {
   const router = Router();
-
-  // endpoints ของหน้า reminder เพิ่มที่นี่
+  const controller = reminderController(db);
+  void controller; // ใช้เมื่อเพิ่ม endpoint เช่น router.get('/api/...', controller.xxx)
 
   return router;
 }

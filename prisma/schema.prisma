@@ -56,6 +56,7 @@ model Note {
   contentText      String    @default("") // ข้อความล้วนที่ดึงจาก content ใช้ค้นหา ตัวอย่างบนการ์ด นับคำ และ export CSV
   emotion          String? // overjoyed / happy / neutral / worried / sad / null
   emotionChangedAt DateTime?
+  deletedAt        DateTime? // มีค่า = อยู่ในถังขยะ
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -65,6 +66,7 @@ model Note {
 
   @@index([userId, createdAt])
   @@index([userId, emotion])
+  @@index([userId, deletedAt])
 }
 
 // ไฟล์แนบของโน้ต (ภาพ/ไฟล์) ตัวไฟล์เก็บในโฟลเดอร์ข้อมูลของแอป ไม่เก็บในไฟล์ .db ลิงก์ (URL) เก็บอยู่ในเนื้อโน้ตเท่านั้น
