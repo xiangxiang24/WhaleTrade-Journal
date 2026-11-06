@@ -722,4 +722,12 @@ export const TH: Record<string, string> = {
   "Could not restore this item. Please try again.": "กู้คืนไม่สำเร็จ กรุณาลองอีกครั้ง",
   "Could not delete this item. Please try again.": "ลบไม่สำเร็จ กรุณาลองอีกครั้ง",
   "Could not empty the trash. Please try again.": "ล้างถังขยะไม่สำเร็จ กรุณาลองอีกครั้ง",
+
+  // ===== Gentle To-Dos: แก้ไข/ลบ =====
+  "Mark “{name}” as done": "ทำเครื่องหมาย “{name}” ว่าเสร็จแล้ว",
+  "Edit task": "แก้ไขงาน",
+  "Double-click to edit": "ดับเบิลคลิกเพื่อแก้ไข",
+  "Delete task “{name}”": "ลบงาน “{name}”",
+  "Task deleted": "ลบงานแล้ว",
+  "Could not delete this task. Please try again.": "ลบงานไม่สำเร็จ กรุณาลองอีกครั้ง",
 }

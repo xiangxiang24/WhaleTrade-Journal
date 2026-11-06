@@ -130,6 +130,23 @@ export async function createTask(text: string): Promise<Task> {
   return { ...created }
 }
 
+// PATCH /tasks/:id (แก้ข้อความ)
+export async function updateTaskText(id: number, text: string): Promise<Task> {
+  await delay()
+  const current = tasks.find((task) => task.id === id)
+  if (!current) throw new Error('This task no longer exists.')
+  const updated: Task = { ...current, text }
+  tasks = tasks.map((task) => (task.id === id ? updated : task))
+  return { ...updated }
+}
+
+// DELETE /tasks/:id
+export async function deleteTask(id: number): Promise<void> {
+  await delay()
+  if (!tasks.some((task) => task.id === id)) throw new Error('This task no longer exists.')
+  tasks = tasks.filter((task) => task.id !== id)
+}
+
 // PATCH /tasks/:id
 export async function setTaskDone(id: number, done: boolean): Promise<Task> {
   await delay()

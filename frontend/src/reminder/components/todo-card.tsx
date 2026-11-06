@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react'
-import { BookOpen, Check, Paperclip, Plus } from 'lucide-react'
+import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { BookOpen, Check, Paperclip, Plus, X } from 'lucide-react'
 import type { Task } from '../../shared/types/reminder'
 import { useI18n } from '../../shared/i18n/use-i18n'
 
@@ -7,17 +7,24 @@ type TodoCardProps = {
   tasks: Task[]
   onToggle: (task: Task) => void
   onAdd: (text: string) => Promise<void>
+  /** แก้ข้อความ task (ดับเบิลคลิกที่ข้อความ) ถ้าไม่สำเร็จให้ throw Error */
+  onEdit: (id: number, text: string) => Promise<void>
+  onDelete: (task: Task) => void
 }
 
 const TASK_MAX = 200
 const NOTE = 'Gentle To-Do List for reminding of sub-events'
 
 // การ์ด Gentle To-Dos: task checkbox (ค้างก่อน เสร็จแล้วขีดฆ่าอยู่ท้าย) + ช่องเพิ่ม task + กล่องหมายเหตุ
-export default function TodoCard({ tasks, onToggle, onAdd }: TodoCardProps) {
+export default function TodoCard({ tasks, onToggle, onAdd, onEdit, onDelete }: TodoCardProps) {
   const { t } = useI18n()
   const [text, setText] = useState('')
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string>()
+  // task ที่กำลังแก้ข้อความ + ค่าที่พิมพ์ (ดับเบิลคลิกเข้า, Enter / คลิกออกเพื่อบันทึก, Esc ยกเลิก)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [draft, setDraft] = useState('')
+  const cancelled = useRef(false)
 
   const pending = tasks.filter((task) => !task.done).sort((a, b) => a.createdAt.localeCompare(b.createdAt))
   const done = tasks.filter((task) => task.done)
@@ -35,6 +42,35 @@ export default function TodoCard({ tasks, onToggle, onAdd }: TodoCardProps) {
       setError(t(caught instanceof Error ? caught.message : 'Could not add this task. Please try again.'))
     } finally {
       setAdding(false)
+    }
+  }
+
+  function startEdit(task: Task) {
+    cancelled.current = false
+    setError(undefined)
+    setDraft(task.text)
+    setEditingId(task.id)
+  }
+
+  async function commitEdit(task: Task) {
+    if (cancelled.current || editingId !== task.id) return
+    const value = draft.trim()
+    setEditingId(null)
+    if (!value || value === task.text) return
+    try {
+      await onEdit(task.id, value)
+    } catch (caught) {
+      setError(t(caught instanceof Error ? caught.message : 'Could not update this task. Please try again.'))
+    }
+  }
+
+  function handleEditKey(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      event.currentTarget.blur()
+    } else if (event.key === 'Escape') {
+      cancelled.current = true
+      setEditingId(null)
     }
   }
 
@@ -62,28 +98,61 @@ export default function TodoCard({ tasks, onToggle, onAdd }: TodoCardProps) {
         ) : (
           <ul className="m-0 mt-4 flex list-none flex-col gap-2 p-0">
             {[...pending, ...done].map((task) => (
-              <li key={task.id}>
-                <label
-                  className={`flex cursor-pointer items-start gap-3 rounded-3xl px-4 py-3 text-[14px] leading-5 ${
-                    task.done ? 'bg-green-50 text-text-muted line-through' : 'bg-surface text-navy-900'
+              <li
+                key={task.id}
+                className={`flex items-start gap-3 rounded-3xl py-2.5 pr-2 pl-4 text-[14px] leading-5 ${
+                  task.done ? 'bg-green-50 text-text-muted' : 'bg-surface text-navy-900'
+                }`}
+              >
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={task.done}
+                  aria-label={t('Mark “{name}” as done', { name: task.text })}
+                  onClick={() => onToggle(task)}
+                  data-no-bounce
+                  className={`mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors duration-150 ${
+                    task.done ? 'border-green-500 bg-green-500 text-surface' : 'border-blue-200 bg-blue-50 text-transparent'
                   }`}
                 >
+                  <Check size={14} strokeWidth={2.5} aria-hidden="true" />
+                </button>
+
+                {editingId === task.id ? (
                   <input
-                    type="checkbox"
-                    checked={task.done}
-                    onChange={() => onToggle(task)}
-                    className="peer sr-only"
+                    autoFocus
+                    value={draft}
+                    maxLength={TASK_MAX}
+                    aria-label={t('Edit task')}
+                    onChange={(event) => setDraft(event.target.value)}
+                    onKeyDown={(event) => handleEditKey(event)}
+                    onBlur={() => void commitEdit(task)}
+                    className="-my-1 h-8 min-w-0 flex-1 rounded-pill border-2 border-blue-500 bg-surface px-3 text-[14px] text-navy-900 outline-none focus:shadow-focus"
                   />
+                ) : (
                   <span
-                    aria-hidden="true"
-                    className={`mt-px inline-flex size-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors duration-150 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-blue-500 ${
-                      task.done ? 'border-green-500 bg-green-500 text-surface' : 'border-blue-200 bg-blue-50 text-transparent'
+                    tabIndex={0}
+                    title={t('Double-click to edit')}
+                    onDoubleClick={() => startEdit(task)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'F2') startEdit(task)
+                    }}
+                    className={`min-w-0 flex-1 cursor-text rounded-md whitespace-pre-line break-words outline-none focus-visible:shadow-focus ${
+                      task.done ? 'line-through' : ''
                     }`}
                   >
-                    <Check size={14} strokeWidth={2.5} />
+                    {task.text}
                   </span>
-                  <span className="min-w-0 whitespace-pre-line break-words">{task.text}</span>
-                </label>
+                )}
+
+                <button
+                  type="button"
+                  aria-label={t('Delete task “{name}”', { name: task.text })}
+                  onClick={() => onDelete(task)}
+                  className="-my-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-pill text-text-muted transition-colors duration-150 hover:bg-red-50 hover:text-red-500"
+                >
+                  <X size={16} strokeWidth={1.75} aria-hidden="true" />
+                </button>
               </li>
             ))}
           </ul>

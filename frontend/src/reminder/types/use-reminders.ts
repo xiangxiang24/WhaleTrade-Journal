@@ -3,11 +3,13 @@ import {
   createReminder,
   createTask,
   deleteReminder,
+  deleteTask,
   fetchReminders,
   fetchTasks,
   setReminderDone,
   setTaskDone,
   updateReminder,
+  updateTaskText,
 } from '../../shared/data/reminders'
 import type { Reminder, Task } from '../../shared/types/reminder'
 import type { ReminderLoadStatus } from './reminder'
@@ -76,5 +78,15 @@ export function useReminders() {
     setTasks((current) => current.map((item) => (item.id === id ? updated : item)))
   }, [])
 
-  return { reminders, tasks, status, reload, addReminder, editReminder, removeReminder, toggleReminder, addTask, toggleTask }
+  const editTask = useCallback(async (id: number, text: string) => {
+    const updated = await updateTaskText(id, text)
+    setTasks((current) => current.map((item) => (item.id === id ? updated : item)))
+  }, [])
+
+  const removeTask = useCallback(async (id: number) => {
+    await deleteTask(id)
+    setTasks((current) => current.filter((item) => item.id !== id))
+  }, [])
+
+  return { reminders, tasks, status, reload, addReminder, editReminder, removeReminder, toggleReminder, addTask, toggleTask, editTask, removeTask }
 }

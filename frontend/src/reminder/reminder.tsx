@@ -40,7 +40,7 @@ export default function ReminderPage({
   onLogout,
 }: ReminderPageProps) {
   const { t } = useI18n()
-  const { reminders, tasks, status, reload, addReminder, editReminder, removeReminder, toggleReminder, addTask, toggleTask } =
+  const { reminders, tasks, status, reload, addReminder, editReminder, removeReminder, toggleReminder, addTask, toggleTask, editTask, removeTask } =
     useReminders()
   const now = useNow()
   const todayKey = dayKey(now, timeZone)
@@ -138,6 +138,15 @@ export default function ReminderPage({
     }
   }
 
+  async function handleDeleteTask(task: Task) {
+    try {
+      await removeTask(task.id)
+      showToast(t('Task deleted'))
+    } catch {
+      showToast(t('Could not delete this task. Please try again.'))
+    }
+  }
+
   async function handleDelete(reminder: Reminder) {
     await removeReminder(reminder.id)
     showToast(t('Reminder deleted'))
@@ -215,7 +224,7 @@ export default function ReminderPage({
                   />
                 </div>
                 <div className="min-w-0 pt-2">
-                  <TodoCard tasks={tasks} onToggle={handleToggleTask} onAdd={addTask} />
+                  <TodoCard tasks={tasks} onToggle={handleToggleTask} onAdd={addTask} onEdit={editTask} onDelete={handleDeleteTask} />
                 </div>
               </div>
             </>
