@@ -47,9 +47,9 @@ export function useCalculator() {
   const [portfolioRows, setPortfolioRows] = useState<AssetRow[]>([])
   const [manualRows, setManualRows] = useState<AssetRow[]>([])
 
-  const [principalText, setPrincipalText] = useState('100,000')
-  const [dcaText, setDcaText] = useState('5,000')
-  const [yearsText, setYearsText] = useState('10')
+  const [principalText, setPrincipalText] = useState('')
+  const [dcaText, setDcaText] = useState('')
+  const [yearsText, setYearsText] = useState('')
   const [phasesOn, setPhasesOn] = useState(false)
   const [phases, setPhases] = useState<PhaseRow[]>([])
   const phaseId = useRef(1)
@@ -158,6 +158,31 @@ export function useCalculator() {
   ])
   const stale = result !== null && result.signature !== signature
 
+  // มีอะไรให้ล้างไหม: กรอกอะไรไว้ / เลือกหุ้นไว้ / เลือกพอร์ตไว้ / มีผลคำนวณอยู่ (ไว้เปิด-ปิดปุ่ม Clear all)
+  const hasInput =
+    result !== null ||
+    portfolioId !== null ||
+    portfolioRows.length > 0 ||
+    manualRows.length > 0 ||
+    [principalText, dcaText, yearsText].some((text) => text !== '') ||
+    phasesOn
+
+  /** Clear all: เริ่มแผนใหม่ ล้างทุกช่อง ทุกตัวเลือก และผลคำนวณเดิม */
+  function clearAll() {
+    setMode('portfolio')
+    setPortfolioId(null)
+    setPortfolioRows([])
+    setManualRows([])
+    setPrincipalText('')
+    setDcaText('')
+    setYearsText('')
+    setPhasesOn(false)
+    setPhases([])
+    phaseId.current = 1
+    setResult(null)
+    setErrors({})
+  }
+
   function validate(): FormErrors {
     const found: FormErrors = {}
     if (rows.length === 0) found.assets = t('Add at least one stock or fund to calculate.')
@@ -225,6 +250,8 @@ export function useCalculator() {
     stale,
     errors,
     calculate,
+    hasInput,
+    clearAll,
   }
 }
 

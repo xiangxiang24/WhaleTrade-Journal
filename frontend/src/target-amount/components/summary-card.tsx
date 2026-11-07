@@ -1,4 +1,4 @@
-import { Calculator, ListChecks } from 'lucide-react'
+import { Calculator, ListChecks, RotateCcw } from 'lucide-react'
 import { formatBaht, formatCompact } from '../types/format'
 import type { Calculator as CalculatorState } from '../types/use-calculator'
 import { useI18n } from '../../shared/i18n/use-i18n'
@@ -8,7 +8,7 @@ const FOOT = 'Takes less than a second · Preserves your data'
 
 // การ์ด Sanctuary Summary: ค่าจากฟอร์มทันที (ยังไม่ต้องกด Calculate) + ปุ่ม Calculate / Recalculate
 // ≥ 1280 = การ์ดแนวตั้งทางขวาที่ติดอยู่กับที่ตอนเลื่อน; น้อยกว่านั้นย้ายขึ้นบนเป็นแถบสรุปแนวนอน (design rules 5.2)
-export default function SummaryCard({ calc, onCalculate }: { calc: CalculatorState; onCalculate: () => void }) {
+export default function SummaryCard({ calc, onCalculate, onClear }: { calc: CalculatorState; onCalculate: () => void; onClear: () => void }) {
   const { t } = useI18n()
   const { summary, result, stale } = calc
   const label = result ? t('Recalculate') : t('Calculate')
@@ -69,6 +69,15 @@ export default function SummaryCard({ calc, onCalculate }: { calc: CalculatorSta
       >
         <Calculator size={18} strokeWidth={1.75} aria-hidden="true" />
         {label}
+      </button>
+      <button
+        type="button"
+        onClick={onClear}
+        disabled={!calc.hasInput}
+        className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-pill border-2 border-blue-500 bg-surface text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:bg-blue-50 active:bg-blue-100 disabled:cursor-not-allowed disabled:border-blue-100 disabled:text-text-muted disabled:hover:bg-surface"
+      >
+        <RotateCcw size={16} strokeWidth={1.75} aria-hidden="true" />
+        {t('Clear all')}
       </button>
       <p className="m-0 mt-3 text-center text-[12px] leading-5 text-text-muted">
         {stale ? t('Your inputs changed since the last result.') : t(FOOT)}

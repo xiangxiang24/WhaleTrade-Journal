@@ -487,6 +487,8 @@ export const TH: Record<string, string> = {
   "Total invested capital": "เงินลงทุนรวม",
   "Calculate": "คำนวณ",
   "Recalculate": "คำนวณใหม่",
+  "Clear all": "ล้างทั้งหมด",
+  "Cleared. Ready for a new plan.": "ล้างแล้ว พร้อมเริ่มแผนใหม่",
   "Takes less than a second · Preserves your data": "ใช้เวลาไม่ถึงวินาที · ข้อมูลของคุณยังอยู่ครบ",
   "Your inputs changed since the last result.": "ข้อมูลที่กรอกเปลี่ยนไปจากผลล่าสุด",
   "Simulated Future": "อนาคตจำลอง",

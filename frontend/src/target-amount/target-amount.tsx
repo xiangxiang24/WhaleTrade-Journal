@@ -47,6 +47,11 @@ export default function TargetAmount({ user, reminderBadge, onNavigate, onLogout
     setTimeout(() => estimateRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }), 50)
   }
 
+  function handleClear() {
+    calc.clearAll()
+    showToast(t('Cleared. Ready for a new plan.'))
+  }
+
   async function handleSave(name: string) {
     const result = calc.result
     if (!result) return
@@ -84,7 +89,7 @@ export default function TargetAmount({ user, reminderBadge, onNavigate, onLogout
           {/* ≥ 1280: ฟอร์ม + การ์ดสรุปติดขวา; น้อยกว่านั้นการ์ดสรุปขึ้นไปอยู่บนฟอร์มเป็นแถบแนวนอน (design rules 5.2) */}
           <div className="mt-6 grid animate-fade-up grid-cols-1 gap-5 px-1 [animation-delay:80ms] min-[1280px]:grid-cols-[minmax(0,1fr)_320px] min-[1280px]:items-start min-[1280px]:gap-6 motion-reduce:animate-none">
             <div className="min-w-0 min-[1280px]:col-start-2 min-[1280px]:row-start-1">
-              <SummaryCard calc={calc} onCalculate={handleCalculate} />
+              <SummaryCard calc={calc} onCalculate={handleCalculate} onClear={handleClear} />
             </div>
             <div className="flex min-w-0 flex-col gap-5 min-[1280px]:col-start-1 min-[1280px]:row-start-1">
               <SourceStep calc={calc} />
