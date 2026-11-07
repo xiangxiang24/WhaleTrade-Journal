@@ -10,7 +10,7 @@ import {
   setTaskDone,
   updateReminder,
   updateTaskText,
-} from '../../shared/data/reminders'
+} from '../apis/reminder'
 import type { Reminder, Task } from '../../shared/types/reminder'
 import type { ReminderLoadStatus } from './reminder'
 

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { deleteCalcPlan, fetchCalcPlans, renameCalcPlan } from '../../shared/data/calc-plans'
-import { getPortfolioNames } from '../../shared/data/portfolios'
+import { deleteCalcPlan, fetchCalcPlans, fetchPortfolioNames, renameCalcPlan } from '../apis/saved-plan'
 import type { CalcPlan } from '../../shared/types/calc-plan'
 import type { SavedPlanLoadStatus } from './saved-plan'
 
@@ -13,11 +12,11 @@ export function useSavedPlans() {
 
   useEffect(() => {
     let cancelled = false
-    fetchCalcPlans()
-      .then((result) => {
+    Promise.all([fetchCalcPlans(), fetchPortfolioNames()])
+      .then(([result, loadedNames]) => {
         if (cancelled) return
         setPlans(result)
-        setNames(getPortfolioNames())
+        setNames(loadedNames)
         setStatus('ready')
       })
       .catch(() => {

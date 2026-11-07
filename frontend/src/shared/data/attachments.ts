@@ -18,13 +18,8 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-// อัปโหลดไฟล์แนบ (ยังเป็นข้อมูลจำลอง: อ่านเป็น data URL เก็บอยู่ในเนื้อโน้ตในหน่วยความจำ)
-// ตอนต่อ backend ให้ส่งไฟล์แบบ multipart ไปเก็บในโฟลเดอร์ข้อมูลของแอป (userData/attachments) แล้วคืน URL ของไฟล์
-//   const body = new FormData(); body.append('file', file); body.append('kind', kind)
-//   const response = await fetch('/api/attachments', { method: 'POST', body })
-//   if (!response.ok) throw new Error('Could not upload this file.')
-//   return (await response.json()) as UploadedAttachment
-export async function uploadAttachment(file: File, kind: AttachmentKind): Promise<UploadedAttachment> {
+/** ตรวจขนาด/ชนิดไฟล์ก่อนส่งขึ้น backend (backend ตรวจซ้ำอีกชั้น) ไม่ผ่าน = throw Error พร้อมข้อความที่จะแสดง */
+export function validateAttachment(file: File, kind: AttachmentKind) {
   const limit = kind === 'image' ? IMAGE_MAX_BYTES : FILE_MAX_BYTES
   if (file.size > limit) {
     throw new Error(`This ${kind} is too large. The limit is ${formatBytes(limit)}.`)
@@ -32,11 +27,7 @@ export async function uploadAttachment(file: File, kind: AttachmentKind): Promis
   if (kind === 'image' && !file.type.startsWith('image/')) {
     throw new Error('Please choose an image file.')
   }
-  const url = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result))
-    reader.onerror = () => reject(new Error('Could not read this file.'))
-    reader.readAsDataURL(file)
-  })
-  return { url, name: file.name, size: file.size, mime: file.type || 'application/octet-stream' }
 }
+
+/** ฟังก์ชันอัปโหลดที่หน้าจอส่งให้ตัวแก้ไข (ผูกกับโน้ตที่มีอยู่แล้ว) */
+export type UploadAttachment = (file: File, kind: AttachmentKind) => Promise<UploadedAttachment>

@@ -42,8 +42,6 @@ function validate(
 export default function Register({ onRegister, onSuccess, onBack, onSwitchToLogin }: RegisterProps) {
   const [fullName, setFullName] = useState('')
   const [displayName, setDisplayName] = useState('')
-  // Display name เริ่มต้นเท่ากับ Full name (database.md) จนกว่าผู้ใช้จะแก้เอง
-  const [displayNameEdited, setDisplayNameEdited] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -57,16 +55,6 @@ export default function Register({ onRegister, onSuccess, onBack, onSwitchToLogi
     setRecoveryCode(null)
     leaveTo(onSuccess)
   }, [onSuccess, leaveTo])
-
-  function handleFullNameChange(value: string) {
-    setFullName(value)
-    if (!displayNameEdited) setDisplayName(value)
-  }
-
-  function handleDisplayNameChange(value: string) {
-    setDisplayName(value)
-    setDisplayNameEdited(value !== '')
-  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -130,7 +118,7 @@ export default function Register({ onRegister, onSuccess, onBack, onSwitchToLogi
             autoComplete="name"
             placeholder="Your full name"
             value={fullName}
-            onChange={handleFullNameChange}
+            onChange={setFullName}
             error={errors.fullName}
           />
           <TextField
@@ -139,7 +127,7 @@ export default function Register({ onRegister, onSuccess, onBack, onSwitchToLogi
             autoComplete="nickname"
             placeholder="How we’ll call you in the app"
             value={displayName}
-            onChange={handleDisplayNameChange}
+            onChange={setDisplayName}
             error={errors.displayName}
           />
           <TextField

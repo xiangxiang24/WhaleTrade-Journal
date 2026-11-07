@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import OpeningPage from './onboarding/opening-page'
 import OnboardingInconnected from './onboarding/onboarding-inconnected'
 import OnboardingConnected from './onboarding/onboarding-connected'
@@ -16,25 +16,29 @@ import SavedPlan from './saved-plan/saved-plan'
 import PlanDetail from './saved-plan/plan-detail'
 import SettingPage from './setting-page/setting-page'
 import TrashPage from './trash/trash-page'
-import { getAccount } from './shared/data/account'
+import { loadAssets } from './shared/data/assets'
+import { getToken } from './shared/apis/client'
+import { fetchMe, loginAccount, logoutAccount, recoverPassword, registerAccount } from './onboarding/apis/onboarding'
+import { countDueReminders } from './reminder/apis/reminder'
 import I18nProvider from './shared/i18n/i18n-provider'
 import type { Account } from './shared/types/account'
-import { countDueReminders } from './shared/data/reminders'
 import type { SidebarKey } from './shared/types/sidebar'
-import type { LoginCredentials } from './onboarding/types/login'
 
 type Screen = 'opening' | 'inconnected' | 'connected' | 'login' | 'register' | 'loading' | 'recovery' | 'journals' | 'journaling' | 'portfolio' | 'transaction-logs' | 'reminder' | 'target-amount' | 'saved-plan' | 'plan-detail' | 'setting' | 'trash'
 
-// ชั่วคราว (ลบทิ้งเมื่อต่อ backend): บัญชีจำลองไว้ทดสอบ Login → modal → Loading → My Journals
-const MOCK_EMAIL = 'demo@whaletrade.app'
-const MOCK_PASSWORD = 'Whale1234'
+// ภาษาล่าสุดจำไว้ในเครื่อง เพื่อให้หน้าก่อนล็อกอินใช้ภาษาเดิม (ค่าจริงอยู่ที่ User.language ใน backend)
+const LANGUAGE_KEY = 'whale-journal:language'
 
-async function mockLogin({ email, password }: LoginCredentials) {
-  await new Promise((resolve) => setTimeout(resolve, 600))
-  if (email.toLowerCase() !== MOCK_EMAIL || password !== MOCK_PASSWORD) {
-    throw new Error('Incorrect email or password.')
+function rememberedLanguage(): Account['language'] {
+  try {
+    return localStorage.getItem(LANGUAGE_KEY) === 'th' ? 'th' : 'en'
+  } catch {
+    return 'en'
   }
 }
+
+// ค่าแทนตอนยังไม่ล็อกอิน (หน้าที่ต้องใช้บัญชีจะไม่แสดงก่อนล็อกอิน)
+const GUEST: Account = { fullName: '', displayName: '', email: '', avatarUrl: null, language: 'en', timezone: 'Asia/Bangkok' }
 
 // เมนู Sidebar ที่มีหน้าแล้ว (เมนูอื่นยังไม่ทำ จึงไม่เปลี่ยนหน้า)
 function screenForMenu(key: SidebarKey): Screen | null {
@@ -49,34 +53,69 @@ function screenForMenu(key: SidebarKey): Screen | null {
 }
 
 type ScreensProps = {
-  account: Account
-  setAccount: (account: Account) => void
+  /** null = ยังไม่ได้ล็อกอิน */
+  session: Account | null
+  setAccount: (account: Account | null) => void
 }
 
-function Screens({ account, setAccount }: ScreensProps) {
+function Screens({ session, setAccount }: ScreensProps) {
+  const account = session ?? GUEST
   const [screen, setScreen] = useState<Screen>('opening')
+  // จำนวนการเตือนที่ถึงเวลาแล้ว (badge ที่ Sidebar) อัปเดตทุกครั้งที่เปลี่ยนหน้า
+  const [due, setDue] = useState(0)
+
+  useEffect(() => {
+    if (!session) return
+    let cancelled = false
+    countDueReminders()
+      .then((count) => {
+        if (!cancelled) setDue(count)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [screen, session])
+
+  // เข้าสู่ระบบสำเร็จ: เก็บบัญชี + โหลดรายการหุ้นให้ทุกหน้าใช้
+  async function enter(next: Account) {
+    await loadAssets()
+    setAccount(next)
+  }
+
+  function logout() {
+    logoutAccount()
+    setAccount(null)
+    setScreen('inconnected')
+  }
+
   const [openNoteId, setOpenNoteId] = useState<number | null>(null)
   const [openPortfolioId, setOpenPortfolioId] = useState<number | null>(null)
   const [openPlanId, setOpenPlanId] = useState<number | null>(null)
   const sidebarUser = { displayName: account.displayName, avatarUrl: account.avatarUrl ?? undefined }
   const timeZone = account.timezone
 
+  // หน้าที่ต้องล็อกอิน: ไม่มีบัญชี (ออกจากระบบ/ลบบัญชี/token ใช้ไม่ได้) = กลับหน้าเลือก Login/Register
+  const needsAccount = !['opening', 'inconnected', 'login', 'register', 'loading', 'recovery'].includes(screen)
+  if (needsAccount && !session) {
+    return <OnboardingInconnected onLogin={() => setScreen('login')} onRegister={() => setScreen('register')} />
+  }
+
   if (screen === 'opening') {
-    return <OpeningPage onFinish={() => setScreen('inconnected')} />
+    return <OpeningPage onFinish={() => setScreen(session ? 'connected' : 'inconnected')} />
   }
   if (screen === 'inconnected') {
     return (
       <OnboardingInconnected
         onLogin={() => setScreen('login')}
         onRegister={() => setScreen('register')}
-        onSwitch={() => setScreen('connected')}
       />
     )
   }
   if (screen === 'login') {
     return (
       <Login
-        onLogin={mockLogin}
+        onLogin={async (credentials) => enter(await loginAccount(credentials))}
         onBack={() => setScreen('inconnected')}
         onSwitchToRegister={() => setScreen('register')}
         onForgotPassword={() => setScreen('recovery')}
@@ -87,6 +126,11 @@ function Screens({ account, setAccount }: ScreensProps) {
   if (screen === 'register') {
     return (
       <Register
+        onRegister={async (data) => {
+          const { recoveryCode, account: created } = await registerAccount(data)
+          await enter(created)
+          return { recoveryCode }
+        }}
         onBack={() => setScreen('inconnected')}
         onSwitchToLogin={() => setScreen('login')}
         onSuccess={() => setScreen('loading')}
@@ -96,6 +140,7 @@ function Screens({ account, setAccount }: ScreensProps) {
   if (screen === 'recovery') {
     return (
       <RecoveryPassword
+        onResetPassword={recoverPassword}
         onBack={() => setScreen('inconnected')}
         onSuccess={() => setScreen('login')}
       />
@@ -106,9 +151,9 @@ function Screens({ account, setAccount }: ScreensProps) {
       <MyJournal
         user={sidebarUser}
         timeZone={timeZone}
-        reminderBadge={countDueReminders()}
+        reminderBadge={due}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'journals')}
-        onLogout={() => setScreen('inconnected')}
+        onLogout={logout}
         onOpenNote={(id) => {
           setOpenNoteId(id)
           setScreen('journaling')
@@ -121,9 +166,9 @@ function Screens({ account, setAccount }: ScreensProps) {
       <PortfolioPage
         user={sidebarUser}
         timeZone={timeZone}
-        reminderBadge={countDueReminders()}
+        reminderBadge={due}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'portfolio')}
-        onLogout={() => setScreen('inconnected')}
+        onLogout={logout}
         onOpenPortfolio={(id) => {
           setOpenPortfolioId(id)
           setScreen('transaction-logs')
@@ -135,11 +180,14 @@ function Screens({ account, setAccount }: ScreensProps) {
     return (
       <SettingPage
         user={sidebarUser}
-        reminderBadge={countDueReminders()}
+        reminderBadge={due}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'setting')}
-        onLogout={() => setScreen('inconnected')}
+        onLogout={logout}
         onAccountChange={setAccount}
-        onAccountDeleted={() => setScreen('opening')}
+        onAccountDeleted={() => {
+          setAccount(null)
+          setScreen('opening')
+        }}
       />
     )
   }
@@ -148,9 +196,9 @@ function Screens({ account, setAccount }: ScreensProps) {
       <TrashPage
         user={sidebarUser}
         timeZone={timeZone}
-        reminderBadge={countDueReminders()}
+        reminderBadge={due}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'trash')}
-        onLogout={() => setScreen('inconnected')}
+        onLogout={logout}
       />
     )
   }
@@ -159,9 +207,9 @@ function Screens({ account, setAccount }: ScreensProps) {
       <SavedPlan
         user={sidebarUser}
         timeZone={timeZone}
-        reminderBadge={countDueReminders()}
+        reminderBadge={due}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'saved-plan')}
-        onLogout={() => setScreen('inconnected')}
+        onLogout={logout}
         onOpenPlan={(id) => {
           setOpenPlanId(id)
           setScreen('plan-detail')
@@ -175,10 +223,10 @@ function Screens({ account, setAccount }: ScreensProps) {
         planId={openPlanId}
         user={sidebarUser}
         timeZone={timeZone}
-        reminderBadge={countDueReminders()}
+        reminderBadge={due}
         onBack={() => setScreen('saved-plan')}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'plan-detail')}
-        onLogout={() => setScreen('inconnected')}
+        onLogout={logout}
       />
     )
   }
@@ -186,9 +234,9 @@ function Screens({ account, setAccount }: ScreensProps) {
     return (
       <TargetAmount
         user={sidebarUser}
-        reminderBadge={countDueReminders()}
+        reminderBadge={due}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'target-amount')}
-        onLogout={() => setScreen('inconnected')}
+        onLogout={logout}
       />
     )
   }
@@ -197,9 +245,9 @@ function Screens({ account, setAccount }: ScreensProps) {
       <ReminderPage
         user={sidebarUser}
         timeZone={timeZone}
-        reminderBadge={countDueReminders()}
+        reminderBadge={due}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'reminder')}
-        onLogout={() => setScreen('inconnected')}
+        onLogout={logout}
       />
     )
   }
@@ -208,10 +256,10 @@ function Screens({ account, setAccount }: ScreensProps) {
       <TransactionLogs
         portfolioId={openPortfolioId}
         user={sidebarUser}
-        reminderBadge={countDueReminders()}
+        reminderBadge={due}
         onBack={() => setScreen('portfolio')}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'transaction-logs')}
-        onLogout={() => setScreen('inconnected')}
+        onLogout={logout}
       />
     )
   }
@@ -220,9 +268,9 @@ function Screens({ account, setAccount }: ScreensProps) {
       <Journaling
         noteId={openNoteId}
         user={sidebarUser}
-        reminderBadge={countDueReminders()}
+        reminderBadge={due}
         onNavigate={(key) => setScreen(screenForMenu(key) ?? 'journaling')}
-        onLogout={() => setScreen('inconnected')}
+        onLogout={logout}
         onBack={() => setScreen('journals')}
         onDeleted={() => setScreen('journals')}
       />
@@ -236,18 +284,49 @@ function Screens({ account, setAccount }: ScreensProps) {
     <OnboardingConnected
       account={{ displayName: account.displayName }}
       onStart={() => setScreen('journals')}
-      onSwitch={() => setScreen('inconnected')}
+      onSwitch={logout}
     />
   )
 }
 
 // บัญชีที่ล็อกอินอยู่ (ชื่อ รูป เขตเวลา ภาษา) หน้า Setting แก้แล้วทุกหน้าเห็นทันที
+// เปิดแอปแล้วมี token เดิม = ตรวจกับ backend ก่อน ถ้ายังใช้ได้จะข้ามหน้า Login (ไปหน้า "ยินดีต้อนรับกลับ")
 function App() {
-  const [account, setAccount] = useState<Account>(() => getAccount())
+  const [account, setAccountState] = useState<Account | null>(null)
+  const [booting, setBooting] = useState(() => getToken() !== null)
+  const [language, setLanguage] = useState<Account['language']>(rememberedLanguage)
+
+  function setAccount(next: Account | null) {
+    setAccountState(next)
+    if (!next) return
+    setLanguage(next.language)
+    try {
+      localStorage.setItem(LANGUAGE_KEY, next.language)
+    } catch {
+      // จำภาษาไม่ได้ (storage ปิด): ใช้ค่าจาก backend ทุกครั้งที่ล็อกอินอยู่แล้ว
+    }
+  }
+
+  useEffect(() => {
+    if (!booting) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const me = await fetchMe()
+        await loadAssets()
+        if (!cancelled) setAccount(me)
+      } catch {
+        // token หมดอายุ/ใช้ไม่ได้ หรือ backend ยังไม่พร้อม: ไปหน้า Login ตามปกติ
+      }
+      if (!cancelled) setBooting(false)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [booting])
+
   return (
-    <I18nProvider language={account.language}>
-      <Screens account={account} setAccount={setAccount} />
-    </I18nProvider>
+    <I18nProvider language={language}>{booting ? null : <Screens session={account} setAccount={setAccount} />}</I18nProvider>
   )
 }
 

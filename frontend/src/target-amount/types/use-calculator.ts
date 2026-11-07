@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { holdings, type Holding } from '../../shared/data/portfolio-math'
-import { fetchPortfolios } from '../../shared/data/portfolios'
-import { fetchTransactions } from '../../shared/data/transactions'
+import { fetchPortfolios } from '../../portfolio/apis/portfolio'
+import { fetchTransactions } from '../../transaction-logs/apis/transaction-logs'
 import type { Portfolio } from '../../shared/types/portfolio'
 import type { Asset } from '../../shared/types/transaction'
-import { calculatePlan } from '../../shared/data/calculate-plan'
+import { calculatePlan } from '../apis/target-amount'
 import {
   MAX_PHASES,
   MAX_YEARS,
@@ -178,14 +178,15 @@ export function useCalculator() {
     return found
   }
 
-  /** กด Calculate / Recalculate: ตรวจข้อมูลแล้วคำนวณ (สำเร็จ = true) */
-  function calculate() {
+  /** กด Calculate / Recalculate: ตรวจข้อมูลแล้วให้ backend คำนวณ (สำเร็จ = true; backend ล้มเหลว = throw Error) */
+  async function calculate() {
     const found = validate()
     setErrors(found)
     if (Object.keys(found).length > 0 || avgYield === null) return false
     const input = { principal, phases: phaseInputs, avgYieldPct: avgYield }
+    const output = await calculatePlan(input)
     setResult({
-      output: calculatePlan(input),
+      output,
       input,
       signature,
       avgYieldPct: avgYield,

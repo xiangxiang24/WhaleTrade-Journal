@@ -6,7 +6,7 @@ import {
   updateEmail,
   updatePreferences,
   updateProfile,
-} from '../../shared/data/account'
+} from '../apis/setting-page'
 import type { Account, Language } from '../../shared/types/account'
 import type { SettingLoadStatus } from './setting'
 

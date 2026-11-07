@@ -5,8 +5,9 @@ import {
   FILE_MAX_BYTES,
   IMAGE_MAX_BYTES,
   formatBytes,
-  uploadAttachment,
+  validateAttachment,
   type AttachmentKind,
+  type UploadAttachment,
 } from '../data/attachments'
 import ModalFrame from '../modal/modal-frame'
 import { useI18n } from '../i18n/use-i18n'
@@ -20,6 +21,8 @@ type AttachmentModalProps = {
   open: boolean
   /** แทรกสิ่งที่แนบลงตัวแก้ไข (ถ้าไม่สำเร็จให้ throw Error) */
   onInsert: (result: AttachmentResult) => void
+  /** อัปโหลดไฟล์ขึ้น backend (ต้องมีโน้ตอยู่แล้ว); ไม่ส่ง = แนบได้เฉพาะลิงก์ */
+  onUpload?: UploadAttachment
   /** เรียกเมื่อ modal ปิดเสร็จ (แทรกสำเร็จ, กด Cancel หรือกด Esc) */
   onClose: () => void
 }
@@ -50,10 +53,11 @@ function normalizeUrl(raw: string): string | null {
   }
 }
 
-function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
+function Dialog({ onInsert, onUpload, onClose }: Omit<AttachmentModalProps, 'open'>) {
   const { t } = useI18n()
   const [closing, setClosing] = useState(false)
-  const [tab, setTab] = useState<Tab>('image')
+  const tabs = onUpload ? TABS : TABS.filter((item) => item.id === 'link')
+  const [tab, setTab] = useState<Tab>(onUpload ? 'image' : 'link')
   const [file, setFile] = useState<File | null>(null)
   const [url, setUrl] = useState('')
   const [label, setLabel] = useState('')
@@ -95,7 +99,8 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
     setBusy(true)
     try {
       const kind: AttachmentKind = tab
-      const uploaded = await uploadAttachment(file, kind)
+      validateAttachment(file, kind)
+      const uploaded = await onUpload!(file, kind)
       onInsert(
         kind === 'image'
           ? { kind: 'image', url: uploaded.url, name: uploaded.name }
@@ -136,7 +141,7 @@ function Dialog({ onInsert, onClose }: Omit<AttachmentModalProps, 'open'>) {
         </p>
 
         <div role="tablist" aria-label={t('Attachment type')} className="mt-4 flex gap-1 rounded-pill bg-blue-50 p-1">
-          {TABS.map(({ id, label: tabLabel, icon: Icon }) => (
+          {tabs.map(({ id, label: tabLabel, icon: Icon }) => (
             <button
               key={id}
               type="button"

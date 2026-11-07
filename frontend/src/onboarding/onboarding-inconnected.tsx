@@ -22,7 +22,7 @@ export default function OnboardingInconnected({
     <OnboardingShell
       leaving={leaving}
       switchLabel="Switch to Authentication"
-      onSwitch={() => leaveTo(onSwitch)}
+      onSwitch={onSwitch ? () => leaveTo(onSwitch) : undefined}
     >
       <div className="flex flex-wrap justify-center gap-7">
         <OnboardingButton className="min-w-54" onClick={() => leaveTo(onLogin)}>

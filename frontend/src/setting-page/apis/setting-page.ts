@@ -1,20 +1,25 @@
-import { request, setToken } from '../../shared/apis/client'
+import { relativeFileUrl, request, setToken, withAvatar } from '../../shared/apis/client'
 import type { Account, Language } from '../../shared/types/account'
 
 // GET /api/account
-export const fetchAccount = () => request<Account>('/api/account')
+export const fetchAccount = async () => withAvatar(await request<Account>('/api/account'))
 
 // PATCH /api/account/profile  (avatarUrl: null = ลบรูป, data URL = รูปใหม่, URL เดิมจาก backend = ไม่เปลี่ยน)
-export const updateProfile = (values: { displayName: string; avatarUrl: string | null }) =>
-  request<Account>('/api/account/profile', { method: 'PATCH', body: values })
+export const updateProfile = async (values: { displayName: string; avatarUrl: string | null }) =>
+  withAvatar(
+    await request<Account>('/api/account/profile', {
+      method: 'PATCH',
+      body: { ...values, avatarUrl: relativeFileUrl(values.avatarUrl) },
+    }),
+  )
 
 // PATCH /api/account/preferences  (ภาษา + เขตเวลา)
-export const updatePreferences = (values: { language: Language; timezone: string }) =>
-  request<Account>('/api/account/preferences', { method: 'PATCH', body: values })
+export const updatePreferences = async (values: { language: Language; timezone: string }) =>
+  withAvatar(await request<Account>('/api/account/preferences', { method: 'PATCH', body: values }))
 
 // PATCH /api/account/email  (ต้องยืนยันรหัสผ่านปัจจุบัน)
-export const updateEmail = (email: string, password: string) =>
-  request<Account>('/api/account/email', { method: 'PATCH', body: { email, password } })
+export const updateEmail = async (email: string, password: string) =>
+  withAvatar(await request<Account>('/api/account/email', { method: 'PATCH', body: { email, password } }))
 
 // POST /api/account/password  (token เก่าใช้ไม่ได้ ได้ token ใหม่กลับมาแล้วเก็บให้เลย)
 export async function changePassword(current: string, next: string): Promise<void> {

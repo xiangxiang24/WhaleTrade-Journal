@@ -6,7 +6,8 @@ import {
   loadNoteDraft,
   saveNoteDraft,
   updateJournalNote,
-} from '../../shared/data/journal-notes'
+} from '../apis/journaling'
+import { isNotFound } from '../../shared/apis/client'
 import { canonicalContent } from '../../shared/note-editor/content'
 import type { JournalNote } from '../../shared/types/journal-note'
 import type { DraftState, EditorLoadStatus, EditorValues } from './journaling'
@@ -42,10 +43,6 @@ export function useJournalEditor(noteId: number) {
       try {
         const [found, draft] = await Promise.all([fetchJournalNote(noteId), loadNoteDraft(noteId)])
         if (cancelled) return
-        if (!found) {
-          setStatus('not-found')
-          return
-        }
         setNote(found)
         setValues(draft ? draft.values : toValues(found))
         if (draft) {
@@ -53,8 +50,8 @@ export function useJournalEditor(noteId: number) {
           setDraftSavedAt(draft.savedAt)
         }
         setStatus('ready')
-      } catch {
-        if (!cancelled) setStatus('error')
+      } catch (error) {
+        if (!cancelled) setStatus(isNotFound(error) ? 'not-found' : 'error')
       }
     })()
     return () => {

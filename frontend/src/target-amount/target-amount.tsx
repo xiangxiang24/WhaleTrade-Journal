@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import AppLayout from '../shared/app-shell/app-layout'
-import { createCalcPlan } from '../shared/data/calc-plans'
+import { createCalcPlan } from '../saved-plan/apis/saved-plan'
 import { usePageLeave } from '../shared/hooks/use-page-leave'
 import type { SidebarKey, SidebarUser } from '../shared/types/sidebar'
 import PortfolioToastView from '../portfolio/components/portfolio-toast'
@@ -35,8 +35,13 @@ export default function TargetAmount({ user, reminderBadge, onNavigate, onLogout
   const showToast = useCallback((message: string) => setToast({ id: Date.now(), message }), [])
   const dismissToast = useCallback(() => setToast(null), [])
 
-  function handleCalculate() {
-    if (!calc.calculate()) return
+  async function handleCalculate() {
+    try {
+      if (!(await calc.calculate())) return
+    } catch (error) {
+      showToast(t(error instanceof Error ? error.message : 'Something went wrong. Please try again.'))
+      return
+    }
     // เลื่อนลงไปที่ผลลัพธ์ (หลัง React วาดผลแล้ว) ผู้ใช้ reduce motion เลื่อนทันที
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     setTimeout(() => estimateRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }), 50)
@@ -49,7 +54,6 @@ export default function TargetAmount({ user, reminderBadge, onNavigate, onLogout
       portfolioId: result.portfolioId,
       name,
       principal: result.input.principal,
-      resultAmount: result.output.total,
       phases: result.input.phases,
       assets: result.assets.map(({ assetId, dividendPct }) => ({ assetId, dividendPct })),
     })

@@ -4,6 +4,9 @@ const TOKEN_KEY = 'whale-journal:token'
 // ตอนพัฒนา Vite proxy /api ไป backend; ตอนเป็นแอปจริง (file://) ต้องเรียก backend ตรงๆ
 const API_BASE = import.meta.env.VITE_API_URL ?? (location.protocol === 'file:' ? 'http://127.0.0.1:3001' : '')
 
+/** backend ตอบ 404 ("This ... no longer exists.") = ไม่พบรายการนั้นแล้ว */
+export const isNotFound = (error: unknown) => error instanceof Error && /no longer exists/.test(error.message)
+
 export function getToken(): string | null {
   try {
     return localStorage.getItem(TOKEN_KEY)
@@ -78,4 +81,14 @@ export async function uploadFile<T>(path: string, file: File): Promise<T> {
 }
 
 /** URL ของไฟล์ที่ backend ส่งมาเป็น path สัมพัทธ์ (เช่น รูปโปรไฟล์ ไฟล์แนบ) ต่อกับที่อยู่ backend ให้ใช้ใน <img src> ได้ */
-export const fileUrl = (path: string | null): string | null => (path ? `${API_BASE}${path}` : null)
+export const fileUrl = (path: string | null): string | null => (path?.startsWith('/') ? `${API_BASE}${path}` : path)
+
+/** ย้อนกลับของ fileUrl: เอา URL เต็มกลับเป็น path สัมพัทธ์ที่ backend รู้จัก (data URL / null ไม่เปลี่ยน) */
+export const relativeFileUrl = (url: string | null): string | null =>
+  API_BASE && url?.startsWith(API_BASE) ? url.slice(API_BASE.length) : url
+
+/** บัญชีที่ backend ส่งมา: รูปโปรไฟล์เป็น path สัมพัทธ์ ต่อกับที่อยู่ backend ให้ใช้ใน <img src> ได้ */
+export const withAvatar = <T extends { avatarUrl: string | null }>(account: T): T => ({
+  ...account,
+  avatarUrl: fileUrl(account.avatarUrl),
+})

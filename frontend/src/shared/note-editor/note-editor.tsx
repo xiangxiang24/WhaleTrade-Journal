@@ -15,6 +15,7 @@ import { createMenuState } from './menu-state'
 import { SlashCommand } from './slash-command'
 import './note-editor.css'
 import { useI18n } from '../i18n/use-i18n'
+import type { UploadAttachment } from '../data/attachments'
 
 type NoteEditorProps = {
   /** เนื้อโน้ต (JSON ของตัวแก้ไข หรือข้อความธรรมดาของโน้ตเก่า) */
@@ -28,6 +29,8 @@ type NoteEditorProps = {
   placeholder?: string
   /** ความสูงขั้นต่ำของพื้นที่เขียน (class ของ Tailwind) */
   minHeightClass?: string
+  /** อัปโหลดรูป/ไฟล์ขึ้น backend ไม่ส่ง = แนบได้เฉพาะลิงก์ (เช่นตอนสร้างโน้ตใหม่ที่ยังไม่มี id) */
+  onUpload?: UploadAttachment
 }
 
 // ตัวแก้ไขโน้ตแบบ Notion-like: พิมพ์ / เรียกเมนูคำสั่ง, แถบเครื่องมือเหนือช่องจด (ย้อนกลับ/ทำซ้ำ, หนา/เอียง/ขีดเส้นใต้, สี)
@@ -40,6 +43,7 @@ export default function NoteEditor({
   invalid = false,
   placeholder,
   minHeightClass = 'min-h-64',
+  onUpload,
 }: NoteEditorProps) {
   const { t } = useI18n()
   const placeholderText = placeholder ?? t('Why did you invest? What would change your mind? What will you measure?')
@@ -156,6 +160,7 @@ export default function NoteEditor({
       <AttachmentModal
         open={attachmentOpen}
         onInsert={insertAttachment}
+        onUpload={onUpload}
         onClose={() => {
           setAttachmentOpen(false)
           editor?.commands.focus()

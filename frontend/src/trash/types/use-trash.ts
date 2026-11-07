@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   emptyJournalTrash,
-  fetchTrashedNotes,
-  purgeJournalNote,
-  restoreJournalNote,
-} from '../../shared/data/journal-notes'
-import {
   emptyPortfolioTrash,
+  fetchTrashedNotes,
   fetchTrashedPortfolios,
+  purgeJournalNote,
   purgePortfolio,
+  restoreJournalNote,
   restorePortfolio,
-} from '../../shared/data/portfolios'
+} from '../apis/trash'
 import type { TrashedNote } from '../../shared/types/journal-note'
 import type { TrashedPortfolio } from '../../shared/types/portfolio'
 import type { TrashLoadStatus } from './trash'

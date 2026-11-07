@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchPortfolio, updatePortfolio } from '../../shared/data/portfolios'
-import { createTransaction, deleteTransaction, fetchTransactions, updateTransaction } from '../../shared/data/transactions'
+import { isNotFound } from '../../shared/apis/client'
+import { fetchPortfolio, updatePortfolio } from '../../portfolio/apis/portfolio'
+import { createTransaction, deleteTransaction, fetchTransactions, updateTransaction } from '../apis/transaction-logs'
 import type { Portfolio, PortfolioFormValues } from '../../shared/types/portfolio'
 import type { Transaction, TransactionFormValues } from '../../shared/types/transaction'
 import type { DetailLoadStatus } from './transaction-logs'
@@ -19,16 +20,12 @@ export function usePortfolioDetail(portfolioId: number) {
     Promise.all([fetchPortfolio(portfolioId), fetchTransactions(portfolioId)])
       .then(([found, txs]) => {
         if (cancelled) return
-        if (!found) {
-          setStatus('missing')
-          return
-        }
         setPortfolio(found)
         setTransactions(txs)
         setStatus('ready')
       })
-      .catch(() => {
-        if (!cancelled) setStatus('error')
+      .catch((error) => {
+        if (!cancelled) setStatus(isNotFound(error) ? 'missing' : 'error')
       })
     return () => {
       cancelled = true

@@ -5,7 +5,7 @@ import {
   restorePortfolio,
   trashPortfolio,
   updatePortfolio,
-} from '../../shared/data/portfolios'
+} from '../apis/portfolio'
 import type { Portfolio, PortfolioFormValues } from '../../shared/types/portfolio'
 import type { PortfolioLoadStatus } from './portfolio'
 

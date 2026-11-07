@@ -4,6 +4,7 @@ import { contentToPlainText } from '../../shared/note-editor/content'
 import NoteEditor from '../../shared/note-editor/note-editor'
 import { countWords } from '../../shared/note-form/count-words'
 import { useI18n } from '../../shared/i18n/use-i18n'
+import type { UploadAttachment } from '../../shared/data/attachments'
 
 type EntryFieldsProps = {
   title: string
@@ -12,6 +13,7 @@ type EntryFieldsProps = {
   contentError?: string
   onTitleChange: (value: string) => void
   onContentChange: (value: string) => void
+  onUpload: UploadAttachment
 }
 
 const TITLE_MAX = 120
@@ -24,6 +26,7 @@ export default function EntryFields({
   contentError,
   onTitleChange,
   onContentChange,
+  onUpload,
 }: EntryFieldsProps) {
   const { t } = useI18n()
   const titleId = useId()
@@ -61,6 +64,7 @@ export default function EntryFields({
           <NoteEditor
             value={content}
             onChange={onContentChange}
+            onUpload={onUpload}
             labelledBy={contentLabelId}
             describedBy={contentError ? `${contentId}-error` : undefined}
             invalid={Boolean(contentError)}

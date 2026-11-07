@@ -8,6 +8,7 @@ type OnboardingShellProps = {
   leaving: boolean
   /** ข้อความปุ่มสลับมุมมองใต้เส้นคั่นด้านขวา */
   switchLabel: string
+  /** ไม่ส่ง = ไม่แสดงปุ่มสลับ */
   onSwitch?: () => void
   /** ส่วนล่างของหน้า (ปุ่มหรือการ์ดบัญชี) */
   children: ReactNode
@@ -26,7 +27,8 @@ export default function OnboardingShell({
 
       {/* เนื้อหาใต้แถบหัว: เข้าด้วยการลอยขึ้นทีละส่วน ออกด้วยการลอยขึ้นและจางหาย (แถบหัวอยู่นิ่ง) */}
       <div className={`flex flex-1 flex-col ${leaving ? 'animate-page-out motion-reduce:animate-none' : ''}`}>
-        <div className="mt-5.5 flex animate-fade-up justify-end motion-reduce:animate-none">
+        <div className="mt-5.5 flex min-h-6 animate-fade-up justify-end motion-reduce:animate-none">
+          {onSwitch && (
           <button
             type="button"
             onClick={onSwitch}
@@ -35,6 +37,7 @@ export default function OnboardingShell({
             <RefreshCw size={20} strokeWidth={1.75} aria-hidden="true" />
             {switchLabel}
           </button>
+          )}
         </div>
 
         <main className="flex flex-1 flex-col items-center justify-center pt-4 pb-8">

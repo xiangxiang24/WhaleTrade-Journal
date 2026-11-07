@@ -10,6 +10,7 @@ import EntryFields from './components/entry-fields'
 import JournalingHeader from './components/journaling-header'
 import MoodSection from './components/mood-section'
 import DeleteJournalModal from './modals/delete-journal-modal'
+import { uploadAttachment } from './apis/journaling'
 import { useJournalEditor } from './types/use-journal-editor'
 import { useI18n } from '../shared/i18n/use-i18n'
 
@@ -117,6 +118,7 @@ export default function Journaling({
           title={editor.values.title}
           content={editor.values.content}
           contentError={contentError}
+          onUpload={(file, kind) => uploadAttachment(noteId, file, kind)}
           onTitleChange={(title) => editor.change({ title })}
           onContentChange={(content) => {
             editor.change({ content })

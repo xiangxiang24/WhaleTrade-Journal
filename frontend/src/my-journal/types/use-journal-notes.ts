@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { createJournalNote, fetchJournalNotes } from '../../shared/data/journal-notes'
+import { createJournalNote } from '../../journaling/apis/journaling'
+import { fetchJournalNotes } from '../apis/my-journal'
 import type { JournalNote } from '../../shared/types/journal-note'
 import type { NoteFormValues } from '../../shared/types/note-form'
 import type { JournalLoadStatus } from './journal'
