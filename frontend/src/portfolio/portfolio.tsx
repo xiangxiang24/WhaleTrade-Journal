@@ -36,7 +36,6 @@ export default function PortfolioPage({
 }: PortfolioPageProps) {
   const { t } = useI18n()
   const { portfolios, status, reload, create, update, trash, restore } = usePortfolios()
-  const [previewEmpty, setPreviewEmpty] = useState(false)
   // form = null ปิด, { portfolio: null } = สร้างใหม่, { portfolio } = แก้พอร์ตเดิม
   const [form, setForm] = useState<{ portfolio: Portfolio | null } | null>(null)
   const [trashTarget, setTrashTarget] = useState<Portfolio | null>(null)
@@ -55,7 +54,6 @@ export default function PortfolioPage({
       showToast({ message: t('Saved changes to “{name}”', { name: values.name }) })
     } else {
       await create(values)
-      setPreviewEmpty(false)
       showToast({ message: t('“{name}” is ready to grow', { name: values.name }) })
     }
   }
@@ -90,8 +88,6 @@ export default function PortfolioPage({
           <div className="animate-fade-up motion-reduce:animate-none">
             <PortfolioHeader
               count={status === 'ready' ? portfolios.length : null}
-              previewEmpty={previewEmpty}
-              onTogglePreview={() => setPreviewEmpty((current) => !current)}
               onOpenTrash={() => leaveTo(() => onNavigate?.('trash'))}
               onCreate={() => setForm({ portfolio: null })}
             />
@@ -105,7 +101,6 @@ export default function PortfolioPage({
             <PortfolioGrid
               status={status}
               portfolios={portfolios}
-              previewEmpty={previewEmpty}
               timeZone={timeZone}
               onOpen={(id) => leaveTo(onOpenPortfolio && (() => onOpenPortfolio(id)))}
               onEdit={(portfolio) => setForm({ portfolio })}

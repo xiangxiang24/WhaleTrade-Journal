@@ -283,7 +283,6 @@ Asset 1 ──< Transaction, PlanAsset   (Restrict: ลบ Asset ที่ถู
 - **รูปที่ API ส่งให้หน้ารายการพอร์ต** (เงินส่งเป็นสตางค์ในรูป string เพราะ BigInt, ฟรอนต์แปลงเป็นบาท): `{ id, name, tagline, icon, annualGoal, reached, totalDca, entries, updatedAt }` ตรงกับ type `Portfolio` ใน `frontend/src/shared/types/portfolio.ts` ซึ่งใช้ข้อมูลจำลองอยู่ใน `shared/data/portfolios.ts` (ไฟล์เดียวที่ต้องแก้ตอนต่อ API)
 - **การดึงรายการ**: query เดียวกรอง `userId` + `deletedAt` ว่าง แล้วรวมค่าจาก `Transaction` ด้วย `groupBy portfolioId` (ใช้ index `(portfolioId, date)`) ห้ามวน query ทีละพอร์ต; เรียงตาม `id` น้อย → มาก
 - **การกระทำบนการ์ด**: สร้าง = insert `Portfolio` (ยังไม่มี transaction จึง reached/DCA = 0, entries = 0), แก้ = update `name` / `tagline` / `icon` / `annualDividendGoal` แล้ว touch `updatedAt`, Move to Trash = ตั้ง `deletedAt` (transaction ไม่ถูกแตะ), Undo / Restore = ล้าง `deletedAt`
-- ปุ่ม "Preview empty slate" เป็นโหมดดูตัวอย่างของหน้าจอเท่านั้น ไม่อ่านหรือเขียนข้อมูล
 - **แท็บกรองในตาราง** = "All (n)" + ค่า `sector` ที่ไม่ซ้ำของ asset ในพอร์ตนั้น; **ช่องค้นหา** ค้นจากชื่อ/ticker ของ asset
 
 ### หน้า My Journals และหน้าเขียน/แก้โน้ต (คำนวณจาก Note ของผู้ใช้ ตาม timezone ที่ตั้งไว้)
@@ -334,7 +333,7 @@ Asset 1 ──< Transaction, PlanAsset   (Restrict: ลบ Asset ที่ถู
 - **Delete account**: ลบแถว User แล้วข้อมูลลูกทั้งหมดถูกลบตามกัน (Note, NoteDraft, Portfolio → Transaction, Reminder, Task, CalcPlan → PlanPhase, PlanAsset) และลบไฟล์ avatar ในโฟลเดอร์ userData ต้องถามยืนยันก่อน
 
 ### ข้อมูลในภาพที่ไม่เก็บในฐานข้อมูล
-- ข้อความตกแต่ง (A peaceful session, วันที่วันนี้, คำคม/ชื่อผู้พูด, ปุ่ม Preview empty slate) เป็นส่วนของหน้าจอ/ระบบแปลภาษา
+- ข้อความตกแต่ง (A peaceful session, วันที่วันนี้, คำคม/ชื่อผู้พูด) เป็นส่วนของหน้าจอ/ระบบแปลภาษา
 - **"Market quiet"** และ **SET Index avg ~3.2% / spread**: เป็นข้อมูลภายนอก แอปออฟไลน์จึงไม่มีให้ ต้องเป็นค่าคงที่ในไฟล์ตั้งค่าของแอป (เช่น `seed/benchmarks.json`) หรือตัดออกจากดีไซน์ ถ้าใช้ค่าคงที่ spread = Avg. Yield on Cost − ค่าเฉลี่ยตลาดในไฟล์
 - ข้อความตกแต่งในหน้า My Journals ("Welcome back", ป้าย "Safe Haven", "Market feels noisy today? Take a deep breath") และในหน้าเขียนโน้ต ("Your thoughts are safe, private, and encrypted", "Parchment Edition", "You can change this anytime…") เป็นข้อความคงที่ ไม่เก็บ; ข้อความตกแต่งในหน้า Reminders ("Roots grow quietly…", "Mindful discipline active", "Autumn Compounding 2026", ข้อความ "Model: Compounded Annualized Growth" และ "Verified 100% Client-Side Simulation" ในหน้า Target Amount, ข้อความ "Next planned portfolio update … days of undisturbed calm remaining") และ "Dividend Haven" ใต้ชื่อผู้ใช้ใน sidebar เป็นข้อความคงที่ของหน้าจอ/ระบบแปลภาษา ไม่ใช่ข้อมูลผู้ใช้
 

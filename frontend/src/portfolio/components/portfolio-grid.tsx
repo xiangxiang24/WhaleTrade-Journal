@@ -8,8 +8,6 @@ import { useI18n } from '../../shared/i18n/use-i18n'
 type PortfolioGridProps = {
   status: PortfolioLoadStatus
   portfolios: Portfolio[]
-  /** true = แสดงหน้าตา Empty state จำลอง แม้มีพอร์ตอยู่ (ปุ่ม Preview empty slate) */
-  previewEmpty: boolean
   timeZone: string
   onOpen: (id: number) => void
   onEdit: (portfolio: Portfolio) => void
@@ -41,7 +39,6 @@ function Message({ title, description, action }: { title: string; description: s
 export default function PortfolioGrid({
   status,
   portfolios,
-  previewEmpty,
   timeZone,
   onOpen,
   onEdit,
@@ -74,7 +71,7 @@ export default function PortfolioGrid({
     )
   }
 
-  if (previewEmpty || portfolios.length === 0) {
+  if (portfolios.length === 0) {
     return (
       <Message
         title={t('Your garden is waiting for its first seed')}

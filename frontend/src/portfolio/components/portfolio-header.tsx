@@ -1,11 +1,9 @@
-import { Cloud, Eye, EyeOff, Leaf, Plus, Trash2 } from 'lucide-react'
+import { Cloud, Leaf, Plus, Trash2 } from 'lucide-react'
 import { useI18n } from '../../shared/i18n/use-i18n'
 
 type PortfolioHeaderProps = {
   /** จำนวนพอร์ตที่ยังไม่อยู่ในถังขยะ (null = กำลังโหลด) */
   count: number | null
-  previewEmpty: boolean
-  onTogglePreview: () => void
   onOpenTrash: () => void
   onCreate: () => void
 }
@@ -14,11 +12,9 @@ type PortfolioHeaderProps = {
 const TITLE = 'Your Portfolios'
 const SUBTITLE = "Each portfolio is its own quiet little garden. Open one whenever you're ready."
 
-// ส่วนหัว: ชิปด่วน (จำนวนพอร์ต + Preview empty slate) / ชื่อหน้า + คำอธิบาย / ปุ่ม Trash + Create Portfolio
+// ส่วนหัว: ชิปจำนวนพอร์ต / ชื่อหน้า + คำอธิบาย / ปุ่ม Trash + Create Portfolio
 export default function PortfolioHeader({
   count,
-  previewEmpty,
-  onTogglePreview,
   onOpenTrash,
   onCreate,
 }: PortfolioHeaderProps) {
@@ -30,23 +26,6 @@ export default function PortfolioHeader({
           <Cloud size={20} strokeWidth={1.75} aria-hidden="true" />
           {count === null ? t('Loading…') : t(count === 1 ? '{n} portfolio' : '{n} portfolios', { n: count })}
         </span>
-        <button
-          type="button"
-          aria-pressed={previewEmpty}
-          onClick={onTogglePreview}
-          className={`inline-flex h-10 items-center gap-2 rounded-pill px-4 text-[16px] leading-6 font-semibold transition-colors duration-150 ${
-            previewEmpty
-              ? 'bg-blue-500 text-surface hover:bg-navy-700 active:bg-navy-900'
-              : 'bg-blue-50 text-navy-700 hover:bg-blue-100 active:bg-blue-100'
-          }`}
-        >
-          {previewEmpty ? (
-            <EyeOff size={20} strokeWidth={1.75} aria-hidden="true" />
-          ) : (
-            <Eye size={20} strokeWidth={1.75} aria-hidden="true" />
-          )}
-          {previewEmpty ? t('Exit empty preview') : t('Preview empty slate')}
-        </button>
       </div>
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-4">

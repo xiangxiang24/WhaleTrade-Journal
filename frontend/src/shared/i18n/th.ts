@@ -171,8 +171,6 @@ export const TH: Record<string, string> = {
   "Each portfolio is its own quiet little garden. Open one whenever you're ready.": "แต่ละพอร์ตคือสวนเล็ก ๆ ที่เงียบสงบของมันเอง เปิดดูได้ทุกเมื่อที่คุณพร้อม",
   "{n} portfolio": "{n} พอร์ต",
   "{n} portfolios": "{n} พอร์ต",
-  "Preview empty slate": "ดูตัวอย่างหน้าว่าง",
-  "Exit empty preview": "ออกจากตัวอย่างหน้าว่าง",
   "Create Portfolio": "สร้างพอร์ต",
   "Portfolios": "พอร์ตการลงทุน",
   "Loading your portfolios": "กำลังโหลดพอร์ตของคุณ",

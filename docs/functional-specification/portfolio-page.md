@@ -28,7 +28,6 @@
 - **ชื่อหน้า (Page Title):** หัวข้อหลัก "Your Portfolios 🌿" พร้อมคำอธิบายย่อ *"Each portfolio is its own quiet little garden. Open one whenever you're ready."*[cite: 4]
 - **ตัวเลือกมุมมองด่วน (Quick Bar Options):** 
   - **3 portfolios:** แสดงป้ายบอกจำนวนพอร์ตทั้งหมดที่มีอยู่ในปัจจุบัน[cite: 4]
-  - **Preview empty slate:** ปุ่มสำหรับเปิดดูจำลองหน้าตา Empty State เมื่อยังไม่มีพอร์ต[cite: 4]
 - **ปุ่มการทำงานหลัก (Header Actions):**
   - **ปุ่ม Trash (ถังขยะ):** ปุ่มขอบสีแดงพร้อมไอคอนถังขยะ สำหรับกดเข้าสู่หน้าถังขยะ เพื่อดูพอร์ตที่ถูก Soft Delete[cite: 4, 5]
   - **ปุ่ม + Create Portfolio:** ปุ่มหลักสีฟ้าสำหรับเปิดฟอร์มสร้างพอร์ตใหม่ (ตั้งชื่อพอร์ต + คำอธิบายสั้นๆ + กำหนดเป้าหมาย Goal)[cite: 4, 5]
