@@ -36,5 +36,19 @@ export function trashController(ctx: AppContext) {
     async emptyPortfolios(_req: Request, res: Response) {
       res.json({ deleted: await service.emptyPortfolios(user(res)) });
     },
+
+    async listPlans(_req: Request, res: Response) {
+      res.json(await service.listPlans(user(res)));
+    },
+    async restorePlan(req: Request, res: Response) {
+      res.json(await service.restorePlan(user(res), idParam(req)));
+    },
+    async purgePlan(req: Request, res: Response) {
+      await service.purgePlan(user(res), idParam(req));
+      res.status(204).end();
+    },
+    async emptyPlans(_req: Request, res: Response) {
+      res.json({ deleted: await service.emptyPlans(user(res)) });
+    },
   };
 }

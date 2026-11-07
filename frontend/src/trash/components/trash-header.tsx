@@ -20,7 +20,7 @@ export default function TrashHeader({ count }: TrashHeaderProps) {
           {t('Trash')}
         </h1>
         <p className="m-0 mt-1 max-w-190 text-[15px] leading-6 text-navy-700 min-[640px]:text-[17px] min-[640px]:leading-7 min-[1280px]:text-[18px]">
-          {t('Journals and portfolios you deleted. Restore them or delete them for good.')}
+          {t('Journals, portfolios and saved plans you deleted. Restore them or delete them for good.')}
         </p>
       </div>
       {count !== null && (

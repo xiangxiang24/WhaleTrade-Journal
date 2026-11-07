@@ -50,7 +50,7 @@ export default function SavedPlan({
 
   async function handleDelete(plan: CalcPlan) {
     await remove(plan.id)
-    showToast(t('“{name}” deleted', { name: plan.name }))
+    showToast(t('“{name}” moved to Trash', { name: plan.name }))
   }
 
   const goNewPlan = () => leaveTo(() => onNavigate?.('target-amount'))

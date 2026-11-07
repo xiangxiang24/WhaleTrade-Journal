@@ -51,7 +51,9 @@ function Dialog({ tab, count, onConfirm, onClose }: Omit<EmptyTrashModalProps, '
   const description =
     tab === 'journals'
       ? t(count === 1 ? '{n} journal will be permanently deleted.' : '{n} journals will be permanently deleted.', { n: count })
-      : t(
+      : tab === 'plans'
+        ? t(count === 1 ? '{n} saved plan will be permanently deleted.' : '{n} saved plans will be permanently deleted.', { n: count })
+        : t(
           count === 1
             ? '{n} portfolio and all of its transactions will be permanently deleted.'
             : '{n} portfolios and all of their transactions will be permanently deleted.',
@@ -69,7 +71,11 @@ function Dialog({ tab, count, onConfirm, onClose }: Omit<EmptyTrashModalProps, '
       cardClassName="max-w-110 p-6 text-left"
     >
       <h2 id={titleId} className="m-0 text-[20px] leading-7 font-bold text-navy-900">
-        {tab === 'journals' ? t('Empty the Journals trash?') : t('Empty the Portfolios trash?')}
+        {tab === 'journals'
+          ? t('Empty the Journals trash?')
+          : tab === 'plans'
+            ? t('Empty the Saved plans trash?')
+            : t('Empty the Portfolios trash?')}
       </h2>
       <p id={descId} className="m-0 mt-2 text-[14px] leading-6 text-navy-700">
         {description} {t('This action cannot be undone.')}

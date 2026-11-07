@@ -2,15 +2,18 @@ import type { AppContext } from '../../context.js';
 import { HttpError } from '../../middleware/http-error.js';
 import { journalingService } from '../journaling/journaling.js';
 import { toNoteDto, type NoteDto } from '../shared/notes.js';
+import { planInclude, toPlanDto, type PlanDto } from '../saved-plan/saved-plan.js';
 import { findOwnPortfolio, withSummaries, type PortfolioDto } from '../portfolio/portfolio.js';
 
 export type TrashedNoteDto = NoteDto & { deletedAt: string };
+export type TrashedPlanDto = PlanDto & { deletedAt: string };
 export type TrashedPortfolioDto = PortfolioDto & { deletedAt: string; planCount: number };
 
 const NOTE_GONE = 'This journal is no longer in the trash.';
 const PORTFOLIO_GONE = 'This portfolio is no longer in the trash.';
+const PLAN_GONE = 'This plan is no longer in the trash.';
 
-// ถังขยะ: โน้ตและพอร์ตที่ผู้ใช้ลบไว้ กู้คืนหรือลบถาวร ไม่มีการลบอัตโนมัติ (ทุกคำสั่งกรองด้วย userId)
+// ถังขยะ: โน้ต พอร์ต และแผนที่บันทึกที่ผู้ใช้ลบไว้ กู้คืนหรือลบถาวร ไม่มีการลบอัตโนมัติ (ทุกคำสั่งกรองด้วย userId)
 export function trashService(ctx: AppContext) {
   const { db } = ctx;
   const journaling = journalingService(ctx);
@@ -25,6 +28,12 @@ export function trashService(ctx: AppContext) {
     const portfolio = await db.portfolio.findFirst({ where: { id, userId, deletedAt: { not: null } } });
     if (!portfolio) throw new HttpError(404, PORTFOLIO_GONE);
     return portfolio;
+  }
+
+  async function trashedPlan(userId: number, id: number) {
+    const plan = await db.calcPlan.findFirst({ where: { id, userId, deletedAt: { not: null } }, include: planInclude });
+    if (!plan) throw new HttpError(404, PLAN_GONE);
+    return plan;
   }
 
   return {
@@ -90,6 +99,34 @@ export function trashService(ctx: AppContext) {
         db.portfolio.deleteMany({ where: { id: { in: ids } } }),
       ]);
       return ids.length;
+    },
+
+    // ===== แผนที่บันทึก =====
+    /** ลบล่าสุดก่อน */
+    async listPlans(userId: number): Promise<TrashedPlanDto[]> {
+      const plans = await db.calcPlan.findMany({
+        where: { userId, deletedAt: { not: null } },
+        include: planInclude,
+        orderBy: { deletedAt: 'desc' },
+      });
+      return plans.map((plan) => ({ ...toPlanDto(plan), deletedAt: plan.deletedAt!.toISOString() }));
+    },
+
+    /** กู้คืน: กลับไปอยู่ใน Saved Plan ตามวันที่บันทึกเดิม */
+    async restorePlan(userId: number, id: number): Promise<PlanDto> {
+      await trashedPlan(userId, id);
+      return toPlanDto(await db.calcPlan.update({ where: { id }, data: { deletedAt: null }, include: planInclude }));
+    },
+
+    /** ลบถาวร: ลบแผนพร้อมเฟสและรายการหุ้น (ลบตามกัน) */
+    async purgePlan(userId: number, id: number): Promise<void> {
+      await trashedPlan(userId, id);
+      await db.calcPlan.delete({ where: { id } });
+    },
+
+    async emptyPlans(userId: number): Promise<number> {
+      const { count } = await db.calcPlan.deleteMany({ where: { userId, deletedAt: { not: null } } });
+      return count;
     },
 
     /** ตรวจว่าพอร์ตอยู่ในถังขยะของผู้ใช้ (ใช้กับ route กู้คืน) */

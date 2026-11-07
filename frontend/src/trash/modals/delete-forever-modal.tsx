@@ -24,7 +24,11 @@ function Dialog({ target, onConfirm, onClose }: Omit<DeleteForeverModalProps, 't
   const descId = useId()
 
   const name =
-    target.kind === 'journal' ? target.note.title?.trim() || t(DEFAULT_TITLE) : target.portfolio.name
+    target.kind === 'journal'
+      ? target.note.title?.trim() || t(DEFAULT_TITLE)
+      : target.kind === 'plan'
+        ? target.plan.name
+        : target.portfolio.name
 
   useEffect(() => {
     if (!closing) return
@@ -62,6 +66,8 @@ function Dialog({ target, onConfirm, onClose }: Omit<DeleteForeverModalProps, 't
       <div id={descId} className="mt-2 text-[14px] leading-6 text-navy-700">
         {target.kind === 'journal' ? (
           <p className="m-0">{t('This journal will be permanently deleted. This action cannot be undone.')}</p>
+        ) : target.kind === 'plan' ? (
+          <p className="m-0">{t('This saved plan will be permanently deleted. You can always calculate and save a new one. This action cannot be undone.')}</p>
         ) : (
           <>
             <p className="m-0">{t('This portfolio will be permanently deleted. This action cannot be undone.')}</p>

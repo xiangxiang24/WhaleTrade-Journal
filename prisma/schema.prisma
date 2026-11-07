@@ -175,6 +175,7 @@ model CalcPlan {
   principal    BigInt // สตางค์
   resultAmount BigInt // สตางค์
   savedAt      DateTime
+  deletedAt    DateTime? // null = ใช้งานอยู่, มีค่า = อยู่ในถังขยะ (กู้คืนได้ ไม่มีการลบอัตโนมัติ)
 
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   portfolio Portfolio?  @relation(fields: [portfolioId], references: [id], onDelete: SetNull)
@@ -182,6 +183,7 @@ model CalcPlan {
   assets    PlanAsset[]
 
   @@index([userId, savedAt])
+  @@index([userId, deletedAt])
 }
 
 model PlanPhase {

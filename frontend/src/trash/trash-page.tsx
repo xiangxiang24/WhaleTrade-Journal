@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import AppLayout from '../shared/app-shell/app-layout'
 import { usePageLeave } from '../shared/hooks/use-page-leave'
+import type { TrashedCalcPlan } from '../shared/types/calc-plan'
 import type { TrashedNote } from '../shared/types/journal-note'
 import type { TrashedPortfolio } from '../shared/types/portfolio'
 import type { SidebarKey, SidebarUser } from '../shared/types/sidebar'
@@ -49,7 +50,8 @@ export default function TrashPage({ user, reminderBadge, timeZone = 'Asia/Bangko
   const visibleNotes = tab === 'journals' ? trash.notes.filter((note) => matchesQuery(noteTitle(note), query)) : trash.notes
   const visiblePortfolios =
     tab === 'portfolios' ? trash.portfolios.filter((portfolio) => matchesQuery(portfolio.name, query)) : trash.portfolios
-  const total = tab === 'journals' ? trash.notes.length : trash.portfolios.length
+  const visiblePlans = tab === 'plans' ? trash.plans.filter((plan) => matchesQuery(plan.name, query)) : trash.plans
+  const total = tab === 'journals' ? trash.notes.length : tab === 'portfolios' ? trash.portfolios.length : trash.plans.length
   const ready = trash.status === 'ready'
 
   function changeTab(next: TrashTab) {
@@ -76,10 +78,18 @@ export default function TrashPage({ user, reminderBadge, timeZone = 'Asia/Bangko
     }
   }
 
+  async function restorePlan(plan: TrashedCalcPlan) {
+    await trash.restorePlan(plan.id)
+    showToast(t('“{name}” restored to Saved Plan', { name: plan.name }))
+  }
+
   async function purge(target: PurgeTarget) {
     if (target.kind === 'journal') {
       await trash.purgeNote(target.note.id)
       showToast(t('“{name}” deleted forever', { name: noteTitle(target.note) }))
+    } else if (target.kind === 'plan') {
+      await trash.purgePlan(target.plan.id)
+      showToast(t('“{name}” deleted forever', { name: target.plan.name }))
     } else {
       await trash.purgePortfolio(target.portfolio.id)
       showToast(t('“{name}” deleted forever', { name: target.portfolio.name }))
@@ -88,8 +98,15 @@ export default function TrashPage({ user, reminderBadge, timeZone = 'Asia/Bangko
 
   async function empty(which: TrashTab) {
     if (which === 'journals') await trash.emptyNotes()
+    else if (which === 'plans') await trash.emptyPlans()
     else await trash.emptyPortfolios()
-    showToast(which === 'journals' ? t('Journals trash emptied') : t('Portfolios trash emptied'))
+    showToast(
+      which === 'journals'
+        ? t('Journals trash emptied')
+        : which === 'plans'
+          ? t('Saved plans trash emptied')
+          : t('Portfolios trash emptied'),
+    )
   }
 
   return (
@@ -105,7 +122,7 @@ export default function TrashPage({ user, reminderBadge, timeZone = 'Asia/Bangko
       <>
         <div className={`pt-2 pb-6 ${leaving ? 'animate-page-out motion-reduce:animate-none' : ''}`}>
           <div className="animate-fade-up motion-reduce:animate-none">
-            <TrashHeader count={ready ? trash.notes.length + trash.portfolios.length : null} />
+            <TrashHeader count={ready ? trash.notes.length + trash.portfolios.length + trash.plans.length : null} />
           </div>
 
           <div className="mt-5 flex animate-fade-up flex-col gap-4 px-1 [animation-delay:60ms] motion-reduce:animate-none">
@@ -115,6 +132,7 @@ export default function TrashPage({ user, reminderBadge, timeZone = 'Asia/Bangko
               onTabChange={changeTab}
               journalCount={trash.notes.length}
               portfolioCount={trash.portfolios.length}
+              planCount={trash.plans.length}
               query={query}
               onQueryChange={setQuery}
               canEmpty={ready && total > 0}
@@ -123,7 +141,7 @@ export default function TrashPage({ user, reminderBadge, timeZone = 'Asia/Bangko
           </div>
 
           <section
-            aria-label={tab === 'journals' ? t('Deleted journals') : t('Deleted portfolios')}
+            aria-label={tab === 'journals' ? t('Deleted journals') : tab === 'plans' ? t('Deleted saved plans') : t('Deleted portfolios')}
             className="mt-5 animate-fade-up px-1 pb-2 [animation-delay:120ms] motion-reduce:animate-none"
           >
             <TrashList
@@ -131,6 +149,8 @@ export default function TrashPage({ user, reminderBadge, timeZone = 'Asia/Bangko
               status={trash.status}
               notes={visibleNotes}
               portfolios={visiblePortfolios}
+              plans={visiblePlans}
+              names={trash.names}
               total={total}
               query={query}
               timeZone={timeZone}
@@ -139,8 +159,11 @@ export default function TrashPage({ user, reminderBadge, timeZone = 'Asia/Bangko
               onDeleteNote={(note) => setPurgeTarget({ kind: 'journal', note })}
               onRestorePortfolio={(portfolio) => void quickRestore(() => restorePortfolio(portfolio))}
               onDeletePortfolio={(portfolio) => setPurgeTarget({ kind: 'portfolio', portfolio })}
+              onRestorePlan={(plan) => void quickRestore(() => restorePlan(plan))}
+              onDeletePlan={(plan) => setPurgeTarget({ kind: 'plan', plan })}
               onGoJournals={() => leaveTo(() => onNavigate?.('my-journals'))}
               onGoPortfolio={() => leaveTo(() => onNavigate?.('portfolio'))}
+              onGoPlans={() => leaveTo(() => onNavigate?.('saved-plan'))}
               onRetry={trash.reload}
             />
           </section>
@@ -157,7 +180,7 @@ export default function TrashPage({ user, reminderBadge, timeZone = 'Asia/Bangko
         <DeleteForeverModal target={purgeTarget} onConfirm={purge} onClose={() => setPurgeTarget(null)} />
         <EmptyTrashModal
           tab={emptyTab}
-          count={emptyTab === 'journals' ? trash.notes.length : trash.portfolios.length}
+          count={emptyTab === 'journals' ? trash.notes.length : emptyTab === 'plans' ? trash.plans.length : trash.portfolios.length}
           onConfirm={empty}
           onClose={() => setEmptyTab(null)}
         />

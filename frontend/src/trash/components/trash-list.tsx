@@ -1,10 +1,12 @@
-import { Search, Wallet, NotebookPen } from 'lucide-react'
+import { NotebookPen, Search, Target, Wallet } from 'lucide-react'
 import banner from '../../assets/Banner.png'
+import type { TrashedCalcPlan } from '../../shared/types/calc-plan'
 import type { TrashedNote } from '../../shared/types/journal-note'
 import type { TrashedPortfolio } from '../../shared/types/portfolio'
 import { useI18n } from '../../shared/i18n/use-i18n'
 import type { TrashLoadStatus, TrashTab } from '../types/trash'
 import TrashedNoteCard from './trashed-note-card'
+import TrashedPlanCard from './trashed-plan-card'
 import TrashedPortfolioCard from './trashed-portfolio-card'
 
 type TrashListProps = {
@@ -13,6 +15,9 @@ type TrashListProps = {
   /** รายการของแท็บที่เปิดอยู่หลังกรองด้วยคำค้น */
   notes: TrashedNote[]
   portfolios: TrashedPortfolio[]
+  plans: TrashedCalcPlan[]
+  /** ชื่อพอร์ตทั้งหมด (id → ชื่อ) ใช้บอกแหล่งที่มาของแผน */
+  names: Map<number, string>
   /** จำนวนรายการจริงของแท็บ (ก่อนค้นหา) แยกว่าว่างจริง หรือแค่ค้นไม่เจอ */
   total: number
   query: string
@@ -22,8 +27,11 @@ type TrashListProps = {
   onDeleteNote: (note: TrashedNote) => void
   onRestorePortfolio: (portfolio: TrashedPortfolio) => void
   onDeletePortfolio: (portfolio: TrashedPortfolio) => void
+  onRestorePlan: (plan: TrashedCalcPlan) => void
+  onDeletePlan: (plan: TrashedCalcPlan) => void
   onGoJournals: () => void
   onGoPortfolio: () => void
+  onGoPlans: () => void
   onRetry: () => void
 }
 
@@ -50,6 +58,8 @@ export default function TrashList({
   status,
   notes,
   portfolios,
+  plans,
+  names,
   total,
   query,
   timeZone,
@@ -58,8 +68,11 @@ export default function TrashList({
   onDeleteNote,
   onRestorePortfolio,
   onDeletePortfolio,
+  onRestorePlan,
+  onDeletePlan,
   onGoJournals,
   onGoPortfolio,
+  onGoPlans,
   onRetry,
 }: TrashListProps) {
   const { t } = useI18n()
@@ -100,6 +113,17 @@ export default function TrashList({
           </button>
         }
       />
+    ) : tab === 'plans' ? (
+      <Message
+        title={t('No saved plans in the trash')}
+        description={t('Saved plans you delete will wait here until you restore or delete them for good.')}
+        action={
+          <button type="button" onClick={onGoPlans} className={PRIMARY_BUTTON}>
+            <Target size={18} strokeWidth={1.75} aria-hidden="true" />
+            {t('Go to Saved Plan')}
+          </button>
+        }
+      />
     ) : (
       <Message
         title={t('No portfolios in the trash')}
@@ -114,7 +138,7 @@ export default function TrashList({
     )
   }
 
-  const shown = tab === 'journals' ? notes.length : portfolios.length
+  const shown = tab === 'journals' ? notes.length : tab === 'portfolios' ? portfolios.length : plans.length
   if (shown === 0) {
     return (
       <div role="status" className="flex flex-col items-center rounded-4xl bg-surface px-6 py-12 text-center shadow-md">
@@ -141,7 +165,13 @@ export default function TrashList({
               />
             </li>
           ))
-        : portfolios.map((portfolio) => (
+        : tab === 'plans'
+          ? plans.map((plan) => (
+              <li key={plan.id} className="min-w-0">
+                <TrashedPlanCard plan={plan} names={names} timeZone={timeZone} onRestore={onRestorePlan} onDelete={onDeletePlan} />
+              </li>
+            ))
+          : portfolios.map((portfolio) => (
             <li key={portfolio.id} className="min-w-0">
               <TrashedPortfolioCard
                 portfolio={portfolio}

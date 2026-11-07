@@ -29,7 +29,7 @@
 5. **เวลาที่เป็นช่วงเวลาจริง** (`remindAt`, `createdAt` ฯลฯ) เก็บเป็น UTC แล้วแปลงตามเขตเวลาผู้ใช้ตอนแสดงผล
 6. **ทุก query ต้องกรองด้วย `userId` ของผู้ที่ล็อกอิน**
    - ตาราง `Transaction` ไม่มี `userId` ตรงๆ ให้ตรวจผ่าน `portfolio.userId` เสมอ (join) ห้ามดึง transaction ด้วย id อย่างเดียว
-7. **Soft delete โน้ตและพอร์ต** (`Note.deletedAt` / `Portfolio.deletedAt` มีค่า = อยู่ในถังขยะ โน้ตในถังขยะไม่แสดงในไทม์ไลน์ ไม่นับในชิปอารมณ์ ค้นหาไม่เจอ และไม่อยู่ใน CSV) พอร์ตในถังขยะต้องไม่ถูกนับในรายการพอร์ต, เครื่องคำนวณ และ CSV ส่วน transaction ไม่ลบเมื่อพอร์ตถูก soft delete
+7. **Soft delete โน้ต พอร์ต และแผนที่บันทึก** (`Note.deletedAt` / `Portfolio.deletedAt` / `CalcPlan.deletedAt` มีค่า = อยู่ในถังขยะ โน้ตในถังขยะไม่แสดงในไทม์ไลน์ ไม่นับในชิปอารมณ์ ค้นหาไม่เจอ และไม่อยู่ใน CSV) พอร์ตในถังขยะต้องไม่ถูกนับในรายการพอร์ต, เครื่องคำนวณ และ CSV ส่วน transaction ไม่ลบเมื่อพอร์ตถูก soft delete
 8. **ตัวเลขสรุปของพอร์ตไม่เก็บเป็นตัวเลขแยก** (ความคืบหน้า Goal, Run-Rate, Total Recorded DCA, Yield on Cost, Holdings, จำนวน entries) คำนวณจาก transaction ทุกครั้งที่ขอ จึงไม่มีทางไม่ตรงกับรายการจริง (ดูข้อ 4)
 9. **ฝั่ง Journal กับฝั่ง Port ไม่เกี่ยวข้องกันเลย** `Note` / `NoteDraft` อ้างอิงแค่ `User` ไม่มี foreign key ไป Portfolio, Transaction หรือ Asset และหน้า Journal ไม่แสดงตัวเลขที่คำนวณจากพอร์ต (ปันผล, Yield ฯลฯ)
 10. **รหัสผ่านเก็บเป็น hash (bcrypt) เท่านั้น ส่วนรหัสกู้คืนเก็บแบบเข้ารหัสที่ถอดกลับได้** (เพื่อให้ผู้ใช้ดูและ copy ซ้ำได้ตลอด)
@@ -207,7 +207,8 @@
 | principal | BigInt | สตางค์ |
 | resultAmount | BigInt | สตางค์ ผลที่แสดงบนการ์ดแผน |
 | savedAt | DateTime | |
-- index `(userId, savedAt)`
+| deletedAt | DateTime? | ว่าง = ใช้งานอยู่ มีค่า = อยู่ในถังขยะ (ไม่แสดงในหน้า Saved Plan เปิดไม่ได้ กู้คืนได้ ไม่มีการลบอัตโนมัติ) |
+- index `(userId, savedAt)`, `(userId, deletedAt)`
 - ป้ายแหล่งที่มาบนการ์ดแสดงชื่อพอร์ต หรือ "Manual Portfolio" เมื่อ `portfolioId` ว่าง
 - ลบพอร์ตถาวร → `portfolioId` ถูกตั้งเป็นว่าง (SetNull) ไม่ลบแผน (การ์ดจะเปลี่ยนเป็น "Manual Portfolio") พอร์ตในถังขยะยังอ้างอิงได้ตามปกติ
 - ระยะเวลา (ป้าย "10 years") ไม่เก็บ คำนวณจากผลรวม `years` ของ phases
@@ -348,7 +349,7 @@ Asset 1 ──< Transaction, PlanAsset   (Restrict: ลบ Asset ที่ถู
 | My Journals (การ์ด, ชิปอารมณ์, ค้นหา) | Note | — (export CSV อ่าน Note) |
 | Write / Edit Note | Note, NoteDraft, NoteAttachment | Note (สร้าง/แก้/ลบ รวม `content` JSON และ `contentText`), NoteDraft (บันทึกอัตโนมัติ/ลบเมื่อ Save/Cancel), NoteAttachment (แนบภาพ/ไฟล์) |
 | Portfolio List (การ์ดพอร์ต) | Portfolio (deletedAt ว่าง), Transaction (Run-Rate, DCA, จำนวน entries) | Portfolio (สร้าง/แก้ชื่อ tagline icon, ลบ = ตั้ง deletedAt) |
-| Trash | Note และ Portfolio (deletedAt มีค่า), Transaction (จำนวน), CalcPlan (จำนวนแผนที่อ้างอิงพอร์ต) | Note / Portfolio (restore ล้าง deletedAt / ลบถาวร / ล้างถังขยะรายแท็บ; ลบพอร์ตถาวร = ลบ Transaction ทั้งหมดและตั้ง `CalcPlan.portfolioId` เป็นว่าง) |
+| Trash | Note, Portfolio และ CalcPlan (deletedAt มีค่า), Transaction (จำนวน), CalcPlan (จำนวนแผนที่อ้างอิงพอร์ต) | Note / Portfolio / CalcPlan (restore ล้าง deletedAt / ลบถาวร / ล้างถังขยะรายแท็บ; ลบพอร์ตถาวร = ลบ Transaction ทั้งหมดและตั้ง `CalcPlan.portfolioId` เป็นว่าง) |
 | Portfolio Detail: การ์ด Annual Dividend Goal | Portfolio, Transaction (dividend) | Portfolio (`annualDividendGoal`) |
 | Portfolio Detail: การ์ด Total Recorded DCA | Transaction (buy) | — |
 | Portfolio Detail: การ์ด Avg. Yield on Cost | Transaction, Asset | — |
@@ -357,7 +358,7 @@ Asset 1 ──< Transaction, PlanAsset   (Restrict: ลบ Asset ที่ถู
 | Target Amount: ส่วน 1 เลือกที่มา (Use a portfolio / Enter manually) | Portfolio (deletedAt ว่าง), Transaction (Holdings และ Yield ของแต่ละ asset), Asset (ค้นหา ticker) | — |
 | Target Amount: ส่วน 2–3 ตัวเลขและ phases | — (ค่าที่กรอกอยู่ในหน้าจอ) | — |
 | Target Amount: Sanctuary Summary + Your Estimate | — (คำนวณจากค่าในฟอร์ม) | CalcPlan, PlanPhase, PlanAsset เฉพาะเมื่อกด Save plan |
-| Saved Plans (หน้า "Personal Vault") | CalcPlan, PlanPhase (ผลรวม years), Portfolio (ชื่อแหล่งที่มา) | CalcPlan (ลบ, เปลี่ยนชื่อ), Open = เปิดหน้าสรุปผลของแผน (คำนวณใหม่จากข้อมูลที่บันทึก) |
+| Saved Plans (หน้า "Personal Vault") | CalcPlan, PlanPhase (ผลรวม years), Portfolio (ชื่อแหล่งที่มา) | CalcPlan (ย้ายไปถังขยะ = ตั้ง deletedAt, เปลี่ยนชื่อ), Open = เปิดหน้าสรุปผลของแผน (คำนวณใหม่จากข้อมูลที่บันทึก) |
 | Reminders: ปฏิทิน + Scheduled In Day | Reminder | Reminder (สร้าง/แก้/ลบ, ติ๊กเสร็จ) |
 | Reminders: Gentle To-Dos | Task | Task (เพิ่ม, ติ๊ก, ลบ) |
 | Reminders: ป้าย due this week | Reminder | — |

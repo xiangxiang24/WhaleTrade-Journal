@@ -38,7 +38,9 @@ type PlanRow = {
 
 const include = { phases: { orderBy: { orderNo: 'asc' as const } }, assets: { orderBy: { id: 'asc' as const } } };
 
-const toDto = (plan: PlanRow): PlanDto => ({
+export const planInclude = include;
+
+export const toPlanDto = (plan: PlanRow): PlanDto => ({
   id: plan.id,
   portfolioId: plan.portfolioId,
   name: plan.name,
@@ -49,10 +51,10 @@ const toDto = (plan: PlanRow): PlanDto => ({
   assets: plan.assets.map((asset) => ({ assetId: asset.assetId, dividendPct: asset.dividendBp / 100 })),
 });
 
-// แผนที่บันทึกไว้ (ลบจริง ไม่มีถังขยะ) ทุกคำสั่งกรองด้วย userId
+// แผนที่บันทึกไว้ ลบแล้วย้ายไปถังขยะ (deletedAt) กู้คืน/ลบถาวรที่หน้า Trash ทุกคำสั่งกรองด้วย userId
 export function savedPlanService({ db }: AppContext) {
   async function own(userId: number, id: number) {
-    const plan = await db.calcPlan.findFirst({ where: { id, userId }, include });
+    const plan = await db.calcPlan.findFirst({ where: { id, userId, deletedAt: null }, include });
     if (!plan) throw new HttpError(404, NOT_FOUND);
     return plan;
   }
@@ -60,12 +62,12 @@ export function savedPlanService({ db }: AppContext) {
   return {
     /** ใหม่ → เก่า */
     async list(userId: number): Promise<PlanDto[]> {
-      const plans = await db.calcPlan.findMany({ where: { userId }, include, orderBy: [{ savedAt: 'desc' }, { id: 'desc' }] });
-      return plans.map(toDto);
+      const plans = await db.calcPlan.findMany({ where: { userId, deletedAt: null }, include, orderBy: [{ savedAt: 'desc' }, { id: 'desc' }] });
+      return plans.map(toPlanDto);
     },
 
     async get(userId: number, id: number): Promise<PlanDto> {
-      return toDto(await own(userId, id));
+      return toPlanDto(await own(userId, id));
     },
 
     /** ชื่อพอร์ตของแผนทั้งหมด รวมพอร์ตในถังขยะ (แผนยังอ้างอิงพอร์ตในถังขยะได้) */
@@ -101,18 +103,19 @@ export function savedPlanService({ db }: AppContext) {
         },
         include,
       });
-      return toDto(plan);
+      return toPlanDto(plan);
     },
 
     /** เปลี่ยนชื่อ (วันที่บันทึกไม่เปลี่ยน) */
     async rename(userId: number, id: number, name: string): Promise<PlanDto> {
       await own(userId, id);
-      return toDto(await db.calcPlan.update({ where: { id }, data: { name }, include }));
+      return toPlanDto(await db.calcPlan.update({ where: { id }, data: { name }, include }));
     },
 
+    /** ย้ายไปถังขยะ (ไม่ลบจริง) */
     async remove(userId: number, id: number): Promise<void> {
       await own(userId, id);
-      await db.calcPlan.delete({ where: { id } });
+      await db.calcPlan.update({ where: { id }, data: { deletedAt: new Date() } });
     },
   };
 }

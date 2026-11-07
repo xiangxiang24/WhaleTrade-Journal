@@ -1,5 +1,6 @@
 import { request } from '../../shared/apis/client'
 import type { JournalNote, TrashedNote } from '../../shared/types/journal-note'
+import type { CalcPlan, TrashedCalcPlan } from '../../shared/types/calc-plan'
 import type { Portfolio, TrashedPortfolio } from '../../shared/types/portfolio'
 
 // ===== โน้ต =====
@@ -29,3 +30,16 @@ export const purgePortfolio = (id: number) => request<void>(`/api/trash/portfoli
 
 // DELETE /api/trash/portfolios  (ล้างถังขยะของพอร์ต คืนจำนวนที่ลบ)
 export const emptyPortfolioTrash = async () => (await request<{ deleted: number }>('/api/trash/portfolios', { method: 'DELETE' })).deleted
+
+// ===== แผนที่บันทึก =====
+// GET /api/trash/plans  (ลบล่าสุดก่อน)
+export const fetchTrashedPlans = () => request<TrashedCalcPlan[]>('/api/trash/plans')
+
+// POST /api/trash/plans/:id/restore
+export const restoreCalcPlan = (id: number) => request<CalcPlan>(`/api/trash/plans/${id}/restore`, { method: 'POST' })
+
+// DELETE /api/trash/plans/:id  (ลบถาวร พร้อมเฟสและรายการหุ้นของแผน)
+export const purgeCalcPlan = (id: number) => request<void>(`/api/trash/plans/${id}`, { method: 'DELETE' })
+
+// DELETE /api/trash/plans  (ล้างถังขยะของแผน คืนจำนวนที่ลบ)
+export const emptyPlanTrash = async () => (await request<{ deleted: number }>('/api/trash/plans', { method: 'DELETE' })).deleted

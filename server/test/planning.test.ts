@@ -78,6 +78,41 @@ describe('calculator, saved plans, reminders and tasks api', () => {
     assert.equal((await t.api('GET', `/api/plans/${planId}`, undefined, alice)).status, 404);
   });
 
+  it('moves deleted plans to the trash, restores them and deletes them for good', async () => {
+    const trashed = (await t.api('GET', '/api/trash/plans', undefined, alice)).json!;
+    assert.deepEqual(trashed.map((plan: { id: number }) => plan.id), [planId]);
+    assert.ok(trashed[0].deletedAt);
+    assert.equal((await t.api('GET', '/api/plans', undefined, alice)).json!.some((plan: { id: number }) => plan.id === planId), false);
+
+    // ของคนอื่นแตะไม่ได้
+    assert.deepEqual((await t.api('GET', '/api/trash/plans', undefined, bob)).json, []);
+    assert.equal((await t.api('POST', `/api/trash/plans/${planId}/restore`, undefined, bob)).status, 404);
+    assert.equal((await t.api('DELETE', `/api/trash/plans/${planId}`, undefined, bob)).status, 404);
+    assert.equal((await t.api('GET', '/api/trash/plans')).status, 401);
+
+    // กู้คืน: กลับมาในรายการ ไม่อยู่ในถังขยะแล้ว
+    const restored = await t.api('POST', `/api/trash/plans/${planId}/restore`, undefined, alice);
+    assert.equal(restored.status, 200);
+    assert.equal(restored.json!.id, planId);
+    assert.equal((await t.api('GET', `/api/plans/${planId}`, undefined, alice)).status, 200);
+    assert.equal((await t.api('POST', `/api/trash/plans/${planId}/restore`, undefined, alice)).status, 404);
+
+    // ลบถาวรได้เฉพาะที่อยู่ในถังขยะ
+    assert.equal((await t.api('DELETE', `/api/trash/plans/${planId}`, undefined, alice)).status, 404);
+    await t.api('DELETE', `/api/plans/${planId}`, undefined, alice);
+    assert.equal((await t.api('DELETE', `/api/trash/plans/${planId}`, undefined, alice)).status, 204);
+    assert.equal((await t.api('GET', '/api/trash/plans', undefined, alice)).json!.length, 0);
+
+    // ล้างถังขยะ: ลบเฉพาะที่อยู่ในถัง
+    const keep = (await t.api('POST', '/api/plans', { name: 'Keep', ...input, assets: [{ assetId: scb, dividendPct: 5 }] }, alice)).json!.id;
+    const gone = (await t.api('POST', '/api/plans', { name: 'Gone', ...input, assets: [{ assetId: scb, dividendPct: 5 }] }, alice)).json!.id;
+    await t.api('DELETE', `/api/plans/${gone}`, undefined, alice);
+    assert.equal((await t.api('DELETE', '/api/trash/plans', undefined, alice)).json!.deleted, 1);
+    assert.equal((await t.api('GET', `/api/plans/${keep}`, undefined, alice)).status, 200);
+    await t.api('DELETE', `/api/plans/${keep}`, undefined, alice);
+    await t.api('DELETE', '/api/trash/plans', undefined, alice);
+  });
+
   let reminderId = 0;
   it('manages reminders, the due badge and the done flag', async () => {
     const past = new Date(Date.now() - 3_600_000).toISOString();

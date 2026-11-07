@@ -7,6 +7,7 @@ type TrashToolbarProps = {
   onTabChange: (tab: TrashTab) => void
   journalCount: number
   portfolioCount: number
+  planCount: number
   query: string
   onQueryChange: (value: string) => void
   /** ซ่อนปุ่มล้างถังขยะเมื่อแท็บที่เปิดอยู่ว่าง */
@@ -14,12 +15,19 @@ type TrashToolbarProps = {
   onEmpty: () => void
 }
 
-// แถบเครื่องมือ: แท็บ Journals / Portfolios + ช่องค้นหา (ใช้กับแท็บที่เปิดอยู่) + ปุ่มล้างถังขยะของแท็บนั้น
+const SEARCH_LABEL: Record<TrashTab, (t: (text: string) => string) => string> = {
+  journals: (t) => t('Search deleted journals'),
+  portfolios: (t) => t('Search deleted portfolios'),
+  plans: (t) => t('Search deleted plans'),
+}
+
+// แถบเครื่องมือ: แท็บ Journals / Portfolios / Saved plans + ช่องค้นหา (ใช้กับแท็บที่เปิดอยู่) + ปุ่มล้างถังขยะของแท็บนั้น
 export default function TrashToolbar({
   tab,
   onTabChange,
   journalCount,
   portfolioCount,
+  planCount,
   query,
   onQueryChange,
   canEmpty,
@@ -29,6 +37,7 @@ export default function TrashToolbar({
   const tabs: { value: TrashTab; label: string; count: number }[] = [
     { value: 'journals', label: t('Journals'), count: journalCount },
     { value: 'portfolios', label: t('Portfolios'), count: portfolioCount },
+    { value: 'plans', label: t('Saved plans'), count: planCount },
   ]
 
   return (
@@ -60,7 +69,7 @@ export default function TrashToolbar({
 
       <div className="flex min-w-0 flex-wrap items-center gap-3 max-[639px]:w-full">
         <label className="relative block min-w-0 max-[639px]:w-full min-[640px]:w-64 min-[1280px]:w-72">
-          <span className="sr-only">{tab === 'journals' ? t('Search deleted journals') : t('Search deleted portfolios')}</span>
+          <span className="sr-only">{SEARCH_LABEL[tab](t)}</span>
           <Search
             size={18}
             strokeWidth={1.75}

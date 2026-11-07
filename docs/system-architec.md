@@ -231,9 +231,9 @@ whaletrade-journal/
 | journaling | `POST /api/notes` · `GET/PUT/DELETE /api/notes/:id` (DELETE = ย้ายไปถังขยะ) · `GET/PUT/DELETE /api/notes/:id/draft` · `POST /api/notes/:id/attachments?kind=&name=` (ไบต์ดิบ) · `GET /api/attachments/:id/file?sig=` |
 | portfolio | `GET/POST /api/portfolios` · `GET/PUT/DELETE /api/portfolios/:id` (DELETE = ถังขยะ) · `POST /api/portfolios/:id/restore` |
 | transaction-logs | `GET/POST /api/portfolios/:id/transactions` · `GET .../transactions/export.csv` · `PUT/DELETE /api/transactions/:id` |
-| trash | `GET/DELETE /api/trash/notes` · `POST /api/trash/notes/:id/restore` · `DELETE /api/trash/notes/:id` · `GET/DELETE /api/trash/portfolios` · `POST .../:id/restore` · `DELETE .../:id` |
+| trash | `GET/DELETE /api/trash/notes` · `POST /api/trash/notes/:id/restore` · `DELETE /api/trash/notes/:id` · `GET/DELETE /api/trash/portfolios` · `POST .../:id/restore` · `DELETE .../:id` · `GET/DELETE /api/trash/plans` · `POST .../:id/restore` · `DELETE .../:id` |
 | target-amount | `POST /api/calculator/calculate` (ไม่แตะฐานข้อมูล) |
-| saved-plan | `GET/POST /api/plans` · `GET/PATCH/DELETE /api/plans/:id` · `GET /api/plans/portfolio-names` |
+| saved-plan | `GET/POST /api/plans` · `GET/PATCH/DELETE /api/plans/:id` (DELETE = ย้ายไปถังขยะ) · `GET /api/plans/portfolio-names` |
 | reminder | `GET/POST /api/reminders` · `GET /api/reminders/due-count` · `PUT/DELETE /api/reminders/:id` · `PATCH /api/reminders/:id/done` · `GET/POST /api/tasks` · `PATCH/DELETE /api/tasks/:id` |
 | setting-page | `GET/DELETE /api/account` · `PATCH /api/account/profile` · `PATCH /api/account/preferences` · `PATCH /api/account/email` · `POST /api/account/password` · `POST /api/account/recovery-code` · `GET /api/avatar/:userId/:file?sig=` |
 

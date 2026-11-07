@@ -55,7 +55,7 @@ function Dialog({ plan, onConfirm, onClose }: Omit<DeletePlanModalProps, 'plan'>
         {t('Delete “{name}”?', { name: plan.name })}
       </h2>
       <p id={descId} className="m-0 mt-2 text-[14px] leading-6 text-navy-700">
-        {t('This saved plan will be permanently deleted. You can always calculate and save a new one. This action cannot be undone.')}
+        {t('This saved plan will be moved to the Trash. You can restore it from there at any time.')}
       </p>
 
       {error && (
@@ -81,7 +81,7 @@ function Dialog({ plan, onConfirm, onClose }: Omit<DeletePlanModalProps, 'plan'>
           onClick={handleConfirm}
           className="inline-flex h-11 items-center rounded-pill bg-red-500 px-6 text-[14px] leading-5 font-semibold text-surface transition-[filter] duration-150 hover:brightness-110 active:brightness-95 disabled:opacity-50"
         >
-          {working ? t('Deleting…') : t('Delete')}
+          {working ? t('Deleting…') : t('Move to Trash')}
         </button>
       </div>
     </ModalFrame>

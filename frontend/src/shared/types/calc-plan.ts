@@ -24,6 +24,9 @@ export type CalcPlan = {
   assets: PlanAsset[]
 }
 
+/** แผนในถังขยะ + เวลาที่ลบ */
+export type TrashedCalcPlan = CalcPlan & { deletedAt: string }
+
 /** ช่วงที่ส่งเข้าตัวคำนวณ */
 export type PhaseInput = { years: number; monthlyDca: number }
 
