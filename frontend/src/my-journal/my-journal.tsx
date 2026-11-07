@@ -7,6 +7,7 @@ import type { SidebarKey, SidebarUser } from '../shared/types/sidebar'
 import JournalHeader from './components/journal-header'
 import JournalList from './components/journal-list'
 import JournalToolbar from './components/journal-toolbar'
+import { useDividendYield } from './types/use-dividend-yield'
 import MoodFilter from './components/mood-filter'
 import NewNoteModal from './modals/new-note-modal'
 import type { MoodFilterValue } from './types/journal'
@@ -19,8 +20,6 @@ type MyJournalProps = {
   reminderBadge?: number
   /** เขตเวลาของผู้ใช้ (รหัส IANA จาก User.timezone) ใช้แปลงวันที่บนการ์ด */
   timeZone?: string
-  /** ผลตอบแทนปันผลเฉลี่ยที่แสดงในป้าย (ยังเป็นค่าจำลอง ต่อ backend ภายหลัง) */
-  dividendYield?: string
   onNavigate?: (key: SidebarKey) => void
   onLogout?: () => void
   onOpenNote?: (id: number) => void
@@ -31,13 +30,13 @@ export default function MyJournal({
   user,
   reminderBadge,
   timeZone = 'Asia/Bangkok',
-  dividendYield = '6.84%',
   onNavigate,
   onLogout,
   onOpenNote,
 }: MyJournalProps) {
   const { t } = useI18n()
   const { notes, status, reload, addNote } = useJournalNotes()
+  const dividendYield = useDividendYield()
   const [newNoteOpen, setNewNoteOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [mood, setMood] = useState<MoodFilterValue>('all')
@@ -94,7 +93,7 @@ export default function MyJournal({
             <JournalToolbar
               query={query}
               onQueryChange={setQuery}
-              dividendYield={dividendYield}
+              dividendYield={dividendYield === undefined ? undefined : dividendYield === null ? null : `${dividendYield.toFixed(2)}%`}
               onNewNote={() => setNewNoteOpen(true)}
             />
             <div className="mt-4">

@@ -4,10 +4,20 @@ import { useI18n } from '../../shared/i18n/use-i18n'
 type JournalToolbarProps = {
   query: string
   onQueryChange: (value: string) => void
-  /** ผลตอบแทนปันผลเฉลี่ยที่แสดงในป้าย เช่น "6.84%" (ไม่ส่งมา = ไม่แสดงป้าย) */
-  dividendYield?: string
+  /** ผลตอบแทนปันผลเฉลี่ยที่แสดงในป้าย เช่น "6.84%"; null = ยังไม่มีข้อมูล (แสดงคำคมแทน); undefined = กำลังโหลด (ไม่แสดงป้าย) */
+  dividendYield?: string | null
   onNewNote: () => void
 }
+
+// คำคมที่แสดงแทนป้ายผลตอบแทนเมื่อยังไม่มีพอร์ต/ปันผล (เปลี่ยนทุกวัน) ข้อความอังกฤษแปลตอนแสดง
+const QUOTES = [
+  'Patience is an investor’s quiet edge.',
+  'Write down your reasons, then let time work.',
+  'Small steps compound into big journeys.',
+  'Calm minds make clearer decisions.',
+]
+
+const dayOfYear = () => Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86_400_000)
 
 // แถวบน: ช่องค้นหา (ซ้าย) / ป้าย Dividend Yield + ปุ่ม New Note (ขวา)
 export default function JournalToolbar({
@@ -37,10 +47,12 @@ export default function JournalToolbar({
       </label>
 
       <div className="flex flex-wrap items-center gap-3 min-[640px]:gap-4 max-[639px]:w-full">
-        {dividendYield && (
+        {dividendYield !== undefined && (
           <span className="inline-flex h-11 items-center gap-2 rounded-pill bg-blue-50 px-4 max-[639px]:w-full max-[639px]:justify-center text-[14px] leading-5 font-medium text-navy-900">
             <Sprout size={16} strokeWidth={1.75} aria-hidden="true" className="text-navy-700" />
-            {t('Dividend Yield at Cost: {value}', { value: dividendYield })}
+            {dividendYield === null
+              ? t(QUOTES[dayOfYear() % QUOTES.length])
+              : t('Dividend Yield at Cost: {value}', { value: dividendYield })}
           </span>
         )}
         <button
