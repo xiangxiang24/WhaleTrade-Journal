@@ -38,7 +38,7 @@ export default function PlanHeader({ count, onNewPlan }: PlanHeaderProps) {
         <button
           type="button"
           onClick={onNewPlan}
-          className="inline-flex h-10 items-center gap-2 rounded-pill border-2 border-blue-500 bg-surface px-5 text-[14px] leading-5 font-semibold text-navy-700 transition-colors duration-150 hover:bg-blue-50 active:bg-blue-100 max-[639px]:flex-1 max-[639px]:justify-center"
+          className="inline-flex h-10 items-center gap-2 rounded-pill bg-blue-500 px-5 text-[14px] leading-5 font-semibold text-surface shadow-cta transition-colors duration-150 hover:bg-navy-700 active:bg-navy-900 max-[639px]:flex-1 max-[639px]:justify-center"
         >
           <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
           {t('New plan')}
