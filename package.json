@@ -67,10 +67,18 @@
       "node_modules/better-sqlite3/**"
     ],
     "mac": {
-      "target": "dir"
+      "target": [
+        "dir",
+        "dmg"
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.finance"
     },
     "directories": {
       "output": "release"
+    },
+    "dmg": {
+      "title": "Trading Journal"
     }
   },
   "overrides": {
