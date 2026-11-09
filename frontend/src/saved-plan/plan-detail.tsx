@@ -12,8 +12,9 @@ import InputsCard from './components/inputs-card'
 import StatStrip from './components/stat-strip'
 import DeletePlanModal from './modals/delete-plan-modal'
 import RenamePlanModal from './modals/rename-plan-modal'
-import { exportPlanCsv, exportPlanImage } from './types/export-plan'
-import { planSource, type PlanToast } from './types/saved-plan'
+import { exportPlanCsv, exportPlanImage, planFilename } from './types/export-plan'
+import { exportPlanPdf } from './types/export-plan-pdf'
+import { formatSavedDate, planSource, type PlanToast } from './types/saved-plan'
 import { usePlanDetail } from './types/use-plan-detail'
 import { useI18n } from '../shared/i18n/use-i18n'
 
@@ -72,8 +73,12 @@ export default function PlanDetail({
         setExportingImage(false)
       }
     } else {
-      // PDF ต้องใช้โปรเซสหลักของ Electron จึงทำตอนต่อ backend (ตอนนี้แจ้งผู้ใช้)
-      showToast(t('Export PDF will be available once the app is connected.'))
+      try {
+        const saved = await exportPlanPdf(plan, source, result.output, formatSavedDate(plan.savedAt, timeZone), planFilename(plan.name, 'pdf'))
+        if (saved) showToast(t('Plan exported as PDF'))
+      } catch (caught) {
+        showToast(t(caught instanceof Error ? caught.message : 'Could not create the PDF. Please try again.'))
+      }
     }
   }
 

@@ -6,6 +6,7 @@ import type { Account } from '../shared/types/account'
 import type { SidebarKey, SidebarUser } from '../shared/types/sidebar'
 import PortfolioToastView from '../portfolio/components/portfolio-toast'
 import AccountSection from './components/account-section'
+import DataSection from './components/data-section'
 import LanguageSection from './components/language-section'
 import SecuritySection from './components/security-section'
 import SettingHeader from './components/setting-header'
@@ -28,7 +29,7 @@ type SettingPageProps = {
   onAccountDeleted?: () => void
 }
 
-// หน้า Setting (หน้าเดียว 3 section): Account / Language & Display / Account Security
+// หน้า Setting (หน้าเดียว): Account / Language & Display / Data & Backup (แอปจริงเท่านั้น) / Account Security
 export default function SettingPage({
   user,
   reminderBadge,
@@ -96,6 +97,7 @@ export default function SettingPage({
                 onSaved={() => showToast(t('Profile saved'))}
               />
               <LanguageSection state={state} onSaved={() => showToast(t('Preferences saved'))} />
+              <DataSection onDone={showToast} />
               <SecuritySection onChangePassword={() => setPasswordOpen(true)} onDelete={() => setDeleteOpen(true)} />
             </div>
           )}

@@ -61,19 +61,23 @@ type ScreensProps = {
 function Screens({ session, setAccount }: ScreensProps) {
   const account = session ?? GUEST
   const [screen, setScreen] = useState<Screen>('opening')
-  // จำนวนการเตือนที่ถึงเวลาแล้ว (badge ที่ Sidebar) อัปเดตทุกครั้งที่เปลี่ยนหน้า
+  // จำนวนการเตือนที่ถึงเวลาแล้ว (badge ที่ Sidebar) อัปเดตทุกครั้งที่เปลี่ยนหน้าและทุกนาที
   const [due, setDue] = useState(0)
 
   useEffect(() => {
     if (!session) return
     let cancelled = false
-    countDueReminders()
-      .then((count) => {
-        if (!cancelled) setDue(count)
-      })
-      .catch(() => {})
+    const refresh = () =>
+      countDueReminders()
+        .then((count) => {
+          if (!cancelled) setDue(count)
+        })
+        .catch(() => {})
+    void refresh()
+    const timer = setInterval(refresh, 60_000)
     return () => {
       cancelled = true
+      clearInterval(timer)
     }
   }, [screen, session])
 

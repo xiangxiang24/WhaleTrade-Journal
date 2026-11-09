@@ -163,3 +163,33 @@ describe('calculator, saved plans, reminders and tasks api', () => {
     assert.equal((await t.api('GET', '/api/tasks', undefined, alice)).json!.length, 1);
   });
 });
+
+describe('reminder notifier', () => {
+  it('notifies each due reminder once, groups bursts, and skips done or future ones', async () => {
+    const { notifyDueReminders } = await import('../services/reminder/notifier.js');
+    const t = await startTestServer();
+    try {
+      const { token } = await t.signUp('notify@example.com');
+      const past = new Date(Date.now() - 60_000).toISOString();
+      const future = new Date(Date.now() + 3_600_000).toISOString();
+      const make = async (title: string, remindAt: string) => (await t.api('POST', '/api/reminders', { title, remindAt }, token)).json!;
+      await make('Pay tax', past);
+      await make('Later', future);
+      const done = await make('Already done', past);
+      await t.api('PATCH', `/api/reminders/${done.id}/done`, { done: true }, token);
+
+      const sent: { title: string; body: string }[] = [];
+      assert.equal(await notifyDueReminders(t.db, (notice) => sent.push(notice)), 1);
+      assert.equal(sent[0]?.title, 'Pay tax');
+      assert.equal(await notifyDueReminders(t.db, (notice) => sent.push(notice)), 0);
+
+      for (const name of ['a', 'b', 'c', 'd']) await make(name, past);
+      sent.length = 0;
+      assert.equal(await notifyDueReminders(t.db, (notice) => sent.push(notice)), 4);
+      assert.equal(sent.length, 1);
+      assert.match(sent[0]!.body, /4/);
+    } finally {
+      await t.close();
+    }
+  });
+});

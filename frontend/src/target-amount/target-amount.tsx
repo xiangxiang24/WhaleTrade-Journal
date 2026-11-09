@@ -1,6 +1,10 @@
 import { useCallback, useRef, useState } from 'react'
 import AppLayout from '../shared/app-shell/app-layout'
 import { createCalcPlan } from '../saved-plan/apis/saved-plan'
+import { exportPlanImage, planFilename } from '../saved-plan/types/export-plan'
+import { exportPlanPdf } from '../saved-plan/types/export-plan-pdf'
+import { formatSavedDate } from '../saved-plan/types/saved-plan'
+import type { CalcPlan } from '../shared/types/calc-plan'
 import { usePageLeave } from '../shared/hooks/use-page-leave'
 import type { SidebarKey, SidebarUser } from '../shared/types/sidebar'
 import PortfolioToastView from '../portfolio/components/portfolio-toast'
@@ -65,10 +69,35 @@ export default function TargetAmount({ user, reminderBadge, onNavigate, onLogout
     showToast(t('“{name}” saved to Saved Plans', { name }))
   }
 
-  // ส่งออก PDF/รูปภาพต้องใช้โปรเซสหลักของ Electron จึงทำตอนต่อ backend (ตอนนี้แจ้งผู้ใช้)
-  const handleExport = (kind: 'PDF' | 'image') => showToast(t('Export {kind} will be available once the app is connected.', { kind: t(kind) }))
-
   const defaultName = t('{n}-year quiet sanctuary', { n: calc.summary.totalYears })
+
+  // ส่งออกผลที่ยังไม่บันทึก: ใช้ตัวส่งออกเดียวกับหน้าแผนที่บันทึก โดยประกอบเป็นแผนชั่วคราว (ไม่ถูกเก็บลงฐานข้อมูล)
+  async function handleExport(kind: 'PDF' | 'image') {
+    const result = calc.result
+    if (!result) return
+    const now = new Date().toISOString()
+    const plan: CalcPlan = {
+      id: 0,
+      portfolioId: result.portfolioId,
+      name: defaultName,
+      principal: result.input.principal,
+      resultAmount: result.output.total,
+      savedAt: now,
+      phases: result.input.phases,
+      assets: result.assets.map(({ assetId, dividendPct }) => ({ assetId, dividendPct })),
+    }
+    const source = calc.options.find((option) => option.portfolio.id === result.portfolioId)?.portfolio.name ?? t('Manual Portfolio')
+    try {
+      if (kind === 'image') {
+        await exportPlanImage(plan, source, result.output)
+        showToast(t('Plan exported as an image'))
+      } else if (await exportPlanPdf(plan, source, result.output, formatSavedDate(now, Intl.DateTimeFormat().resolvedOptions().timeZone), planFilename(plan.name, 'pdf'))) {
+        showToast(t('Plan exported as PDF'))
+      }
+    } catch (caught) {
+      showToast(t(caught instanceof Error ? caught.message : 'Something went wrong. Please try again.'))
+    }
+  }
 
   return (
     <AppLayout

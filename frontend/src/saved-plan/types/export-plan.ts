@@ -7,7 +7,7 @@ import { stageName } from '../../target-amount/types/target-amount'
 import { formatYears, planYears } from './saved-plan'
 
 /** ชื่อไฟล์ที่ปลอดภัยจากชื่อแผน เช่น "Retire at 60" → "retire-at-60-plan.csv" */
-export function planFilename(name: string, extension: 'csv' | 'png') {
+export function planFilename(name: string, extension: 'csv' | 'png' | 'pdf') {
   const slug = name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '')
   return `${slug || 'saved'}-plan.${extension}`
 }
