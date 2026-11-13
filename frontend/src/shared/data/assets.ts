@@ -14,12 +14,19 @@ export async function loadAssets(): Promise<void> {
 }
 
 // ค้นจากชื่อหรือ ticker (ไม่สนตัวพิมพ์ใหญ่เล็ก) ใช้กับช่องเลือกหุ้นในฟอร์ม
+// รายชื่อมีหมื่นกว่าตัว จึงจัดอันดับให้ ticker ตรงเป๊ะขึ้นก่อน ตามด้วย ticker ที่ขึ้นต้นด้วยคำค้น แล้วค่อยเป็นที่เหลือ
 export function searchAssets(query: string, limit = 8): Asset[] {
   const keyword = query.trim().toLowerCase()
-  const matches = keyword
-    ? ASSETS.filter(
-        (asset) => asset.ticker.toLowerCase().includes(keyword) || asset.name.toLowerCase().includes(keyword),
-      )
-    : ASSETS
-  return matches.slice(0, limit)
+  if (!keyword) return ASSETS.slice(0, limit)
+  const exact: Asset[] = []
+  const prefix: Asset[] = []
+  const rest: Asset[] = []
+  for (const asset of ASSETS) {
+    const ticker = asset.ticker.toLowerCase()
+    if (ticker === keyword) exact.push(asset)
+    else if (ticker.startsWith(keyword)) prefix.push(asset)
+    else if (rest.length < limit && (ticker.includes(keyword) || asset.name.toLowerCase().includes(keyword))) rest.push(asset)
+    if (exact.length + prefix.length >= limit && rest.length >= limit) break
+  }
+  return [...exact, ...prefix, ...rest].slice(0, limit)
 }

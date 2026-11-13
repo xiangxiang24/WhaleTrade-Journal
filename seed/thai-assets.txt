@@ -1,0 +1,147 @@
+# หุ้น/กองทุนไทย (แก้ไข/เพิ่มได้) รูปแบบ: ตลาด|ticker|ชื่อ|ชนิด(stock/fund)|หมวด
+# SET ไม่เปิดให้ดาวน์โหลดรายชื่ออัตโนมัติ และ SEC ต้องใช้ API key รายชื่อนี้จึงรวบรวมเอง แล้วสร้าง seed/assets.json ด้วย scripts/build-assets-seed.mjs
+SET|SCB|SCB X Public Co.|stock|Banking
+SET|KBANK|Kasikornbank|stock|Banking
+SET|KTB|Krung Thai Bank|stock|Banking
+SET|BBL|Bangkok Bank|stock|Banking
+SET|TTB|TMBThanachart Bank|stock|Banking
+SET|TISCO|TISCO Financial Group|stock|Banking
+SET|KKP|Kiatnakin Phatra Bank|stock|Banking
+SET|BAY|Bank of Ayudhya|stock|Banking
+SET|LHFG|LH Financial Group|stock|Banking
+SET|TCAP|Thanachart Capital|stock|Finance
+SET|MTC|Muangthai Capital|stock|Finance
+SET|SAWAD|Srisawad Corporation|stock|Finance
+SET|KTC|Krungthai Card|stock|Finance
+SET|AEONTS|AEON Thana Sinsap (Thailand)|stock|Finance
+SET|TIDLOR|Ngern Tid Lor|stock|Finance
+SET|THANI|Ratchthani Leasing|stock|Finance
+SET|ASK|Asia Sermkij Leasing|stock|Finance
+SET|BAM|Bangkok Commercial Asset Management|stock|Finance
+SET|JMT|JMT Network Services|stock|Finance
+SET|TLI|Thai Life Insurance|stock|Insurance
+SET|BLA|Bangkok Life Assurance|stock|Insurance
+SET|TQM|TQM Alpha|stock|Insurance
+SET|TIPH|Dhipaya Group Holdings|stock|Insurance
+SET|MBK|MBK|stock|Property
+SET|PTT|PTT|stock|Energy
+SET|PTTEP|PTT Exploration & Prod.|stock|Energy
+SET|PTTGC|PTT Global Chemical|stock|Materials
+SET|OR|PTT Oil and Retail Business|stock|Energy
+SET|TOP|Thai Oil|stock|Energy
+SET|BCP|Bangchak Corporation|stock|Energy
+SET|IRPC|IRPC|stock|Energy
+SET|SPRC|Star Petroleum Refining|stock|Energy
+SET|ESSO|Esso (Thailand)|stock|Energy
+SET|BANPU|Banpu|stock|Energy
+SET|PTG|PTG Energy|stock|Energy
+SET|GULF|Gulf Energy Development|stock|Utilities
+SET|GPSC|Global Power Synergy|stock|Utilities
+SET|EGCO|Electricity Generating|stock|Utilities
+SET|RATCH|Ratch Group|stock|Utilities
+SET|BGRIM|B.Grimm Power|stock|Utilities
+SET|CKP|CK Power|stock|Utilities
+SET|BCPG|BCPG|stock|Utilities
+SET|EA|Energy Absolute|stock|Utilities
+SET|GUNKUL|Gunkul Engineering|stock|Utilities
+SET|SUPER|Super Energy Corporation|stock|Utilities
+SET|TPIPP|TPI Polene Power|stock|Utilities
+SET|WHAUP|WHA Utilities and Power|stock|Utilities
+SET|SPCG|SPCG|stock|Utilities
+SET|TTW|TTW|stock|Utilities
+SET|ADVANC|Advanced Info Service|stock|Communication
+SET|TRUE|True Corporation|stock|Communication
+SET|INTUCH|Intouch Holdings|stock|Communication
+SET|THCOM|Thaicom|stock|Communication
+SET|CPALL|CP All|stock|Commerce
+SET|CPAXT|CP Axtra|stock|Commerce
+SET|CRC|Central Retail Corporation|stock|Commerce
+SET|HMPRO|Home Product Center|stock|Commerce
+SET|GLOBAL|Siam Global House|stock|Commerce
+SET|BJC|Berli Jucker|stock|Commerce
+SET|COM7|Com7|stock|Commerce
+SET|DOHOME|Dohome|stock|Commerce
+SET|CPF|Charoen Pokphand Foods|stock|Food
+SET|TU|Thai Union Group|stock|Food
+SET|OSP|Osotspa|stock|Food
+SET|CBG|Carabao Group|stock|Food
+SET|ICHI|Ichitan Group|stock|Food
+SET|M|MK Restaurant Group|stock|Food
+SET|GFPT|GFPT|stock|Food
+SET|BTG|Betagro|stock|Food
+SET|TKN|Taokaenoi Food & Marketing|stock|Food
+SET|SAPPE|Sappe|stock|Food
+SET|STA|Sri Trang Agro-Industry|stock|Food
+SET|TVO|Thai Vegetable Oil|stock|Food
+SET|SCC|Siam Cement|stock|Materials
+SET|SCGP|SCG Packaging|stock|Materials
+SET|IVL|Indorama Ventures|stock|Materials
+SET|TASCO|Tipco Asphalt|stock|Materials
+SET|SCCC|Siam City Cement|stock|Materials
+SET|EPG|Eastern Polymer Group|stock|Materials
+SET|AOT|Airports of Thailand|stock|Transport
+SET|BA|Bangkok Airways|stock|Transport
+SET|AAV|Asia Aviation|stock|Transport
+SET|BTS|BTS Group Holdings|stock|Transport
+SET|BEM|Bangkok Expressway and Metro|stock|Transport
+SET|PSL|Precious Shipping|stock|Transport
+SET|RCL|Regional Container Lines|stock|Transport
+SET|TTA|Thoresen Thai Agencies|stock|Transport
+SET|BDMS|Bangkok Dusit Medical Services|stock|Healthcare
+SET|BH|Bumrungrad Hospital|stock|Healthcare
+SET|BCH|Bangkok Chain Hospital|stock|Healthcare
+SET|CHG|Chularat Hospital|stock|Healthcare
+SET|PR9|Praram 9 Hospital|stock|Healthcare
+SET|THG|Thonburi Healthcare Group|stock|Healthcare
+SET|VIBHA|Vibhavadi Medical Center|stock|Healthcare
+SET|MEGA|Mega Lifesciences|stock|Healthcare
+SET|AP|AP (Thailand)|stock|Property
+SET|SPALI|Supalai|stock|Property
+SET|LH|Land and Houses|stock|Property
+SET|QH|Quality Houses|stock|Property
+SET|SIRI|Sansiri|stock|Property
+SET|ORI|Origin Property|stock|Property
+SET|PSH|Pruksa Holding|stock|Property
+SET|SC|SC Asset Corporation|stock|Property
+SET|ANAN|Ananda Development|stock|Property
+SET|NOBLE|Noble Development|stock|Property
+SET|WHA|WHA Corporation|stock|Property
+SET|AMATA|Amata Corporation|stock|Property
+SET|CPN|Central Pattana|stock|Property
+SET|AWC|Asset World Corp|stock|Property
+SET|CENTEL|Central Plaza Hotel|stock|Tourism
+SET|ERW|The Erawan Group|stock|Tourism
+SET|MINT|Minor International|stock|Tourism
+SET|DELTA|Delta Electronics (Thailand)|stock|Technology
+SET|HANA|Hana Microelectronics|stock|Technology
+SET|KCE|KCE Electronics|stock|Technology
+SET|SYNEX|Synnex (Thailand)|stock|Technology
+SET|JMART|Jay Mart|stock|Technology
+SET|JAS|Jasmine International|stock|Technology
+SET|VGI|VGI|stock|Media
+SET|PLANB|Plan B Media|stock|Media
+SET|MAJOR|Major Cineplex Group|stock|Media
+SET|BEAUTY|Beauty Community|stock|Consumer
+SET|SISB|SISB|stock|Education
+SET|CK|CH. Karnchang|stock|Construction
+SET|STEC|Sino-Thai Engineering & Construction|stock|Construction
+SET|TOA|TOA Paint (Thailand)|stock|Construction
+SET|DRT|Diamond Building Products|stock|Construction
+SET|SAT|Somboon Advance Technology|stock|Automotive
+SET|AH|AAPICO Hitech|stock|Automotive
+SET|CPNREIT|CPN Retail Growth Leasehold REIT|fund|REIT
+SET|WHART|WHA Premium Growth Freehold and Leasehold REIT|fund|REIT
+SET|FTREIT|Frasers Property Thailand Industrial Freehold & Leasehold REIT|fund|REIT
+SET|PROSPECT|Prospect Logistics and Industrial Freehold and Leasehold REIT|fund|REIT
+SET|IMPACT|Impact Growth REIT|fund|REIT
+SET|AIMIRT|AIM Industrial Growth Freehold and Leasehold REIT|fund|REIT
+SET|DIF|Digital Telecommunications Infrastructure Fund|fund|Infrastructure
+SET|TFFIF|Thailand Future Fund|fund|Infrastructure
+SET|BTSGIF|BTS Rail Mass Transit Growth Infrastructure Fund|fund|Infrastructure
+SET|LPF|Land and Houses Freehold and Leasehold Property Fund|fund|REIT
+SET|QHPF|Quality Houses Property Fund|fund|REIT
+TH-FUND|SET50-D|SET50 Dividend Index Fund|fund|
+TH-FUND|K-USXNDQ-A(D)|K US Nasdaq-100 Index Fund (A, Dividend)|fund|
+US|KO|Coca-Cola Co.|stock|Consumer
+US|O|Realty Income Corp.|stock|Real Estate
+US|AAPL|Apple Inc.|stock|Technology

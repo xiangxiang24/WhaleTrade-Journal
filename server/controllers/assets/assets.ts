@@ -2,7 +2,8 @@ import type { Request, Response } from 'express';
 import type { AppContext } from '../../context.js';
 import { assetsService } from '../../services/assets/assets.js';
 
-const MAX_LIMIT = 1000;
+// หน้าจอโหลดรายชื่อทั้งหมดครั้งเดียวหลังล็อกอิน (หมื่นกว่าตัว) จึงต้องไม่ตัดที่ 1000
+const MAX_LIMIT = 50000;
 
 export function assetsController(ctx: AppContext) {
   const service = assetsService(ctx);

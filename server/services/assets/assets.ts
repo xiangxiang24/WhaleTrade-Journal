@@ -25,16 +25,22 @@ export const toAssetDto = (asset: AssetRow): AssetDto => ({
 
 type SeedAsset = { ticker: string; name: string; type: string; market: string; sector: string | null };
 
-/** นำเข้ารายชื่อจาก seed/assets.json ทำซ้ำได้ไม่ซ้ำรายการ (unique market + ticker) ตอนเปิดแอป */
+/** นำเข้ารายชื่อจาก seed/assets.json ทำซ้ำได้ไม่ซ้ำรายการ (unique market + ticker) ตอนเปิดแอป
+ * รายชื่อมีหมื่นกว่าตัว จึงเพิ่มของใหม่เป็นชุดเดียว และแก้เฉพาะรายการที่ชื่อ/ชนิด/หมวดเปลี่ยน (คง id เดิมที่ธุรกรรมอ้างอยู่) */
 export async function importAssets(db: Db, file: string): Promise<number> {
   if (!fs.existsSync(file)) return 0;
   const seed = JSON.parse(fs.readFileSync(file, 'utf8')) as SeedAsset[];
+  const existing = new Map((await db.asset.findMany()).map((row) => [`${row.market}:${row.ticker}`, row]));
+
+  const fresh = seed.filter((asset) => !existing.has(`${asset.market}:${asset.ticker}`));
+  for (let start = 0; start < fresh.length; start += 500) {
+    await db.asset.createMany({ data: fresh.slice(start, start + 500).map((asset) => ({ ...asset, source: 'seed' })) });
+  }
   for (const asset of seed) {
-    await db.asset.upsert({
-      where: { market_ticker: { market: asset.market, ticker: asset.ticker } },
-      update: { name: asset.name, type: asset.type, sector: asset.sector },
-      create: { ...asset, source: 'seed' },
-    });
+    const row = existing.get(`${asset.market}:${asset.ticker}`);
+    if (row && (row.name !== asset.name || row.type !== asset.type || row.sector !== asset.sector)) {
+      await db.asset.update({ where: { id: row.id }, data: { name: asset.name, type: asset.type, sector: asset.sector } });
+    }
   }
   return seed.length;
 }

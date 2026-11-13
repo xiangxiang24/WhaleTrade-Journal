@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
 import { startTestServer } from './helpers.js';
@@ -24,7 +25,10 @@ describe('portfolio, transactions and trash api', () => {
 
   it('serves the seeded asset list', async () => {
     const all = await t.api('GET', '/api/assets', undefined, alice);
-    assert.equal(all.json!.length, 13);
+    const seed = JSON.parse(fs.readFileSync('seed/assets.json', 'utf8')) as { ticker: string }[];
+    assert.equal(all.json!.length, seed.length);
+    const tickers = new Set(all.json!.map((asset: { ticker: string }) => asset.ticker));
+    for (const ticker of ['NVDA', 'JEPQ', 'K-USXNDQ-A(D)', 'TISCO', 'CPALL', 'KTB', 'SCB', 'KBANK', 'KKP']) assert.ok(tickers.has(ticker), `${ticker} is seeded`);
     assert.equal((await t.api('GET', '/api/assets?q=apple', undefined, alice)).json![0].ticker, 'AAPL');
     assert.equal((await t.api('GET', `/api/assets?ids=${scb}`, undefined, alice)).json!.length, 1);
     assert.equal((await t.api('GET', '/api/assets')).status, 401);
